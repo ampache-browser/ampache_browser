@@ -13,31 +13,29 @@
 #include <QtGui/QLineEdit>
 #include <QtGui/QSpacerItem>
 #include <QtGui/QListView>
+#include <QtGui/QTreeView>
 #include <QtGui/QLayout>
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QSplitter>
 #include <QtGui/QStatusBar>
 #include <QtGui/QDockWidget>
-
-
-#include "ui/ampache_browser_main_window.h"
+#include "ampache_browser_main_window.h"
 
 
 
 namespace ui
 {
 
-AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget *parent): QMainWindow(parent)
-{
+AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow(parent) {
     // TODO: icon
     setWindowTitle(tr("Ampache Browser"));
     setMinimumSize(200, 200);
-    setGeometry(40, 40, 850, 620);
+    setGeometry(5, 90, 850, 620);
     setDockOptions(AnimatedDocks);
 
     // tool bar
-    auto playAction = new QAction(style()->standardIcon(QStyle::SP_MediaPlay), tr("Play"), this);
+    playAction = new QAction(style()->standardIcon(QStyle::SP_MediaPlay), tr("Play"), this);
     auto enqueueAction = new QAction(style()->standardIcon(QStyle::SP_DialogApplyButton), tr("Enqueue"), this);
     auto searchLineEdit = new QLineEdit();
     auto spacerWidget = new QWidget();
@@ -61,28 +59,26 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget *parent): QMainWindow
     // central widget
     auto centralWidget = new QWidget();
     auto centralLayout = new QHBoxLayout();
-    auto albumsListView = new QListView();
+    albumsListView = new QListView();
+    albumsListView->setViewMode(QListView::ViewMode::IconMode);
+    albumsListView->setGridSize(QSize(128, 138));
 
     centralLayout->addWidget(albumsListView);
     centralWidget->setLayout(centralLayout);
     setCentralWidget(centralWidget);
 
     // docks
-    auto artistsLayout = new QVBoxLayout();
-    auto tracksLayout = new QHBoxLayout();
     auto artistsDockWidget = new QDockWidget(tr("Artists"),  this);
     auto tracksDockWidget = new QDockWidget(tr("Tracks"),  this);
-    auto artistsListView = new QListView();
-    auto tracksListView = new QListView();
+    auto artistsTreeView = new QTreeView();
+    auto tracksTreeView = new QTreeView();
 
     artistsDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     artistsDockWidget->setAllowedAreas(Qt::RightDockWidgetArea);
-    artistsDockWidget->setLayout(artistsLayout);
-    artistsDockWidget->setWidget(artistsListView);
+    artistsDockWidget->setWidget(artistsTreeView);
     tracksDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     tracksDockWidget->setAllowedAreas(Qt::RightDockWidgetArea);
-    tracksDockWidget->setLayout(tracksLayout);
-    tracksDockWidget->setWidget(tracksListView);
+    tracksDockWidget->setWidget(tracksTreeView);
     addDockWidget(Qt::RightDockWidgetArea, artistsDockWidget);
     addDockWidget(Qt::RightDockWidgetArea, tracksDockWidget);
 
@@ -90,7 +86,9 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget *parent): QMainWindow
     statusBar()->showMessage(tr("Ready"));
 }
 
-AmpacheBrowserMainWindow::~AmpacheBrowserMainWindow()
-{}
 
-};
+
+AmpacheBrowserMainWindow::~AmpacheBrowserMainWindow() {
+}
+
+}

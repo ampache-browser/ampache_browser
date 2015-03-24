@@ -8,18 +8,24 @@
 
 
 #include <QtGui/QApplication>
-#include "ui/ampache_browser_main_window.h"
+#include "application/ampache_browser.h"
 
 
 
 using namespace ui;
+using namespace application;
 
 
 
 int main(int argc, char** argv)
 {
-    QApplication app(argc, argv);
-    AmpacheBrowserMainWindow ampacheBrowserMainWindow;
-    ampacheBrowserMainWindow.show();
-    return app.exec();
+    auto application = new QApplication{argc, argv};
+    auto ui = new Ui{};
+    auto ampacheBrowser = new AmpacheBrowser{*ui};
+    
+    return application->exec();
+
+    delete(ampacheBrowser);
+    delete(ui);
+    delete(application);
 }

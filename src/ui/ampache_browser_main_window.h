@@ -13,21 +13,26 @@
 
 
 #include <QtGui/QMainWindow>
+#include <QtGui/QListView>
+#include <QtGui/QAction>
 
 
 
-namespace ui
-{
+namespace ui {
 
-class AmpacheBrowserMainWindow: public QMainWindow
-{
+class AmpacheBrowserMainWindow: public QMainWindow {
    Q_OBJECT
 
 public:
-    explicit AmpacheBrowserMainWindow(QWidget *parent = 0);
-    virtual ~AmpacheBrowserMainWindow();
+    explicit AmpacheBrowserMainWindow(QWidget* parent = 0);
+    ~AmpacheBrowserMainWindow();
+
+    QListView* albumsListView;
+
+    QAction* playAction;
 };
-};
+
+}
 
 
 
