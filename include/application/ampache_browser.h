@@ -17,6 +17,7 @@
 #include <memory>
 #include "domain/album.h"
 #include "ui/ui.h"
+#include "application/album_model.h"
 
 // SMELL: How to organize file structure better?
 #include "src/application/ampache_service.h"
@@ -46,9 +47,10 @@ public:
 
 private:
     Ui* myUi;
-    QStandardItemModel* myAlbumsModel;
+    AlbumModel* myAlbumsModel;
     AmpacheService* myAmpacheService;
 
+    void onConnected();
     void onAlbumWindowRedraw();
     void onReadyAlbums(const vector<unique_ptr<Album>>& albums);
 };

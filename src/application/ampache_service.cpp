@@ -7,6 +7,7 @@
 
 
 
+#include <iostream>
 #include <sstream>
 #include <chrono>
 #include <memory>
@@ -15,6 +16,7 @@
 #include <QtCore/QString>
 #include <QtCore/QUrl>
 #include <QtCore/QVariant>
+#include <QtCore/QCoreApplication>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtGui/QImageReader>
@@ -54,8 +56,20 @@ AmpacheService::~AmpacheService() {
 
 
 
-void AmpacheService::requestAlbums(int offset, int limit) const {
-    callMethod(Method.Albums, {{"offset", to_string(offset)}, {"limit", to_string(limit)}});
+int AmpacheService::numberOfAlbums() const {
+    return myNumberOfAlbums;
+}
+
+
+
+void AmpacheService::requestAlbums(int offset, int limit) {
+    // TODO: Remove request queueing.  Moved to ManagedAmpacheService.
+    if (myCurrentOffsetAndLimit.first == -1) {
+        myCurrentOffsetAndLimit = {offset, limit};
+        callMethod(Method.Albums, {{"offset", to_string(offset)}, {"limit", to_string(limit)}});
+    } else {
+        myAlbumsRequests.push(pair<int, int>{offset, limit});
+    }
 }
 
 
@@ -124,12 +138,17 @@ void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader) {
         auto value = xmlStreamReader.readElementText().toStdString();
         if (name == "auth") {
             myAuthToken = value;
+        } else if (name == "albums") {
+            myNumberOfAlbums = stoi(value);
         }
     }
 
     if (xmlStreamReader.hasError()) {
       // TODO: handle error
     }
+
+    bool b = true;
+    connected(b);
 }
 
 
@@ -182,7 +201,11 @@ map<string, unique_ptr<Album>> AmpacheService::createAlbums(QXmlStreamReader& xm
             if (xmlElement == "name") {
                 albumName = value;
             } else if (xmlElement == "year") {
-                year = stoi(value);
+                year = 0;
+                try {
+                    year = stoi(value);
+                } catch (const invalid_argument& ex) {}
+                catch (const out_of_range& ex) {}
             } else if (xmlElement == "art") {
                 artUrl = value;
             }
@@ -200,6 +223,8 @@ map<string, unique_ptr<Album>> AmpacheService::createAlbums(QXmlStreamReader& xm
 
 void AmpacheService::fillAlbumArts(map<string, unique_ptr<Album>>& artUrlsToAlbumsMap) {
     for (auto& artUrlAndAlbumPair: artUrlsToAlbumsMap) {
+        QCoreApplication::processEvents();
+
         string artUrl = artUrlAndAlbumPair.first;
 
         QNetworkReply* networkReply = myNetworkAccessManager->get(QNetworkRequest(QUrl(QString::fromStdString(
@@ -212,6 +237,8 @@ void AmpacheService::fillAlbumArts(map<string, unique_ptr<Album>>& artUrlsToAlbu
 
 
 void AmpacheService::onAlbumArtFinished() {
+    QCoreApplication::processEvents();
+
     auto networkReply = qobject_cast<QNetworkReply*>(sender());
     string url = networkReply->request().url().toString().toStdString();
     auto urlAndAlbum = myPendingAlbumArts.find(url);
@@ -226,11 +253,25 @@ void AmpacheService::onAlbumArtFinished() {
         album->setArt(new QPixmap{100, 100});
     }
 
+    QCoreApplication::processEvents();
+
     myFinishedAlbumArts.push_back(move(album));
     myPendingAlbumArts.erase(urlAndAlbum);
 
     if (myPendingAlbumArts.empty()) {
-        readyAlbums(myFinishedAlbumArts);
+        auto finishedOffsetAndLimit = myCurrentOffsetAndLimit;
+        if (!myAlbumsRequests.empty()) {
+            myCurrentOffsetAndLimit = myAlbumsRequests.front();
+            callMethod(Method.Albums, {{"offset", to_string(myCurrentOffsetAndLimit.first)},
+                {"limit", to_string(myCurrentOffsetAndLimit.second)}});
+            myAlbumsRequests.pop();
+        }
+        else {
+            myCurrentOffsetAndLimit = {-1, -1};
+        }
+        auto readyAlbumsEventArgs = ReadyAlbumsEventArgs(myFinishedAlbumArts, finishedOffsetAndLimit.first,
+            finishedOffsetAndLimit.second);
+        readyAlbums(readyAlbumsEventArgs);
         myFinishedAlbumArts.clear();
     }
 

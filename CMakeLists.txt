@@ -6,12 +6,12 @@ find_package(Qt4 REQUIRED)
 include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/../include
     ${CMAKE_CURRENT_BINARY_DIR}/.. /usr/include/botan-1.10)
 
-set(ampache_browser_SRCS src/ui/ui.cpp src/application/ampache_browser.cpp src/application/ampache_service.cpp src/domain/album.cpp
+set(ampache_browser_SRCS src/application/request_group.cpp src/application/managed_ampache_service.cpp src/application/request_tracker.cpp src/application/album_model.cpp src/ui/ui.cpp src/application/ampache_browser.cpp src/application/ampache_service.cpp src/domain/album.cpp
     src/domain/track.cpp src/domain/artist.cpp src/ui/ampache_browser_main_window.cpp src/main.cpp)
 # by HS
 # headers with QT meta objects
-set(ampache_browser_HEADERS_WITH_MO include/ui/ui.h src/ui/ampache_browser_main_window.h
-    src/application/ampache_service.h)
+set(ampache_browser_HEADERS_WITH_MO include/ui/ui.h include/application/album_model.h
+    src/ui/ampache_browser_main_window.h src/application/ampache_service.h)
 # qt4_automoc(${ampache_browser_SRCS})
 qt4_wrap_cpp(ampache_browser_HEADERS_MOC ${ampache_browser_HEADERS_WITH_MO})
 # add_executable(ampache_browser ${ampache_browser_SRCS})

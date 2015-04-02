@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <queue>
 #include <memory>
 #include <functional>
 
@@ -35,6 +36,21 @@ using namespace domain;
 
 namespace application {
 
+class ReadyAlbumsEventArgs {
+
+public:
+    vector<unique_ptr<Album>> albums;
+    int offset;
+    int limit;
+
+    ReadyAlbumsEventArgs(vector<unique_ptr<Album>>& albums_in, int offset_in, int limit_in):
+    albums{move(albums_in)},
+    offset{offset_in},
+    limit{limit_in} { }
+};
+
+
+
 class AmpacheService: public QObject {
     Q_OBJECT
 
@@ -43,9 +59,13 @@ public:
 
     ~AmpacheService();
 
-    Event<vector<unique_ptr<Album>>> readyAlbums{};
+    Event<bool> connected{};
 
-    void requestAlbums(int offset, int limit) const;
+    Event<ReadyAlbumsEventArgs> readyAlbums{};
+
+    int numberOfAlbums() const;
+
+    void requestAlbums(int offset, int limit);
 
     const vector<Artist*> retrieveArtists() const;
 
@@ -67,9 +87,12 @@ private:
     const string myPassword;
     const string myUser;
 
-    string myAuthToken;
-    QNetworkAccessManager* myNetworkAccessManager;
+    string myAuthToken = "";
+    int myNumberOfAlbums = 0;
+    QNetworkAccessManager* myNetworkAccessManager = nullptr;
 
+    pair<int, int> myCurrentOffsetAndLimit{-1, -1};
+    queue<pair<int, int>> myAlbumsRequests{};
     multimap<string, unique_ptr<Album>> myPendingAlbumArts{};
     vector<unique_ptr<Album>> myFinishedAlbumArts{};
 

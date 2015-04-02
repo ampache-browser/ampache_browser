@@ -24,8 +24,7 @@
 
 
 
-namespace ui
-{
+namespace ui {
 
 AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow(parent) {
     // TODO: icon
@@ -61,6 +60,9 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     auto centralLayout = new QHBoxLayout();
     albumsListView = new QListView();
     albumsListView->setViewMode(QListView::ViewMode::IconMode);
+    albumsListView->setResizeMode(QListView::ResizeMode::Adjust);
+    albumsListView->setWordWrap(true);
+    albumsListView->setVerticalScrollMode(QAbstractItemView::ScrollMode::ScrollPerPixel);
     albumsListView->setGridSize(QSize(128, 138));
 
     centralLayout->addWidget(albumsListView);

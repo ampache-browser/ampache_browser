@@ -15,6 +15,7 @@
 #include "domain/album.h"
 #include "application/ampache_browser.h"
 #include "ui/ui.h"
+#include "application/album_model.h"
 
 using namespace std;
 using namespace placeholders;
@@ -28,9 +29,6 @@ namespace application {
 
 AmpacheBrowser::AmpacheBrowser(Ui& ui):
 myUi(&ui) {
-    myAlbumsModel = new QStandardItemModel{};
-    ui.setAlbumsModel(*myAlbumsModel);
-
     string url;
     string user;
     string pass;
@@ -41,10 +39,8 @@ myUi(&ui) {
         getline(creds, pass);
         creds.close();
     }
-
     myAmpacheService = new AmpacheService{url, user, pass};
-    myAmpacheService->readyAlbums += bind(&AmpacheBrowser::onReadyAlbums, this, _1);
-    myUi->albumWindowRedraw += bind(&AmpacheBrowser::onAlbumWindowRedraw, this);
+    myAmpacheService->connected += bind(&AmpacheBrowser::onConnected, this);
 }
 
 
@@ -72,22 +68,9 @@ AmpacheBrowser& AmpacheBrowser::operator=(AmpacheBrowser&& other) = default;
 
 
 
-void AmpacheBrowser::onAlbumWindowRedraw() {
-    myAmpacheService->requestAlbums(0, 10);
-}
-
-
-
-void AmpacheBrowser::onReadyAlbums(const vector<unique_ptr<Album>>& albums) {
-    for (auto& album: albums) {
-        auto item = new QStandardItem(QString::fromStdString(album->getName()));
-
-        // SMELL: Compute size hint from pixmap size (or scale pixmap to size relative to this).
-        item->setSizeHint(QSize(128, 128));
-
-        item->setData(*(album->getArt()), Qt::ItemDataRole::DecorationRole);
-        myAlbumsModel->appendRow(item);
-    }
+void AmpacheBrowser::onConnected() {
+    myAlbumsModel = new AlbumModel{*myAmpacheService};
+    myUi->setAlbumsModel(*myAlbumsModel);
 }
 
 }

@@ -32,7 +32,7 @@ Ui::~Ui() {
 
 
 
-void Ui::setAlbumsModel(QStandardItemModel& model) {
+void Ui::setAlbumsModel(QAbstractListModel& model) {
     myMainWindow->albumsListView->setModel(&model);
 }
 
