@@ -7,9 +7,9 @@
 
 
 
+#include <iostream>
 #include <vector>
 #include <memory>
-#include <iostream>
 
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
@@ -19,6 +19,7 @@
 #include "ampache_service.h"
 #include "application/album_model.h"
 
+using namespace std;
 using namespace placeholders;
 using namespace domain;
 
@@ -36,7 +37,6 @@ myAmpacheService(ampacheService) {
 
 AlbumModel::~AlbumModel() {
     delete(myManagedAmpacheService);
-    delete(myRequestTracker);
 }
 
 
@@ -48,6 +48,7 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
 
     QVariant notLoaded{};
     if (role == Qt::DisplayRole) {
+//         cout << "data: " << index.row() << endl;
         notLoaded = QVariant{QString{"loading..."}};
     }
 

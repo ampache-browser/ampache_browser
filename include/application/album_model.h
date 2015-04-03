@@ -23,10 +23,7 @@
 
 #include "src/application/ampache_service.h"
 #include "src/application/managed_ampache_service.h"
-#include "src/application/request_tracker.h"
 #include "domain/album.h"
-
-using namespace domain;
 
 
 
@@ -46,8 +43,7 @@ public:
 private:
     AmpacheService& myAmpacheService;
     ManagedAmpacheService* myManagedAmpacheService = nullptr;
-    unordered_map<int, unique_ptr<Album>> myAlbums{};
-    RequestTracker* myRequestTracker = new RequestTracker{};
+    unordered_map<int, unique_ptr<domain::Album>> myAlbums{};
 
     void onReadyAlbums(ReadyAlbumsEventArgs& readyAlbumsEventArgs);
     void onProgressAlbums(ReadyAlbumsEventArgs& readyAlbumsEventArgs);

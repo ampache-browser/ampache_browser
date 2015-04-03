@@ -17,6 +17,7 @@
 #include "infrastructure/event.h"
 #include "request_group.h"
 #include "ampache_service.h"
+#include "requests.h"
 
 
 
@@ -35,14 +36,11 @@ public:
 
 private:
     AmpacheService& myAmpacheService;
-    unordered_set<int> myAlbumRequests;
-    vector<RequestGroup> myAlbumRequestGroups;
-    RequestGroup myCurrentRequestGroup = RequestGroup{};
+    Requests* myAlbumRequests = new Requests{};
+
+    void onReadyToExecuteAlbums(RequestGroup& requestGroup);
 
     void onReadyAlbums(ReadyAlbumsEventArgs& readyAlbumsEventArgs);
-    bool isAlbumRequested(int offset);
-    int findOwningGroupIdx(int offset);
-    int findExtensibleGroupIdx(int offset);
 };
 
 }
