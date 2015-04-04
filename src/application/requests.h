@@ -12,9 +12,11 @@
 
 
 
+#include <limits>
 #include <vector>
 #include "infrastructure/event.h"
 #include "request_group.h"
+#include "request_groups.h"
 
 
 
@@ -23,6 +25,10 @@ namespace application {
 class Requests {
 
 public:
+    explicit Requests(int granularity);
+
+    ~Requests();
+
     infrastructure::Event<RequestGroup> readyToExecute{};
 
     void add(int offset);
@@ -30,11 +36,10 @@ public:
     RequestGroup setFinished();
 
 private:
-    std::vector<RequestGroup> myRequestGroups;
+    RequestGroups* myRequestGroups;
     RequestGroup myCurrentRequestGroup = RequestGroup{};
+    int myLastEnqueuedOffset = std::numeric_limits<int>::max();
 
-    int findOwningGroupIdx(int offset);
-    int findExtensibleGroupIdx(int offset);
 };
 
 }

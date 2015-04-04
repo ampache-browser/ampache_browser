@@ -40,7 +40,6 @@ void ManagedAmpacheService::requestAlbum(int offset) {
 
 
 void ManagedAmpacheService::onReadyToExecuteAlbums(RequestGroup& requestGroup) {
-    cout << "request: " << requestGroup.getLower() << ", " << requestGroup.getSize() << endl;
     myAmpacheService.requestAlbums(requestGroup.getLower(), requestGroup.getSize());
 }
 

@@ -36,7 +36,8 @@ public:
 
 private:
     AmpacheService& myAmpacheService;
-    Requests* myAlbumRequests = new Requests{};
+
+    Requests* myAlbumRequests = new Requests{3};
 
     void onReadyToExecuteAlbums(RequestGroup& requestGroup);
 

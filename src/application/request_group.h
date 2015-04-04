@@ -37,13 +37,15 @@ public:
 
     bool canBeExtendedToOffset(int offset) const;
 
-    void extend();
+    bool hasIntersection(RequestGroup other) const;
 
     std::pair<RequestGroup, RequestGroup> split(int offset) const;
 
-    RequestGroup upperTake(int size);
+    std::pair<RequestGroup, RequestGroup> substract(RequestGroup other) const;
 
-    RequestGroup lowerTake(int size);
+    void extend();
+
+    void shrink();
 
 private:
     int myLower;

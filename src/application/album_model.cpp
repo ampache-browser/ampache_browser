@@ -48,7 +48,6 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
 
     QVariant notLoaded{};
     if (role == Qt::DisplayRole) {
-//         cout << "data: " << index.row() << endl;
         notLoaded = QVariant{QString{"loading..."}};
     }
 
@@ -78,7 +77,6 @@ int AlbumModel::rowCount(const QModelIndex& parent) const {
 
 void AlbumModel::onProgressAlbums(ReadyAlbumsEventArgs& readyAlbumsEventArgs) {
     int idx = readyAlbumsEventArgs.offset;
-    cout << "progress" << idx << endl;
     for (auto& album: readyAlbumsEventArgs.albums) {
         myAlbums[idx++] = move(album);
     }

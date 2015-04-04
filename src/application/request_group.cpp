@@ -7,6 +7,7 @@
 
 
 
+#include <algorithm>
 #include "request_group.h"
 
 using namespace std;
@@ -73,11 +74,11 @@ bool RequestGroup::canBeExtendedToOffset(int offset) const {
 
 
 
-void RequestGroup::extend() {
-    if (isEmpty()) {
-        myLower = myUpper + 1;
+bool RequestGroup::hasIntersection(RequestGroup other) const {
+    if (myUpper < other.getLower() || myLower > other.getUpper()) {
+        return false;
     }
-    myUpper++;
+    return true;
 }
 
 
@@ -99,34 +100,27 @@ pair<RequestGroup, RequestGroup> RequestGroup::split(int offset) const {
 
 
 
-RequestGroup RequestGroup::upperTake(int size) {
-    if (isEmpty() || size <= 0) {
-        return RequestGroup{};
+pair<RequestGroup, RequestGroup> RequestGroup::substract(RequestGroup other) const {
+    if (!hasIntersection(other)) {
+        return pair<RequestGroup, RequestGroup>{RequestGroup{}, RequestGroup{}};
     }
-
-    if (size > getSize()) {
-        size = getSize();
-    }
-
-    auto takenPart = RequestGroup{myUpper - (size - 1), myUpper};
-    myUpper -= size;
-    return takenPart;
+    return pair<RequestGroup, RequestGroup>{RequestGroup{myLower, other.getLower() - 1},
+        RequestGroup{other.getUpper() + 1, myUpper}};
 }
 
 
 
-RequestGroup RequestGroup::lowerTake(int size) {
-    if (isEmpty() || size <= 0) {
-        return RequestGroup{};
+void RequestGroup::extend() {
+    if (isEmpty()) {
+        myLower = myUpper + 1;
     }
+    myUpper++;
+}
 
-    if (size > getSize()) {
-        size = getSize();
-    }
 
-    auto takenPart = RequestGroup{myLower, myLower + (size - 1)};
-    myLower += size;
-    return takenPart;
+
+void RequestGroup::shrink() {
+    myLower++;
 }
 
 }

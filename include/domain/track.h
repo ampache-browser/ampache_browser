@@ -33,8 +33,8 @@ public:
     Artist* getArtist() const;
 
 private:
-    Artist* myArtist;
     const string myName;
+    Artist* myArtist;
 };
 
 }

@@ -84,8 +84,8 @@ private:
     } Method;
 
     const string myUrl;
-    const string myPassword;
     const string myUser;
+    const string myPassword;
 
     string myAuthToken = "";
     int myNumberOfAlbums = 0;
