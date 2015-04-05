@@ -40,7 +40,7 @@ using namespace domain;
 
 namespace application {
 
-AmpacheService::AmpacheService(string url,  string user, string password):
+AmpacheService::AmpacheService(string url, string user, string password):
 myUrl{url},
 myUser{user},
 myPassword{password},
@@ -63,13 +63,7 @@ int AmpacheService::numberOfAlbums() const {
 
 
 void AmpacheService::requestAlbums(int offset, int limit) {
-    // TODO: Remove request queueing.  Moved to ManagedAmpacheService.
-    if (myCurrentOffsetAndLimit.first == -1) {
-        myCurrentOffsetAndLimit = {offset, limit};
-        callMethod(Method.Albums, {{"offset", to_string(offset)}, {"limit", to_string(limit)}});
-    } else {
-        myAlbumsRequests.push(pair<int, int>{offset, limit});
-    }
+    callMethod(Method.Albums, {{"offset", to_string(offset)}, {"limit", to_string(limit)}});
 }
 
 
@@ -147,7 +141,7 @@ void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader) {
       // TODO: handle error
     }
 
-    bool b = true;
+    bool b = false;
     connected(b);
 }
 
@@ -259,19 +253,7 @@ void AmpacheService::onAlbumArtFinished() {
     myPendingAlbumArts.erase(urlAndAlbum);
 
     if (myPendingAlbumArts.empty()) {
-        auto finishedOffsetAndLimit = myCurrentOffsetAndLimit;
-        if (!myAlbumsRequests.empty()) {
-            myCurrentOffsetAndLimit = myAlbumsRequests.front();
-            callMethod(Method.Albums, {{"offset", to_string(myCurrentOffsetAndLimit.first)},
-                {"limit", to_string(myCurrentOffsetAndLimit.second)}});
-            myAlbumsRequests.pop();
-        }
-        else {
-            myCurrentOffsetAndLimit = {-1, -1};
-        }
-        auto readyAlbumsEventArgs = ReadyAlbumsEventArgs(myFinishedAlbumArts, finishedOffsetAndLimit.first,
-            finishedOffsetAndLimit.second);
-        readyAlbums(readyAlbumsEventArgs);
+        readyAlbums(myFinishedAlbumArts);
         myFinishedAlbumArts.clear();
     }
 

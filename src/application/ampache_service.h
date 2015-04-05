@@ -28,48 +28,29 @@
 #include "domain/artist.h"
 #include "domain/track.h"
 
-using namespace std;
-using namespace infrastructure;
-using namespace domain;
-
 
 
 namespace application {
-
-class ReadyAlbumsEventArgs {
-
-public:
-    vector<unique_ptr<Album>> albums;
-    int offset;
-    int limit;
-
-    ReadyAlbumsEventArgs(vector<unique_ptr<Album>>& albums_in, int offset_in, int limit_in):
-    albums{move(albums_in)},
-    offset{offset_in},
-    limit{limit_in} { }
-};
-
-
 
 class AmpacheService: public QObject {
     Q_OBJECT
 
 public:
-    explicit AmpacheService(string url, string user, string password);
+    explicit AmpacheService(std::string url, std::string user, std::string password);
 
     ~AmpacheService();
 
-    Event<bool> connected{};
+    infrastructure::Event<bool> connected{};
 
-    Event<ReadyAlbumsEventArgs> readyAlbums{};
+    infrastructure::Event<std::vector<std::unique_ptr<domain::Album>>> readyAlbums{};
 
     int numberOfAlbums() const;
 
     void requestAlbums(int offset, int limit);
 
-    const vector<Artist*> retrieveArtists() const;
+    const std::vector<Artist*> retrieveArtists() const;
 
-    const vector<Track*> retrieveTracks() const;
+    const std::vector<domain::Track*> retrieveTracks() const;
 
 private slots:
     void onFinished();
@@ -77,33 +58,31 @@ private slots:
 
 private:
     struct {
-        const string Handshake = "handshake";
-        const string Ping = "ping";
-        const string Albums = "albums";
-        const string Artists = "artists";
+        const std::string Handshake = "handshake";
+        const std::string Ping = "ping";
+        const std::string Albums = "albums";
+        const std::string Artists = "artists";
     } Method;
 
-    const string myUrl;
-    const string myUser;
-    const string myPassword;
+    const std::string myUrl;
+    const std::string myUser;
+    const std::string myPassword;
 
-    string myAuthToken = "";
+    std::string myAuthToken = "";
     int myNumberOfAlbums = 0;
     QNetworkAccessManager* myNetworkAccessManager = nullptr;
 
-    pair<int, int> myCurrentOffsetAndLimit{-1, -1};
-    queue<pair<int, int>> myAlbumsRequests{};
-    multimap<string, unique_ptr<Album>> myPendingAlbumArts{};
-    vector<unique_ptr<Album>> myFinishedAlbumArts{};
+    std::multimap<std::string, std::unique_ptr<domain::Album>> myPendingAlbumArts{};
+    std::vector<std::unique_ptr<domain::Album>> myFinishedAlbumArts{};
 
     void connectToServer();
-    void callMethod(string name, map<string, string> arguments) const;
+    void callMethod(std::string name, std::map<std::string, std::string> arguments) const;
     void processHandshake(QXmlStreamReader& xmlStreamReader);
     void processAlbums(QXmlStreamReader& xmlStreamReader);
-    map<string, unique_ptr<Album>> createAlbums(QXmlStreamReader& xmlStreamReader) const;
-    void fillAlbumArts(map<string, unique_ptr<Album>>& artUrlsToAlbumsMap);
-    string assembleUrlBase() const;
-    string parseMethodName(const string& methodCallUrl) const;
+    std::map<std::string, std::unique_ptr<domain::Album>> createAlbums(QXmlStreamReader& xmlStreamReader) const;
+    void fillAlbumArts(std::map<std::string, std::unique_ptr<domain::Album>>& artUrlsToAlbumsMap);
+    std::string assembleUrlBase() const;
+    std::string parseMethodName(const std::string& methodCallUrl) const;
 };
 
 }

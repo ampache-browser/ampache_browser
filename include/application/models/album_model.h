@@ -12,6 +12,8 @@
 
 
 
+class RequestGroup;
+
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -21,9 +23,9 @@
 #include <QtCore/QModelIndex>
 #include <QtCore/QAbstractListModel>
 
-#include "src/application/ampache_service.h"
-#include "src/application/managed_ampache_service.h"
 #include "domain/album.h"
+#include "src/application/models/requests.h"
+#include "src/application/ampache_service.h"
 
 
 
@@ -38,15 +40,16 @@ public:
     ~AlbumModel() override;
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
 private:
     AmpacheService& myAmpacheService;
-    ManagedAmpacheService* myManagedAmpacheService = nullptr;
-    unordered_map<int, unique_ptr<domain::Album>> myAlbums{};
+    std::unordered_map<int, std::unique_ptr<domain::Album>> myAlbums{};
+    Requests* const myAlbumRequests = new Requests{3};
 
-    void onReadyAlbums(ReadyAlbumsEventArgs& readyAlbumsEventArgs);
-    void onProgressAlbums(ReadyAlbumsEventArgs& readyAlbumsEventArgs);
+    void onReadyToExecuteAlbums(RequestGroup& requestGroup);
+    void onReadyAlbums(std::vector<std::unique_ptr<domain::Album>>& albums);
 };
 
 }

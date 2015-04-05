@@ -12,19 +12,14 @@
 
 
 
+class AlbumModel;
+class AmpacheService;
+
 #include <QtGui/QStandardItemModel>
 #include <vector>
 #include <memory>
 #include "domain/album.h"
 #include "ui/ui.h"
-#include "application/album_model.h"
-
-// SMELL: How to organize file structure better?
-#include "src/application/ampache_service.h"
-
-using namespace std;
-using namespace domain;
-using namespace ui;
 
 
 
@@ -33,7 +28,7 @@ namespace application {
 class AmpacheBrowser {
 
 public:
-    AmpacheBrowser(Ui& ui);
+    AmpacheBrowser(ui::Ui& ui);
 
     ~AmpacheBrowser();
 
@@ -46,13 +41,13 @@ public:
     AmpacheBrowser& operator=(AmpacheBrowser&& other);
 
 private:
-    Ui* myUi;
+    ui::Ui* myUi;
     AlbumModel* myAlbumsModel;
     AmpacheService* myAmpacheService;
 
     void onConnected();
     void onAlbumWindowRedraw();
-    void onReadyAlbums(const vector<unique_ptr<Album>>& albums);
+    void onReadyAlbums(const std::vector<std::unique_ptr<domain::Album>>& albums);
 };
 
 }

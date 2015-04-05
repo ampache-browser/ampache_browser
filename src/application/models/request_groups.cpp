@@ -28,7 +28,7 @@ bool RequestGroups::isEmpty() const {
 
 
 
-void RequestGroups::place(RequestGroup requestGroup) {
+void RequestGroups::cutAndPlaceOnTop(RequestGroup requestGroup) {
     auto intersectingGroupIdxs = findIntersectingGroupIdxs(requestGroup);
     for (auto idx = intersectingGroupIdxs.size(); idx-- > 0;) {
         auto intersectingGroupIdx = intersectingGroupIdxs[idx];
@@ -92,7 +92,7 @@ void RequestGroups::chop() {
             choppedGroups.push_back(split.second);
             choppedGroups.push_back(split.first);
         } else {
-            placeBack(choppedGroups, group);
+            appendOnTop(choppedGroups, group);
         }
     }
     myRequestGroups = choppedGroups;
@@ -100,7 +100,7 @@ void RequestGroups::chop() {
 
 
 
-void RequestGroups::placeBack(vector<RequestGroup>& groups, const RequestGroup groupToPlace) {
+void RequestGroups::appendOnTop(vector<RequestGroup>& groups, const RequestGroup groupToPlace) {
     if (groups.size() == 0) {
         groups.push_back(groupToPlace);
         return;

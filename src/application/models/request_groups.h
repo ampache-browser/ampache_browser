@@ -27,7 +27,7 @@ public:
 
     bool isEmpty() const;
 
-    void place(RequestGroup requestGroup);
+    void cutAndPlaceOnTop(RequestGroup requestGroup);
 
     bool extend(int offset);
 
@@ -40,7 +40,7 @@ private:
 
     void chop();
 
-    void placeBack(std::vector<RequestGroup>& groups, const RequestGroup groupToPlace);
+    void appendOnTop(std::vector<RequestGroup>& groups, const RequestGroup groupToPlace);
 
     int findOwningGroupIdx(int offset) const;
 

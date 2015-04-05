@@ -13,9 +13,10 @@
 #include <QtCore/QString>
 #include <QtCore/QList>
 #include "domain/album.h"
-#include "application/ampache_browser.h"
 #include "ui/ui.h"
-#include "application/album_model.h"
+#include "application/models/album_model.h"
+#include "ampache_service.h"
+#include "application/ampache_browser.h"
 
 using namespace std;
 using namespace placeholders;
@@ -52,24 +53,24 @@ AmpacheBrowser::~AmpacheBrowser() {
 
 
 
-AmpacheBrowser::AmpacheBrowser(const AmpacheBrowser& other) = default;
+AmpacheBrowser::AmpacheBrowser(const AmpacheBrowser&) = default;
 
 
 
-AmpacheBrowser& AmpacheBrowser::operator=(const AmpacheBrowser& other) = default;
+AmpacheBrowser& AmpacheBrowser::operator=(const AmpacheBrowser&) = default;
 
 
 
-AmpacheBrowser::AmpacheBrowser(AmpacheBrowser&& other) = default;
+AmpacheBrowser::AmpacheBrowser(AmpacheBrowser&&) = default;
 
 
 
-AmpacheBrowser& AmpacheBrowser::operator=(AmpacheBrowser&& other) = default;
+AmpacheBrowser& AmpacheBrowser::operator=(AmpacheBrowser&&) = default;
 
 
 
 void AmpacheBrowser::onConnected() {
-    myAlbumsModel = new AlbumModel{*myAmpacheService};
+    myAlbumsModel = new AlbumModel(*myAmpacheService);
     myUi->setAlbumsModel(*myAlbumsModel);
 }
 

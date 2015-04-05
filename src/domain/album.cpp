@@ -20,7 +20,7 @@ using namespace std;
 
 namespace domain {
 
-Album::Album(const string &id, const string &name, int releaseYear):
+Album::Album(const string id, const string name, int releaseYear):
 myId{id},
 myName{name},
 myReleaseYear{releaseYear} {

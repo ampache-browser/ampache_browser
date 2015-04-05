@@ -12,10 +12,9 @@
 
 
 
-#include <string>
-#include "domain/artist.h"
+class Artist;
 
-using namespace std;
+#include <string>
 
 
 
@@ -24,16 +23,16 @@ namespace domain {
 class Track {
 
 public:
-    Track(const string &name, Artist* artist);
+    Track(const std::string &name, Artist* artist);
 
     ~Track();
 
-    const string getName() const;
+    const std::string getName() const;
 
     Artist* getArtist() const;
 
 private:
-    const string myName;
+    const std::string myName;
     Artist* myArtist;
 };
 

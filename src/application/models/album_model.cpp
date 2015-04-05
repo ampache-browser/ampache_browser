@@ -16,8 +16,9 @@
 #include <QtCore/QAbstractListModel>
 
 #include "domain/album.h"
-#include "ampache_service.h"
-#include "application/album_model.h"
+#include "../ampache_service.h"
+#include "requests.h"
+#include "application/models/album_model.h"
 
 using namespace std;
 using namespace placeholders;
@@ -29,14 +30,14 @@ namespace application {
 
 AlbumModel::AlbumModel(AmpacheService& ampacheService, QObject* parent): QAbstractListModel(parent),
 myAmpacheService(ampacheService) {
-    myManagedAmpacheService = new ManagedAmpacheService{myAmpacheService};
-    myManagedAmpacheService->progressAlbums += bind(&AlbumModel::onProgressAlbums, this, _1);
+    myAlbumRequests->readyToExecute += bind(&AlbumModel::onReadyToExecuteAlbums, this, _1);
+    myAmpacheService.readyAlbums += bind(&AlbumModel::onReadyAlbums, this, _1);
 }
 
 
 
 AlbumModel::~AlbumModel() {
-    delete(myManagedAmpacheService);
+    delete(myAlbumRequests);
 }
 
 
@@ -55,7 +56,7 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
     auto indexAndAlbum = myAlbums.find(row);
     if (indexAndAlbum == myAlbums.end()) {
         if (role == Qt::DisplayRole) {
-            myManagedAmpacheService->requestAlbum(row);
+            myAlbumRequests->add(row);
         }
         return notLoaded;
     }
@@ -69,20 +70,27 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
 
 
 
-int AlbumModel::rowCount(const QModelIndex& parent) const {
+int AlbumModel::rowCount(const QModelIndex&) const {
     return myAmpacheService.numberOfAlbums();
 }
 
 
 
-void AlbumModel::onProgressAlbums(ReadyAlbumsEventArgs& readyAlbumsEventArgs) {
-    int idx = readyAlbumsEventArgs.offset;
-    for (auto& album: readyAlbumsEventArgs.albums) {
-        myAlbums[idx++] = move(album);
+void AlbumModel::onReadyToExecuteAlbums(application::RequestGroup& requestGroup) {
+    myAmpacheService.requestAlbums(requestGroup.getLower(), requestGroup.getSize());
+}
+
+
+
+void AlbumModel::onReadyAlbums(vector<unique_ptr<Album>>& albums) {
+    auto finishedRequestGroup = myAlbumRequests->setFinished();
+
+    int row = finishedRequestGroup.getLower();
+    for (auto& album: albums) {
+        myAlbums[row++] = move(album);
     }
 
-    dataChanged(createIndex(readyAlbumsEventArgs.offset, 0),
-        createIndex(readyAlbumsEventArgs.offset + readyAlbumsEventArgs.limit - 1, 0));
+    dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
 }
 
 }

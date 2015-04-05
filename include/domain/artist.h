@@ -14,8 +14,6 @@
 
 #include <string>
 
-using namespace std;
-
 
 
 namespace domain {
@@ -23,14 +21,14 @@ namespace domain {
 class Artist {
 
 public:
-    Artist(const string &name);
+    Artist(const std::string &name);
 
     ~Artist();
 
-    const string getName() const;
+    const std::string getName() const;
 
 private:
-    const string myName;
+    const std::string myName;
 };
 
 }

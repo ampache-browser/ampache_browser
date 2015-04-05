@@ -10,8 +10,6 @@
 #include <functional>
 #include "event.h"
 
-using namespace std;
-
 
 
 namespace infrastructure {
@@ -26,14 +24,14 @@ void Event<T>::operator()(T& args) {
 
 
 template <class T>
-void Event<T>::operator+=(function<void(T&)> subscriber) {
+void Event<T>::operator+=(std::function<void(T&)> subscriber) {
     mySubscribers.push_back(subscriber);
 }
 
 
 
 template <class T>
-void Event<T>::operator-=(function<void(T&)> subscriber) {
+void Event<T>::operator-=(std::function<void(T&)> subscriber) {
     mySubscribers.erase(subscriber);
 }
 

@@ -15,8 +15,6 @@
 #include <vector>
 #include <functional>
 
-using namespace std;
-
 
 
 namespace infrastructure {
@@ -44,7 +42,7 @@ public:
      * @param subscriber A listener that shall be subscribed to the event.
      * @return void
      */
-    void operator+=(function<void(T&)> subscriber);
+    void operator+=(std::function<void(T&)> subscriber);
 
     /**
      * @brief Unsubscribes the subscriber from the event.
@@ -52,10 +50,10 @@ public:
      * @param subscriber A listener that shall be unsubscribed from the event.
      * @return void
      */
-    void operator-=(function<void(T&)> subscriber);
+    void operator-=(std::function<void(T&)> subscriber);
 
 private:
-    vector<function<void(T&)>> mySubscribers;
+    std::vector<std::function<void(T&)>> mySubscribers;
 
 };
 

@@ -28,6 +28,8 @@ Requests::~Requests() {
 
 
 
+// SMELL: The algorithm is not clearly visible from here because it heavilly relies on RequestGroups behaviour (sorting
+// chops backwards, etc.).
 void Requests::add(int offset) {
     if (myCurrentRequestGroup.isEmpty()) {
         myCurrentRequestGroup = RequestGroup{offset, offset};
@@ -40,9 +42,9 @@ void Requests::add(int offset) {
     }
 
     if (offset < myLastEnqueuedOffset) {
-        myRequestGroups->place(RequestGroup{offset, offset});
+        myRequestGroups->cutAndPlaceOnTop(RequestGroup{offset, offset});
     } else if (offset > myLastEnqueuedOffset + 1) {
-        myRequestGroups->place(RequestGroup{offset, offset});
+        myRequestGroups->cutAndPlaceOnTop(RequestGroup{offset, offset});
     } else {
         myRequestGroups->extend(offset);
     }
