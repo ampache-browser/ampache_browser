@@ -37,8 +37,9 @@ void Ui::setAlbumsModel(QAbstractListModel& model) {
 }
 
 
+
 void Ui::onPlayActionTriggered() {
-    bool b = true;
+    bool b = false;
     albumWindowRedraw(b);
 }
 

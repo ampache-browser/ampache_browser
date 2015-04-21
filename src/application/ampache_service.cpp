@@ -17,9 +17,11 @@
 #include <QtCore/QUrl>
 #include <QtCore/QVariant>
 #include <QtCore/QCoreApplication>
+#include <QtCore/QThreadPool>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtGui/QImageReader>
+#include <QtGui/QImage>
 #include <QtGui/QPixmap>
 #include <QtXml/QXmlStreamReader>
 
@@ -217,8 +219,6 @@ map<string, unique_ptr<Album>> AmpacheService::createAlbums(QXmlStreamReader& xm
 
 void AmpacheService::fillAlbumArts(map<string, unique_ptr<Album>>& artUrlsToAlbumsMap) {
     for (auto& artUrlAndAlbumPair: artUrlsToAlbumsMap) {
-        QCoreApplication::processEvents();
-
         string artUrl = artUrlAndAlbumPair.first;
 
         QNetworkReply* networkReply = myNetworkAccessManager->get(QNetworkRequest(QUrl(QString::fromStdString(
@@ -231,23 +231,25 @@ void AmpacheService::fillAlbumArts(map<string, unique_ptr<Album>>& artUrlsToAlbu
 
 
 void AmpacheService::onAlbumArtFinished() {
-    QCoreApplication::processEvents();
-
     auto networkReply = qobject_cast<QNetworkReply*>(sender());
     string url = networkReply->request().url().toString().toStdString();
+    auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(url, *networkReply);
+    scaleAlbumArtRunnable->setAutoDelete(false);
+    connect(scaleAlbumArtRunnable, SIGNAL(finished(ScaleAlbumArtRunnable*)), this,
+        SLOT(onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable*)));
+    QThreadPool::globalInstance()->start(scaleAlbumArtRunnable);
+}
+
+
+
+void AmpacheService::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable) {
+    auto scaledAlbumArt = scaleAlbumArtRunnable->getResult();
+    auto url = scaleAlbumArtRunnable->getId();
     auto urlAndAlbum = myPendingAlbumArts.find(url);
     auto& album = urlAndAlbum->second;
-
-    QPixmap art{};
-
-    if (art.loadFromData(networkReply->readAll())) {
-        album->setArt(new QPixmap{art.scaled(100, 100, Qt::AspectRatioMode::IgnoreAspectRatio,
-            Qt::TransformationMode::SmoothTransformation)});
-    } else {
-        album->setArt(new QPixmap{100, 100});
-    }
-
-    QCoreApplication::processEvents();
+    auto art = new QPixmap{};
+    art->convertFromImage(*scaledAlbumArt);
+    album->setArt(art);
 
     myFinishedAlbumArts.push_back(move(album));
     myPendingAlbumArts.erase(urlAndAlbum);
@@ -257,7 +259,8 @@ void AmpacheService::onAlbumArtFinished() {
         myFinishedAlbumArts.clear();
     }
 
-    networkReply->deleteLater();
+    scaleAlbumArtRunnable->getNetworkReply()->deleteLater();
+    scaleAlbumArtRunnable->deleteLater();
 }
 
 
@@ -272,6 +275,41 @@ string AmpacheService::parseMethodName(const string& methodCallUrl) const {
     auto nameBeginPos = assembleUrlBase().length();
     auto nameEndPos = methodCallUrl.find("&", nameBeginPos);
     return methodCallUrl.substr(nameBeginPos, nameEndPos - nameBeginPos);
+}
+
+
+
+ScaleAlbumArtRunnable::ScaleAlbumArtRunnable(const string id, QNetworkReply& networkReply):
+myId{id} {
+    myNetworkReply = &networkReply;
+}
+
+
+
+string ScaleAlbumArtRunnable::getId() const {
+    return myId;
+}
+
+
+
+QImage* ScaleAlbumArtRunnable::getResult() const {
+    return myScaledAlbumArt;
+}
+
+
+
+QNetworkReply* ScaleAlbumArtRunnable::getNetworkReply() const {
+    return myNetworkReply;
+}
+
+
+
+void ScaleAlbumArtRunnable::run() {
+    QImage art{};
+    art.loadFromData(myNetworkReply->readAll());
+    myScaledAlbumArt = new QImage{art.scaled(100, 100, Qt::AspectRatioMode::IgnoreAspectRatio,
+        Qt::TransformationMode::SmoothTransformation)};
+    emit finished(this);
 }
 
 }

@@ -62,8 +62,8 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     albumsListView->setViewMode(QListView::ViewMode::IconMode);
     albumsListView->setResizeMode(QListView::ResizeMode::Adjust);
     albumsListView->setWordWrap(true);
-    albumsListView->setVerticalScrollMode(QAbstractItemView::ScrollMode::ScrollPerPixel);
-    albumsListView->setGridSize(QSize(128, 138));
+    albumsListView->setGridSize(QSize(128, 192));
+    albumsListView->setIconSize(QSize(100, 100));
 
     centralLayout->addWidget(albumsListView);
     centralWidget->setLayout(centralLayout);

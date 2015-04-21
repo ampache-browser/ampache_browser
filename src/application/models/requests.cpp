@@ -16,9 +16,8 @@ using namespace std;
 
 namespace application {
 
-Requests::Requests(int granularity) {
-    myRequestGroups = new RequestGroups{granularity};
-}
+Requests::Requests(int granularity):
+myRequestGroups{new RequestGroups{granularity}} { }
 
 
 

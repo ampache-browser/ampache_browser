@@ -23,9 +23,11 @@ int main(int argc, char** argv)
     auto ui = new Ui{};
     auto ampacheBrowser = new AmpacheBrowser{*ui};
     
-    return application->exec();
+    auto exit = application->exec();
 
     delete(ampacheBrowser);
     delete(ui);
     delete(application);
+
+    return exit;
 }

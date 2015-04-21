@@ -20,6 +20,7 @@
 #include <functional>
 
 #include <QtCore/QObject>
+#include <QtCore/QRunnable>
 #include <QtXml/QXmlStreamReader>
 #include <QtNetwork/QNetworkReply>
 
@@ -31,6 +32,31 @@
 
 
 namespace application {
+
+class ScaleAlbumArtRunnable: public QObject, public QRunnable {
+    Q_OBJECT
+
+signals:
+    void finished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable);
+
+public:
+    explicit ScaleAlbumArtRunnable(const std::string id, QNetworkReply& networkReply);
+
+    std::string getId() const;
+
+    QImage* getResult() const;
+
+    QNetworkReply* getNetworkReply() const;
+
+private:
+    const std::string myId;
+    QNetworkReply* myNetworkReply = nullptr;
+    QImage* myScaledAlbumArt = nullptr;
+
+    void run() override;
+};
+
+
 
 class AmpacheService: public QObject {
     Q_OBJECT
@@ -48,13 +74,14 @@ public:
 
     void requestAlbums(int offset, int limit);
 
-    const std::vector<Artist*> retrieveArtists() const;
+    const std::vector<domain::Artist*> retrieveArtists() const;
 
     const std::vector<domain::Track*> retrieveTracks() const;
 
 private slots:
     void onFinished();
     void onAlbumArtFinished();
+    void onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable);
 
 private:
     struct {
@@ -70,10 +97,11 @@ private:
 
     std::string myAuthToken = "";
     int myNumberOfAlbums = 0;
-    QNetworkAccessManager* myNetworkAccessManager = nullptr;
+    QNetworkAccessManager* const myNetworkAccessManager = nullptr;
 
     std::multimap<std::string, std::unique_ptr<domain::Album>> myPendingAlbumArts{};
     std::vector<std::unique_ptr<domain::Album>> myFinishedAlbumArts{};
+    std::string myCurrentlyScaledUrl = "";
 
     void connectToServer();
     void callMethod(std::string name, std::map<std::string, std::string> arguments) const;

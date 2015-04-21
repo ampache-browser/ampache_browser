@@ -14,6 +14,7 @@
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
 #include <QtCore/QAbstractListModel>
+#include <QtGui/QIcon>
 
 #include "domain/album.h"
 #include "../ampache_service.h"
@@ -50,6 +51,8 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
     QVariant notLoaded{};
     if (role == Qt::DisplayRole) {
         notLoaded = QVariant{QString{"loading..."}};
+    } else if (role == Qt::DecorationRole) {
+        notLoaded = QIcon{QPixmap{100, 100}};
     }
 
     int row = index.row();
@@ -63,6 +66,8 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
 
     if (role == Qt::DisplayRole) {
         return QVariant{QString::fromStdString(indexAndAlbum->second->getName())};
+    } else if (role == Qt::DecorationRole) {
+        return QIcon{*(indexAndAlbum->second->getArt())};
     } else {
         return QVariant{};
     }
