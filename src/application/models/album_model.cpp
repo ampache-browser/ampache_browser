@@ -33,6 +33,8 @@ AlbumModel::AlbumModel(AmpacheService& ampacheService, QObject* parent): QAbstra
 myAmpacheService(ampacheService) {
     myAlbumRequests->readyToExecute += bind(&AlbumModel::onReadyToExecuteAlbums, this, _1);
     myAmpacheService.readyAlbums += bind(&AlbumModel::onReadyAlbums, this, _1);
+    myArtRequests->readyToExecute += bind(&AlbumModel::onReadyToExecuteArts, this, _1);
+    myAmpacheService.readyAlbumArts += bind(&AlbumModel::onReadyAlbumArts, this, _1);
 }
 
 
@@ -52,7 +54,10 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
     if (role == Qt::DisplayRole) {
         notLoaded = QVariant{QString{"loading..."}};
     } else if (role == Qt::DecorationRole) {
-        notLoaded = QIcon{QPixmap{100, 100}};
+        // SMELL: size specified on multiple places
+        QPixmap notLoadedPixmap{100, 100};
+        notLoadedPixmap.fill(Qt::GlobalColor::lightGray);
+        notLoaded = QIcon{notLoadedPixmap};
     }
 
     int row = index.row();
@@ -65,9 +70,14 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
     }
 
     if (role == Qt::DisplayRole) {
-        return QVariant{QString::fromStdString(indexAndAlbum->second->getName())};
+        return QVariant{QString::fromStdString(indexAndAlbum->second.second->getName())};
     } else if (role == Qt::DecorationRole) {
-        return QIcon{*(indexAndAlbum->second->getArt())};
+        if (indexAndAlbum->second.second->getArt() == nullptr) {
+            myArtRequests->add(row);
+            return notLoaded;
+        } else {
+            return QIcon{*(indexAndAlbum->second.second->getArt())};
+        }
     } else {
         return QVariant{};
     }
@@ -81,18 +91,46 @@ int AlbumModel::rowCount(const QModelIndex&) const {
 
 
 
-void AlbumModel::onReadyToExecuteAlbums(application::RequestGroup& requestGroup) {
+void AlbumModel::onReadyToExecuteAlbums(RequestGroup& requestGroup) {
     myAmpacheService.requestAlbums(requestGroup.getLower(), requestGroup.getSize());
 }
 
 
 
-void AlbumModel::onReadyAlbums(vector<unique_ptr<Album>>& albums) {
+void AlbumModel::onReadyAlbums(multimap<string, unique_ptr<Album>>& artUrlsAndAlbums) {
     auto finishedRequestGroup = myAlbumRequests->setFinished();
 
     int row = finishedRequestGroup.getLower();
-    for (auto& album: albums) {
-        myAlbums[row++] = move(album);
+    for (auto& urlAndAlbum: artUrlsAndAlbums) {
+        myAlbums[row++] = move(urlAndAlbum);
+    }
+
+    dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+}
+
+
+
+void AlbumModel::onReadyToExecuteArts(RequestGroup& requestGroup) {
+    vector<string> urls;
+    for (auto idx = requestGroup.getLower(); idx <= requestGroup.getUpper(); idx++) {
+        auto indexAndAlbum = myAlbums.find(idx);
+        urls.push_back(indexAndAlbum->second.first);
+    }
+    myAmpacheService.requestAlbumArts(urls);
+}
+
+
+
+void AlbumModel::onReadyAlbumArts(map<string, QPixmap>& artUrlsAndArts) {
+    auto finishedRequestGroup = myArtRequests->setFinished();
+
+    for (auto artUrlAndArt: artUrlsAndArts) {
+        for (auto& album: myAlbums) {
+            if (album.second.first == artUrlAndArt.first) {
+                album.second.second->setArt(new QPixmap{artUrlAndArt.second});
+                break;
+            }
+        }
     }
 
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));

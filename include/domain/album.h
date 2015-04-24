@@ -63,8 +63,8 @@ private:
     const std::string myName;
     const int myReleaseYear;
     std::vector<Track*> myTracks;
-    Artist* myArtist;
-    QPixmap* myArt;
+    Artist* myArtist = nullptr;
+    QPixmap* myArt = nullptr;
 };
 
 }

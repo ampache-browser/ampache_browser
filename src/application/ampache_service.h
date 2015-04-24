@@ -14,6 +14,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <map>
 #include <queue>
 #include <memory>
@@ -40,18 +41,16 @@ signals:
     void finished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable);
 
 public:
-    explicit ScaleAlbumArtRunnable(const std::string id, QNetworkReply& networkReply);
+    explicit ScaleAlbumArtRunnable(const std::string id, const QByteArray imageData);
 
     std::string getId() const;
 
-    QImage* getResult() const;
-
-    QNetworkReply* getNetworkReply() const;
+    QImage getResult() const;
 
 private:
     const std::string myId;
-    QNetworkReply* myNetworkReply = nullptr;
-    QImage* myScaledAlbumArt = nullptr;
+    const QByteArray myImageData;
+    QImage myScaledAlbumArt;
 
     void run() override;
 };
@@ -68,11 +67,15 @@ public:
 
     infrastructure::Event<bool> connected{};
 
-    infrastructure::Event<std::vector<std::unique_ptr<domain::Album>>> readyAlbums{};
+    infrastructure::Event<std::multimap<std::string, std::unique_ptr<domain::Album>>> readyAlbums{};
+
+    infrastructure::Event<std::map<std::string, QPixmap>> readyAlbumArts{};
 
     int numberOfAlbums() const;
 
     void requestAlbums(int offset, int limit);
+
+    void requestAlbumArts(std::vector<std::string> urls);
 
     const std::vector<domain::Artist*> retrieveArtists() const;
 
@@ -99,16 +102,15 @@ private:
     int myNumberOfAlbums = 0;
     QNetworkAccessManager* const myNetworkAccessManager = nullptr;
 
-    std::multimap<std::string, std::unique_ptr<domain::Album>> myPendingAlbumArts{};
-    std::vector<std::unique_ptr<domain::Album>> myFinishedAlbumArts{};
-    std::string myCurrentlyScaledUrl = "";
+    std::set<std::string> myPendingAlbumArts;
+    std::map<std::string, QPixmap> myFinishedAlbumArts;
 
     void connectToServer();
     void callMethod(std::string name, std::map<std::string, std::string> arguments) const;
     void processHandshake(QXmlStreamReader& xmlStreamReader);
     void processAlbums(QXmlStreamReader& xmlStreamReader);
-    std::map<std::string, std::unique_ptr<domain::Album>> createAlbums(QXmlStreamReader& xmlStreamReader) const;
-    void fillAlbumArts(std::map<std::string, std::unique_ptr<domain::Album>>& artUrlsToAlbumsMap);
+    std::multimap<std::string, std::unique_ptr<domain::Album>> createAlbums(QXmlStreamReader& xmlStreamReader) const;
+    void fillAlbumArts(std::multimap<std::string, std::unique_ptr<domain::Album>>& artUrlsToAlbumsMap);
     std::string assembleUrlBase() const;
     std::string parseMethodName(const std::string& methodCallUrl) const;
 };
