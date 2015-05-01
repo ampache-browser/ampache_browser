@@ -46,11 +46,11 @@ public:
 private:
     AmpacheService& myAmpacheService;
     std::unordered_map<int, std::pair<std::string, std::unique_ptr<domain::Album>>> myAlbums;
-    Requests* const myAlbumRequests = new Requests{30};
+    Requests* const myAlbumRequests = new Requests;
     Requests* const myArtRequests = new Requests{3};
 
     void onReadyToExecuteAlbums(RequestGroup& requestGroup);
-    void onReadyAlbums(std::multimap<std::string, std::unique_ptr<domain::Album>>& artUrlsAndAlbums);
+    void onReadyAlbums(std::vector<std::pair<std::string, std::unique_ptr<domain::Album>>>& artUrlsAndAlbums);
     void onReadyToExecuteArts(RequestGroup& requestGroup);
     void onReadyAlbumArts(std::map<std::string, QPixmap>& artUrlsAndArts);
 };

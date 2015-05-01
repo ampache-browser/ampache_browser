@@ -49,6 +49,11 @@ void RequestGroups::cutAndPlaceOnTop(RequestGroup requestGroup) {
 
 
 bool RequestGroups::extend(int offset) {
+    if (myRequestGroups.empty()) {
+        myRequestGroups.push_back(RequestGroup{offset, offset});
+        return true;
+    }
+
     auto extensibleGroupIdx = findExtensibleGroupIdx(offset);
     if (extensibleGroupIdx == -1) {
         return false;
@@ -81,6 +86,10 @@ RequestGroup RequestGroups::pop() {
 
 
 void RequestGroups::chop() {
+    if (myGranularity == 0) {
+        return;
+    }
+
     vector<RequestGroup> choppedGroups;
     for (auto& group: myRequestGroups) {
         if (group.getSize() > myGranularity) {

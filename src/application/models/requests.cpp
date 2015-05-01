@@ -21,6 +21,10 @@ myRequestGroups{new RequestGroups{granularity}} { }
 
 
 
+Requests::Requests(): Requests(0) { }
+
+
+
 Requests::~Requests() {
     delete(myRequestGroups);
 }

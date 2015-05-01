@@ -97,7 +97,7 @@ void AlbumModel::onReadyToExecuteAlbums(RequestGroup& requestGroup) {
 
 
 
-void AlbumModel::onReadyAlbums(multimap<string, unique_ptr<Album>>& artUrlsAndAlbums) {
+void AlbumModel::onReadyAlbums(vector<pair<string, unique_ptr<Album>>>& artUrlsAndAlbums) {
     auto finishedRequestGroup = myAlbumRequests->setFinished();
 
     int row = finishedRequestGroup.getLower();

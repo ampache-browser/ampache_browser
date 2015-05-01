@@ -67,7 +67,7 @@ public:
 
     infrastructure::Event<bool> connected{};
 
-    infrastructure::Event<std::multimap<std::string, std::unique_ptr<domain::Album>>> readyAlbums{};
+    infrastructure::Event<std::vector<std::pair<std::string, std::unique_ptr<domain::Album>>>> readyAlbums{};
 
     infrastructure::Event<std::map<std::string, QPixmap>> readyAlbumArts{};
 
@@ -109,7 +109,8 @@ private:
     void callMethod(std::string name, std::map<std::string, std::string> arguments) const;
     void processHandshake(QXmlStreamReader& xmlStreamReader);
     void processAlbums(QXmlStreamReader& xmlStreamReader);
-    std::multimap<std::string, std::unique_ptr<domain::Album>> createAlbums(QXmlStreamReader& xmlStreamReader) const;
+    std::vector<std::pair<std::string, std::unique_ptr<domain::Album>>> createAlbums(
+        QXmlStreamReader& xmlStreamReader) const;
     void fillAlbumArts(std::multimap<std::string, std::unique_ptr<domain::Album>>& artUrlsToAlbumsMap);
     std::string assembleUrlBase() const;
     std::string parseMethodName(const std::string& methodCallUrl) const;

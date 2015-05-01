@@ -27,6 +27,8 @@ class Requests {
 public:
     explicit Requests(int granularity);
 
+    explicit Requests();
+
     ~Requests();
 
     infrastructure::Event<RequestGroup> readyToExecute{};

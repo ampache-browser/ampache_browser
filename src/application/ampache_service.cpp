@@ -168,8 +168,8 @@ void AmpacheService::processAlbums(QXmlStreamReader& xmlStreamReader) {
 
 
 
-multimap<string, unique_ptr<Album>> AmpacheService::createAlbums(QXmlStreamReader& xmlStreamReader) const {
-    multimap<string, unique_ptr<Album>> artUrlsToAlbumsMap{};
+vector<pair<string, unique_ptr<Album>>> AmpacheService::createAlbums(QXmlStreamReader& xmlStreamReader) const {
+    vector<pair<string, unique_ptr<Album>>> artUrlsToAlbumsMap{};
 
     QString xmlElement;
     while ((!xmlStreamReader.atEnd()) && (xmlElement != "root")) {
@@ -189,7 +189,7 @@ multimap<string, unique_ptr<Album>> AmpacheService::createAlbums(QXmlStreamReade
 
         if (xmlStreamReader.isEndElement()) {
             if (xmlElement == "album") {
-                artUrlsToAlbumsMap.emplace(artUrl, unique_ptr<Album>{new Album{id, albumName, year}});
+                artUrlsToAlbumsMap.emplace_back(artUrl, unique_ptr<Album>{new Album{id, albumName, year}});
             }
         }
 
