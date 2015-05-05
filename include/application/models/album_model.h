@@ -12,24 +12,23 @@
 
 
 
-class RequestGroup;
-
 #include <vector>
 #include <unordered_map>
-#include <unordered_set>
 #include <memory>
 
-#include <QtCore/QVariant>
-#include <QtCore/QModelIndex>
 #include <QtCore/QAbstractListModel>
 
 #include "domain/album.h"
 #include "src/application/models/requests.h"
-#include "src/application/ampache_service.h"
 
 
 
 namespace application {
+
+class AmpacheService;
+class RequestGroup;
+
+
 
 class AlbumModel: public QAbstractListModel {
     Q_OBJECT

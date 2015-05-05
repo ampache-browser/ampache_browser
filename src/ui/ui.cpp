@@ -32,8 +32,14 @@ Ui::~Ui() {
 
 
 
-void Ui::setAlbumsModel(QAbstractListModel& model) {
+void Ui::setAlbumModel(QAbstractItemModel& model) {
     myMainWindow->albumsListView->setModel(&model);
+}
+
+
+
+void Ui::setArtistModel(QAbstractItemModel& model) {
+    myMainWindow->artistsListView->setModel(&model);
 }
 
 

@@ -14,6 +14,7 @@
 
 #include <QtGui/QMainWindow>
 #include <QtGui/QListView>
+#include <QtGui/QTreeView>
 #include <QtGui/QAction>
 
 
@@ -28,6 +29,7 @@ public:
     ~AmpacheBrowserMainWindow();
 
     QListView* albumsListView;
+    QListView* artistsListView;
 
     QAction* playAction;
 };

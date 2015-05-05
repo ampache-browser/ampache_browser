@@ -12,13 +12,15 @@
 
 
 
-class Artist;
-
 #include <string>
 
 
 
 namespace domain {
+
+class Artist;
+
+
 
 class Track {
 

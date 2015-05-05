@@ -15,6 +15,7 @@
 #include "domain/album.h"
 #include "ui/ui.h"
 #include "application/models/album_model.h"
+#include "application/models/artist_model.h"
 #include "ampache_service.h"
 #include "application/ampache_browser.h"
 
@@ -48,7 +49,8 @@ myUi(&ui) {
 
 AmpacheBrowser::~AmpacheBrowser() {
     delete(myAmpacheService);
-    delete(myAlbumsModel);
+    delete(myAlbumModel);
+    delete(myArtistModel);
 }
 
 
@@ -70,8 +72,10 @@ AmpacheBrowser& AmpacheBrowser::operator=(AmpacheBrowser&&) = default;
 
 
 void AmpacheBrowser::onConnected() {
-    myAlbumsModel = new AlbumModel(*myAmpacheService);
-    myUi->setAlbumsModel(*myAlbumsModel);
+    myAlbumModel = new AlbumModel(*myAmpacheService);
+    myArtistModel = new ArtistModel(*myAmpacheService);
+    myUi->setAlbumModel(*myAlbumModel);
+    myUi->setArtistModel(*myArtistModel);
 }
 
 }

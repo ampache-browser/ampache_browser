@@ -12,9 +12,6 @@
 
 
 
-class AlbumModel;
-class AmpacheService;
-
 #include <QtGui/QStandardItemModel>
 #include <vector>
 #include <memory>
@@ -24,6 +21,12 @@ class AmpacheService;
 
 
 namespace application {
+
+class AlbumModel;
+class ArtistModel;
+class AmpacheService;
+
+
 
 class AmpacheBrowser {
 
@@ -42,8 +45,9 @@ public:
 
 private:
     ui::Ui* myUi;
-    AlbumModel* myAlbumsModel;
-    AmpacheService* myAmpacheService;
+    AlbumModel* myAlbumModel = nullptr;
+    ArtistModel* myArtistModel = nullptr;
+    AmpacheService* myAmpacheService = nullptr;
 
     void onConnected();
     void onAlbumWindowRedraw();

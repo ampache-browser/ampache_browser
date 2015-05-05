@@ -36,7 +36,9 @@ public:
 
     Event<bool> albumWindowRedraw{};
 
-    void setAlbumsModel(QAbstractListModel& model);
+    void setAlbumModel(QAbstractItemModel& model);
+
+    void setArtistModel(QAbstractItemModel& model);
 
 private slots:
     void onPlayActionTriggered();

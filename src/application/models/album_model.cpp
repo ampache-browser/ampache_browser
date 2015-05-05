@@ -35,6 +35,11 @@ myAmpacheService(ampacheService) {
     myAmpacheService.readyAlbums += bind(&AlbumModel::onReadyAlbums, this, _1);
     myArtRequests->readyToExecute += bind(&AlbumModel::onReadyToExecuteArts, this, _1);
     myAmpacheService.readyAlbumArts += bind(&AlbumModel::onReadyAlbumArts, this, _1);
+
+    // start populating with data
+    for (int row; row < rowCount(); row++) {
+        myAlbumRequests->add(row);
+    }
 }
 
 

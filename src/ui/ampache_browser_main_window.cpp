@@ -72,12 +72,14 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     // docks
     auto artistsDockWidget = new QDockWidget(tr("Artists"),  this);
     auto tracksDockWidget = new QDockWidget(tr("Tracks"),  this);
-    auto artistsTreeView = new QTreeView();
+    artistsListView = new QListView();
+    artistsListView->setResizeMode(QListView::ResizeMode::Adjust);
+    artistsListView->setUniformItemSizes(true);
     auto tracksTreeView = new QTreeView();
 
     artistsDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     artistsDockWidget->setAllowedAreas(Qt::RightDockWidgetArea);
-    artistsDockWidget->setWidget(artistsTreeView);
+    artistsDockWidget->setWidget(artistsListView);
     tracksDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     tracksDockWidget->setAllowedAreas(Qt::RightDockWidgetArea);
     tracksDockWidget->setWidget(tracksTreeView);

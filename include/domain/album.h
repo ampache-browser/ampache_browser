@@ -12,9 +12,6 @@
 
 
 
-class Artist;
-class Track;
-
 #include <string>
 #include <vector>
 #include <QtGui/QPixmap>
@@ -22,6 +19,11 @@ class Track;
 
 
 namespace domain {
+
+class Artist;
+class Track;
+
+
 
 class Album {
 

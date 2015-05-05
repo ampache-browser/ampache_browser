@@ -21,6 +21,7 @@
 #include <QtCore/QThreadPool>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
+#include <QtNetwork/QNetworkReply>
 #include <QtGui/QImageReader>
 #include <QtGui/QImage>
 #include <QtGui/QPixmap>
@@ -30,8 +31,8 @@
 #include <botan/hex.h>
 
 #include "infrastructure/event.h"
-#include "domain/album.h"
 #include "domain/artist.h"
+#include "domain/album.h"
 #include "domain/track.h"
 #include "ampache_service.h"
 
@@ -82,6 +83,18 @@ void AmpacheService::requestAlbumArts(vector<string> urls) {
 
 
 
+int AmpacheService::numberOfArtists() const {
+    return myNumberOfArtists;
+}
+
+
+
+void AmpacheService::requestArtists(int offset, int limit) {
+    callMethod(Method.Artists, {{"offset",  to_string(offset)}, {"limit", to_string(limit)}});
+}
+
+
+
 void AmpacheService::connectToServer() {
     Botan::SHA_256 sha256;
     auto currentTime = to_string(chrono::duration_cast<chrono::seconds>(chrono::system_clock::now().
@@ -127,7 +140,7 @@ void AmpacheService::onFinished() {
     } else if (methodName == Method.Albums) {
         processAlbums(xmlStreamReader);
     } else if (methodName == Method.Artists) {
-//         processArtists(xmlStreamReader);
+        processArtists(xmlStreamReader);
     }
 
     networkReply->deleteLater();
@@ -148,6 +161,8 @@ void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader) {
             myAuthToken = value;
         } else if (name == "albums") {
             myNumberOfAlbums = stoi(value);
+        } else if (name ==  "artists") {
+            myNumberOfArtists = stoi(value);
         }
     }
 
@@ -258,6 +273,64 @@ void AmpacheService::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scal
     }
 
     scaleAlbumArtRunnable->deleteLater();
+}
+
+
+
+void AmpacheService::processArtists(QXmlStreamReader& xmlStreamReader) {
+    auto artists = createArtists(xmlStreamReader);
+    readyArtists(artists);
+}
+
+
+
+vector<unique_ptr<Artist>> AmpacheService::createArtists(QXmlStreamReader& xmlStreamReader) const {
+    vector<unique_ptr<Artist>> artists{};
+
+    QString xmlElement;
+    while ((!xmlStreamReader.atEnd()) && (xmlElement != "root")) {
+        xmlStreamReader.readNext();
+        if (xmlStreamReader.isStartElement()) {
+            xmlElement = xmlStreamReader.name().toString();
+        }
+    }
+
+    string id;
+    string artistName;
+    while (!xmlStreamReader.atEnd()) {
+        xmlStreamReader.readNext();
+        xmlElement = xmlStreamReader.name().toString();
+
+        if (xmlStreamReader.isEndElement()) {
+            if (xmlElement == "artist") {
+                artists.emplace_back(unique_ptr<Artist>{new Artist{id, artistName}});
+            }
+        }
+
+        if (!xmlStreamReader.isStartElement()) {
+            continue;
+        }
+
+        if (xmlElement == "artist") {
+            QXmlStreamAttributes attributes = xmlStreamReader.attributes();
+            if (attributes.hasAttribute("id")) {
+                id = attributes.value("id").toString().toStdString();
+            }
+        }
+        else {
+            auto value = xmlStreamReader.readElementText().toStdString();
+
+            if (xmlElement == "name") {
+                artistName = value;
+            }
+        }
+    }
+
+    if (xmlStreamReader.hasError()) {
+      // TODO: handle error
+    }
+
+    return artists;
 }
 
 
