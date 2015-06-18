@@ -13,7 +13,7 @@
 
 
 #include <QtCore/QObject>
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 #include <QtGui/QStandardItemModel>
 #include "src/ui/ampache_browser_main_window.h"
 #include "infrastructure/event.h"

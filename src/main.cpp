@@ -7,7 +7,7 @@
 
 
 
-#include <QtGui/QApplication>
+#include <QApplication>
 #include "application/ampache_browser.h"
 
 

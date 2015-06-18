@@ -12,10 +12,10 @@
 
 
 
-#include <QtGui/QMainWindow>
-#include <QtGui/QListView>
-#include <QtGui/QTreeView>
-#include <QtGui/QAction>
+#include <QMainWindow>
+#include <QListView>
+#include <QTreeView>
+#include <QAction>
 
 
 

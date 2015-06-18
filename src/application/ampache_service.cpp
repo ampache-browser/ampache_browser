@@ -25,7 +25,7 @@
 #include <QtGui/QImageReader>
 #include <QtGui/QImage>
 #include <QtGui/QPixmap>
-#include <QtXml/QXmlStreamReader>
+#include <QXmlStreamReader>
 
 #include <botan/sha2_32.h>
 #include <botan/hex.h>

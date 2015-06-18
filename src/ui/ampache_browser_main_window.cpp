@@ -7,19 +7,19 @@
 
 
 
-#include <QtGui/QToolBar>
-#include <QtGui/QStyle>
-#include <QtGui/QAction>
-#include <QtGui/QLineEdit>
-#include <QtGui/QSpacerItem>
-#include <QtGui/QListView>
-#include <QtGui/QTreeView>
-#include <QtGui/QLayout>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QSplitter>
-#include <QtGui/QStatusBar>
-#include <QtGui/QDockWidget>
+#include <QToolBar>
+#include <QStyle>
+#include <QAction>
+#include <QLineEdit>
+#include <QSpacerItem>
+#include <QListView>
+#include <QTreeView>
+#include <QLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QSplitter>
+#include <QStatusBar>
+#include <QDockWidget>
 #include "ampache_browser_main_window.h"
 
 

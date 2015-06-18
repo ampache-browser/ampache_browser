@@ -8,8 +8,8 @@
 
 
 #include <QtCore/QObject>
-#include <QtGui/QMainWindow>
-#include <QtGui/QListView>
+#include <QMainWindow>
+#include <QListView>
 #include <QtGui/QStandardItemModel>
 #include "ampache_browser_main_window.h"
 #include "ui/ui.h"
