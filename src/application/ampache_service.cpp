@@ -26,9 +26,7 @@
 #include <QtGui/QImage>
 #include <QtGui/QPixmap>
 #include <QXmlStreamReader>
-
-#include <botan/sha2_32.h>
-#include <botan/hex.h>
+#include <QCryptographicHash>
 
 #include "infrastructure/event.h"
 #include "domain/artist.h"
@@ -108,13 +106,11 @@ void AmpacheService::requestTracks(int offset, int limit) {
 
 
 void AmpacheService::connectToServer() {
-    Botan::SHA_256 sha256;
     auto currentTime = to_string(chrono::duration_cast<chrono::seconds>(chrono::system_clock::now().
         time_since_epoch()).count());
-    auto keyVector = sha256.process(myPassword);
-    string key = Botan::hex_encode(keyVector, keyVector.size(), false);
-    auto passphraseVector = sha256.process(currentTime + key);
-    string passphrase = Botan::hex_encode(passphraseVector, passphraseVector.size(), false);
+    auto key = QCryptographicHash::hash(QByteArray::fromStdString(myPassword), QCryptographicHash::Sha256).toHex();
+    auto passphrase = QCryptographicHash::hash(QByteArray::fromStdString(currentTime) + key,
+        QCryptographicHash::Sha256).toHex().toStdString();
 
     ostringstream urlStream;
     urlStream << assembleUrlBase() << Method.Handshake << "&auth=" << passphrase << "&timestamp=" << currentTime
