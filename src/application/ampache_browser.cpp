@@ -9,13 +9,11 @@
 
 #include <fstream>
 #include <memory>
-#include <QtGui/QStandardItemModel>
-#include <QtCore/QString>
-#include <QtCore/QList>
-#include "domain/album.h"
+
 #include "ui/ui.h"
 #include "application/models/album_model.h"
 #include "application/models/artist_model.h"
+#include "application/models/track_model.h"
 #include "ampache_service.h"
 #include "application/ampache_browser.h"
 
@@ -51,6 +49,7 @@ AmpacheBrowser::~AmpacheBrowser() {
     delete(myAmpacheService);
     delete(myAlbumModel);
     delete(myArtistModel);
+    delete(myTrackModel);
 }
 
 
@@ -74,8 +73,10 @@ AmpacheBrowser& AmpacheBrowser::operator=(AmpacheBrowser&&) = default;
 void AmpacheBrowser::onConnected() {
     myAlbumModel = new AlbumModel(*myAmpacheService);
     myArtistModel = new ArtistModel(*myAmpacheService);
+    myTrackModel = new TrackModel(*myAmpacheService);
     myUi->setAlbumModel(*myAlbumModel);
     myUi->setArtistModel(*myArtistModel);
+    myUi->setTrackModel(*myTrackModel);
 }
 
 }

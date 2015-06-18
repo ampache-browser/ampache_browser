@@ -40,6 +40,8 @@ public:
 
     void setArtistModel(QAbstractItemModel& model);
 
+    void setTrackModel(QAbstractItemModel& model);
+
 private slots:
     void onPlayActionTriggered();
 

@@ -25,16 +25,26 @@ class Artist;
 class Track {
 
 public:
-    Track(const std::string &name, Artist* artist);
+    Track(const std::string id, const std::string title, int number, const std::string url);
 
     ~Track();
 
+    const std::string getId() const;
+
     const std::string getName() const;
+
+    int getNumber() const;
+
+    const std::string getUrl() const;
 
     Artist* getArtist() const;
 
 private:
-    const std::string myName;
+    const std::string myId;
+    const std::string myTitle;
+    const int myNumber;
+    const std::string myUrl;
+
     Artist* myArtist;
 };
 

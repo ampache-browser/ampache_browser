@@ -17,10 +17,11 @@ using namespace std;
 
 namespace domain {
 
-Track::Track(const string &name, Artist* artist):
-myName{name},
-myArtist{artist} {
-}
+Track::Track(const std::string id, const std::string title, int number, const std::string url):
+myId{id},
+myTitle{title},
+myNumber{number},
+myUrl{url} { }
 
 
 
@@ -29,8 +30,26 @@ Track::~Track() {
 
 
 
+const string Track::getId() const {
+    return myId;
+}
+
+
+
 const string Track::getName() const {
-    return myName;
+    return myTitle;
+}
+
+
+
+int Track::getNumber() const {
+    return myNumber;
+}
+
+
+
+const string Track::getUrl() const {
+    return myUrl;
 }
 
 

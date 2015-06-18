@@ -75,7 +75,7 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     artistsListView = new QListView();
     artistsListView->setResizeMode(QListView::ResizeMode::Adjust);
     artistsListView->setUniformItemSizes(true);
-    auto tracksTreeView = new QTreeView();
+    tracksTreeView = new QTreeView();
 
     artistsDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     artistsDockWidget->setAllowedAreas(Qt::RightDockWidgetArea);

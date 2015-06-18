@@ -74,6 +74,8 @@ public:
 
     infrastructure::Event<std::vector<std::unique_ptr<domain::Artist>>> readyArtists{};
 
+    infrastructure::Event<std::vector<std::unique_ptr<domain::Track>>> readyTracks{};
+
     int numberOfAlbums() const;
 
     void requestAlbums(int offset, int limit);
@@ -84,7 +86,9 @@ public:
 
     void requestArtists(int offset, int limit);
 
-    const std::vector<domain::Track*> retrieveTracks() const;
+    int numberOfTracks() const;
+
+    void requestTracks(int offset, int limit);
 
 private slots:
     void onFinished();
@@ -97,6 +101,7 @@ private:
         const std::string Ping = "ping";
         const std::string Albums = "albums";
         const std::string Artists = "artists";
+        const std::string Tracks = "songs";
     } Method;
 
     const std::string myUrl;
@@ -107,6 +112,7 @@ private:
     std::string myAuthToken = "";
     int myNumberOfAlbums = 0;
     int myNumberOfArtists = 0;
+    int myNumberOfTracks = 0;
 
     std::set<std::string> myPendingAlbumArts;
     std::map<std::string, QPixmap> myFinishedAlbumArts;
@@ -119,6 +125,8 @@ private:
         QXmlStreamReader& xmlStreamReader) const;
     void processArtists(QXmlStreamReader& xmlStreamReader);
     std::vector<std::unique_ptr<domain::Artist>> createArtists(QXmlStreamReader& xmlStreamReader) const;
+    void processTracks(QXmlStreamReader& xmlStreamReader);
+    std::vector<std::unique_ptr<domain::Track>> createTracks(QXmlStreamReader& xmlStreamReader) const;
     std::string assembleUrlBase() const;
     std::string parseMethodName(const std::string& methodCallUrl) const;
 };

@@ -95,6 +95,18 @@ void AmpacheService::requestArtists(int offset, int limit) {
 
 
 
+int AmpacheService::numberOfTracks() const {
+    return myNumberOfTracks;
+}
+
+
+
+void AmpacheService::requestTracks(int offset, int limit) {
+    callMethod(Method.Tracks, {{"offset", to_string(offset)}, {"limit", to_string(limit)}});
+}
+
+
+
 void AmpacheService::connectToServer() {
     Botan::SHA_256 sha256;
     auto currentTime = to_string(chrono::duration_cast<chrono::seconds>(chrono::system_clock::now().
@@ -141,6 +153,8 @@ void AmpacheService::onFinished() {
         processAlbums(xmlStreamReader);
     } else if (methodName == Method.Artists) {
         processArtists(xmlStreamReader);
+    } else if (methodName == Method.Tracks) {
+        processTracks(xmlStreamReader);
     }
 
     networkReply->deleteLater();
@@ -163,6 +177,8 @@ void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader) {
             myNumberOfAlbums = stoi(value);
         } else if (name ==  "artists") {
             myNumberOfArtists = stoi(value);
+        } else if (name ==  "songs") {
+            myNumberOfTracks = stoi(value);
         }
     }
 
@@ -331,6 +347,74 @@ vector<unique_ptr<Artist>> AmpacheService::createArtists(QXmlStreamReader& xmlSt
     }
 
     return artists;
+}
+
+
+
+void AmpacheService::processTracks(QXmlStreamReader& xmlStreamReader) {
+    auto tracks = createTracks(xmlStreamReader);
+    readyTracks(tracks);
+}
+
+
+
+vector<unique_ptr<Track>> AmpacheService::createTracks(QXmlStreamReader& xmlStreamReader) const {
+    vector<unique_ptr<Track>> tracks{};
+
+    QString xmlElement;
+    while ((!xmlStreamReader.atEnd()) && (xmlElement != "root")) {
+        xmlStreamReader.readNext();
+        if (xmlStreamReader.isStartElement()) {
+            xmlElement = xmlStreamReader.name().toString();
+        }
+    }
+
+    string id;
+    string title;
+    int number;
+    string url;
+    while (!xmlStreamReader.atEnd()) {
+        xmlStreamReader.readNext();
+        xmlElement = xmlStreamReader.name().toString();
+
+        if (xmlStreamReader.isEndElement()) {
+            if (xmlElement == "song") {
+                tracks.emplace_back(unique_ptr<Track>{new Track{id, title, number, url}});
+            }
+        }
+
+        if (!xmlStreamReader.isStartElement()) {
+            continue;
+        }
+
+        if (xmlElement == "song") {
+            QXmlStreamAttributes attributes = xmlStreamReader.attributes();
+            if (attributes.hasAttribute("id")) {
+                id = attributes.value("id").toString().toStdString();
+            }
+        }
+        else {
+            auto value = xmlStreamReader.readElementText().toStdString();
+
+            if (xmlElement == "title") {
+                title = value;
+            } else if (xmlElement == "track") {
+                number = 0;
+                try {
+                    number = stoi(value);
+                } catch (const invalid_argument& ex) {}
+                catch (const out_of_range& ex) {}
+            } else if (xmlElement == "url") {
+                url = value;
+            }
+        }
+    }
+
+    if (xmlStreamReader.hasError()) {
+      // TODO: handle error
+    }
+
+    return tracks;
 }
 
 

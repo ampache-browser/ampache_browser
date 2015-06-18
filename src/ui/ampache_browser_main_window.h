@@ -30,6 +30,7 @@ public:
 
     QListView* albumsListView;
     QListView* artistsListView;
+    QTreeView* tracksTreeView;
 
     QAction* playAction;
 };

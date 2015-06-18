@@ -12,11 +12,7 @@
 
 
 
-#include <QtGui/QStandardItemModel>
-#include <vector>
-#include <memory>
-#include "domain/album.h"
-#include "ui/ui.h"
+# include "ui/ui.h"
 
 
 
@@ -24,6 +20,7 @@ namespace application {
 
 class AlbumModel;
 class ArtistModel;
+class TrackModel;
 class AmpacheService;
 
 
@@ -47,11 +44,10 @@ private:
     ui::Ui* myUi;
     AlbumModel* myAlbumModel = nullptr;
     ArtistModel* myArtistModel = nullptr;
+    TrackModel* myTrackModel = nullptr;
     AmpacheService* myAmpacheService = nullptr;
 
     void onConnected();
-    void onAlbumWindowRedraw();
-    void onReadyAlbums(const std::vector<std::unique_ptr<domain::Album>>& albums);
 };
 
 }

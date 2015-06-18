@@ -44,6 +44,12 @@ void Ui::setArtistModel(QAbstractItemModel& model) {
 
 
 
+void Ui::setTrackModel(QAbstractItemModel& model) {
+    myMainWindow->tracksTreeView->setModel(&model);
+}
+
+
+
 void Ui::onPlayActionTriggered() {
     bool b = false;
     albumWindowRedraw(b);
