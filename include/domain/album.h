@@ -28,19 +28,7 @@ class Track;
 class Album {
 
 public:
-    Album(const std::string id, const std::string name, int releaseYear);
-
-    ~Album();
-
-    Album(const Album& other) = default;
-
-    Album& operator=(const Album& other) = default;
-
-    Album(Album&& other) = default;
-
-    Album& operator=(Album&& other) = default;
-
-    // TODO: Define copy and move constructors in other classes that defines destructor.
+    Album(const std::string& id, const std::string& name, int releaseYear);
 
     const std::string getId() const;
 
@@ -48,11 +36,10 @@ public:
 
     int getReleaseYear() const;
 
-    Artist* getArtist() const;
+    const Artist& getArtist() const;
 
-    // TODO: Determine artist from tracks.  Note that Ampache info already contains artist in album data so setArtist
-    // might be unnecessary
-    void setArtist(Artist* artist);
+    // TODO: Determine artist from tracks.
+    void setArtist(const domain::Artist& artist);
 
     QPixmap* getArt() const;
 
@@ -65,7 +52,8 @@ private:
     const std::string myName;
     const int myReleaseYear;
     std::vector<Track*> myTracks;
-    Artist* myArtist = nullptr;
+    const Artist* myArtist = nullptr;
+    // TODO: change to unique_ptr
     QPixmap* myArt = nullptr;
 };
 

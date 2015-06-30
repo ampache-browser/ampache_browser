@@ -7,29 +7,28 @@
 
 
 
-#include <iostream>
-
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
-#include <QtCore/QAbstractListModel>
+#include <QAbstractTableModel>
 
 #include "domain/artist.h"
-#include "../ampache_service.h"
+#include "data/artist_repository.h"
 #include "requests.h"
 #include "application/models/artist_model.h"
 
 using namespace std;
 using namespace placeholders;
+using namespace data;
 using namespace domain;
 
 
 
 namespace application {
 
-ArtistModel::ArtistModel(AmpacheService& ampacheService, QObject* parent): QAbstractListModel(parent),
-myAmpacheService(ampacheService) {
+ArtistModel::ArtistModel(ArtistRepository& artistRepository, QObject* parent): QAbstractTableModel(parent),
+myArtistRepository(artistRepository) {
     myRequests->readyToExecute += bind(&ArtistModel::onReadyToExecute, this, _1);
-    myAmpacheService.readyArtists += bind(&ArtistModel::onReadyArtists, this, _1);
+    myArtistRepository.loaded += bind(&ArtistModel::onReadyArtists, this, _1);
 
     // start populating with data
     for (int row; row < rowCount(); row++) {
@@ -54,36 +53,44 @@ QVariant ArtistModel::data(const QModelIndex& index, int role) const {
     }
 
     int row = index.row();
-    auto indexAndArtist = myArtists.find(row);
-    if (indexAndArtist == myArtists.end()) {
-        myRequests->add(row);
-        return QVariant{QString{"..."}};
+    if (!myArtistRepository.isLoaded(row)) {
+        if (role == Qt::DisplayRole) {
+            myRequests->add(row);
+        }
+        return "...";
     }
-    return QVariant{QString::fromStdString(indexAndArtist->second->getName())};
+
+    auto& artist = myArtistRepository.get(row);
+    if (index.column() == 0) {
+        return QString::fromStdString(artist.getName());
+    }
+    else {
+        return QString::fromStdString(artist.getId());
+    }
 }
 
 
 
 int ArtistModel::rowCount(const QModelIndex&) const {
-    return myAmpacheService.numberOfArtists();
+    return myArtistRepository.maxCount();
+}
+
+
+
+int ArtistModel::columnCount(const QModelIndex&) const {
+    return 2;
 }
 
 
 
 void ArtistModel::onReadyToExecute(RequestGroup& requestGroup) {
-    myAmpacheService.requestArtists(requestGroup.getLower(), requestGroup.getSize());
+    myArtistRepository.load(requestGroup.getLower(), requestGroup.getSize());
 }
 
 
 
-void ArtistModel::onReadyArtists(vector<unique_ptr<Artist>>& artists) {
+void ArtistModel::onReadyArtists(pair<int, int>&) {
     auto finishedRequestGroup = myRequests->setFinished();
-
-    int row = finishedRequestGroup.getLower();
-    for (auto& artist: artists) {
-        myArtists[row++] = move(artist);
-    }
-
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
 }
 

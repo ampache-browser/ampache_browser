@@ -32,7 +32,10 @@
 #include "domain/artist.h"
 #include "domain/album.h"
 #include "domain/track.h"
-#include "ampache_service.h"
+#include "album_data.h"
+#include "artist_data.h"
+#include "track_data.h"
+#include "data/ampache_service.h"
 
 using namespace std;
 using namespace infrastructure;
@@ -40,7 +43,7 @@ using namespace domain;
 
 
 
-namespace application {
+namespace data {
 
 AmpacheService::AmpacheService(string url, string user, string password):
 myUrl{url},
@@ -189,14 +192,14 @@ void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader) {
 
 
 void AmpacheService::processAlbums(QXmlStreamReader& xmlStreamReader) {
-    auto artUrlsToAlbumsMap = createAlbums(xmlStreamReader);
-    readyAlbums(artUrlsToAlbumsMap);
+    auto albumsData = createAlbums(xmlStreamReader);
+    readyAlbums(albumsData);
 }
 
 
 
-vector<pair<string, unique_ptr<Album>>> AmpacheService::createAlbums(QXmlStreamReader& xmlStreamReader) const {
-    vector<pair<string, unique_ptr<Album>>> artUrlsToAlbumsMap{};
+vector<unique_ptr<AlbumData>> AmpacheService::createAlbums(QXmlStreamReader& xmlStreamReader) const {
+    vector<unique_ptr<AlbumData>> albumData{};
 
     QString xmlElement;
     while ((!xmlStreamReader.atEnd()) && (xmlElement != "root")) {
@@ -210,13 +213,14 @@ vector<pair<string, unique_ptr<Album>>> AmpacheService::createAlbums(QXmlStreamR
     string albumName;
     int year;
     string artUrl;
+    string artistId = "TODO";
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
         xmlElement = xmlStreamReader.name().toString();
 
         if (xmlStreamReader.isEndElement()) {
-            if (xmlElement == "album") {
-                artUrlsToAlbumsMap.emplace_back(artUrl, unique_ptr<Album>{new Album{id, albumName, year}});
+            if (xmlElement == "album") {albumData.emplace_back(
+                new AlbumData{id, artUrl, artistId, unique_ptr<Album>{new Album{id, albumName, year}}});
             }
         }
 
@@ -251,7 +255,7 @@ vector<pair<string, unique_ptr<Album>>> AmpacheService::createAlbums(QXmlStreamR
       // TODO: handle error
     }
 
-    return artUrlsToAlbumsMap;
+    return albumData;
 }
 
 
@@ -290,14 +294,14 @@ void AmpacheService::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scal
 
 
 void AmpacheService::processArtists(QXmlStreamReader& xmlStreamReader) {
-    auto artists = createArtists(xmlStreamReader);
-    readyArtists(artists);
+    auto artistsData = createArtists(xmlStreamReader);
+    readyArtists(artistsData);
 }
 
 
 
-vector<unique_ptr<Artist>> AmpacheService::createArtists(QXmlStreamReader& xmlStreamReader) const {
-    vector<unique_ptr<Artist>> artists{};
+vector<unique_ptr<ArtistData>> AmpacheService::createArtists(QXmlStreamReader& xmlStreamReader) const {
+    vector<unique_ptr<ArtistData>> artistsData{};
 
     QString xmlElement;
     while ((!xmlStreamReader.atEnd()) && (xmlElement != "root")) {
@@ -315,7 +319,7 @@ vector<unique_ptr<Artist>> AmpacheService::createArtists(QXmlStreamReader& xmlSt
 
         if (xmlStreamReader.isEndElement()) {
             if (xmlElement == "artist") {
-                artists.emplace_back(unique_ptr<Artist>{new Artist{id, artistName}});
+                artistsData.emplace_back(new ArtistData{id, unique_ptr<Artist>{new Artist{id, artistName}}});
             }
         }
 
@@ -342,20 +346,20 @@ vector<unique_ptr<Artist>> AmpacheService::createArtists(QXmlStreamReader& xmlSt
       // TODO: handle error
     }
 
-    return artists;
+    return artistsData;
 }
 
 
 
 void AmpacheService::processTracks(QXmlStreamReader& xmlStreamReader) {
-    auto tracks = createTracks(xmlStreamReader);
-    readyTracks(tracks);
+    auto tracksData = createTracks(xmlStreamReader);
+    readyTracks(tracksData);
 }
 
 
 
-vector<unique_ptr<Track>> AmpacheService::createTracks(QXmlStreamReader& xmlStreamReader) const {
-    vector<unique_ptr<Track>> tracks{};
+vector<unique_ptr<TrackData>> AmpacheService::createTracks(QXmlStreamReader& xmlStreamReader) const {
+    vector<unique_ptr<TrackData>> tracksData{};
 
     QString xmlElement;
     while ((!xmlStreamReader.atEnd()) && (xmlElement != "root")) {
@@ -369,13 +373,16 @@ vector<unique_ptr<Track>> AmpacheService::createTracks(QXmlStreamReader& xmlStre
     string title;
     int number;
     string url;
+    string artistId = "TODO";
+    string albumId = "TODO";
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
         xmlElement = xmlStreamReader.name().toString();
 
         if (xmlStreamReader.isEndElement()) {
             if (xmlElement == "song") {
-                tracks.emplace_back(unique_ptr<Track>{new Track{id, title, number, url}});
+                tracksData.emplace_back(new TrackData{
+                    id, artistId, albumId, unique_ptr<Track>{new Track{id, title, number, url}}});
             }
         }
 
@@ -410,7 +417,7 @@ vector<unique_ptr<Track>> AmpacheService::createTracks(QXmlStreamReader& xmlStre
       // TODO: handle error
     }
 
-    return tracks;
+    return tracksData;
 }
 
 

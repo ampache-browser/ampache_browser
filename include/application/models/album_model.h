@@ -13,19 +13,18 @@
 
 
 #include <vector>
-#include <unordered_map>
 #include <memory>
 
 #include <QtCore/QAbstractListModel>
 
 #include "domain/album.h"
+#include "data/album_repository.h"
 #include "src/application/models/requests.h"
 
 
 
 namespace application {
 
-class AmpacheService;
 class RequestGroup;
 
 
@@ -34,7 +33,7 @@ class AlbumModel: public QAbstractListModel {
     Q_OBJECT
 
 public:
-    explicit AlbumModel(AmpacheService& ampacheService, QObject* parent = 0);
+    explicit AlbumModel(data::AlbumRepository& albumRepository, QObject* parent = 0);
 
     ~AlbumModel() override;
 
@@ -43,15 +42,14 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
 private:
-    AmpacheService& myAmpacheService;
-    std::unordered_map<int, std::pair<std::string, std::unique_ptr<domain::Album>>> myAlbums;
+    data::AlbumRepository& myAlbumRepository;
     Requests* const myAlbumRequests = new Requests;
     Requests* const myArtRequests = new Requests{3};
 
     void onReadyToExecuteAlbums(RequestGroup& requestGroup);
-    void onReadyAlbums(std::vector<std::pair<std::string, std::unique_ptr<domain::Album>>>& artUrlsAndAlbums);
+    void onLoaded(std::pair<int, int>& offsetAndLimit);
     void onReadyToExecuteArts(RequestGroup& requestGroup);
-    void onReadyAlbumArts(std::map<std::string, QPixmap>& artUrlsAndArts);
+    void onArtsLoaded(std::pair<int, int>& offsetAndLimit);
 };
 
 }

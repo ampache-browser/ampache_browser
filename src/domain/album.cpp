@@ -20,15 +20,10 @@ using namespace std;
 
 namespace domain {
 
-Album::Album(const string id, const string name, int releaseYear):
+Album::Album(const string& id, const string& name, int releaseYear):
 myId{id},
 myName{name},
 myReleaseYear{releaseYear} {
-}
-
-
-
-Album::~Album() {
 }
 
 
@@ -51,14 +46,14 @@ int Album::getReleaseYear() const {
 
 
 
-Artist* Album::getArtist() const {
-    return myArtist;
+const Artist& Album::getArtist() const {
+    return *myArtist;
 }
 
 
 
-void Album::setArtist(Artist* artist) {
-    myArtist = artist;
+void Album::setArtist(const Artist& artist) {
+    myArtist = &artist;
 }
 
 

@@ -25,11 +25,6 @@ myUrl{url} { }
 
 
 
-Track::~Track() {
-}
-
-
-
 const string Track::getId() const {
     return myId;
 }

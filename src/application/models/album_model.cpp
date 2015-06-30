@@ -17,24 +17,25 @@
 #include <QtGui/QIcon>
 
 #include "domain/album.h"
-#include "../ampache_service.h"
+#include "data/album_repository.h"
 #include "requests.h"
 #include "application/models/album_model.h"
 
 using namespace std;
 using namespace placeholders;
+using namespace data;
 using namespace domain;
 
 
 
 namespace application {
 
-AlbumModel::AlbumModel(AmpacheService& ampacheService, QObject* parent): QAbstractListModel(parent),
-myAmpacheService(ampacheService) {
+AlbumModel::AlbumModel(AlbumRepository& albumRepository, QObject* parent): QAbstractListModel(parent),
+myAlbumRepository(albumRepository) {
     myAlbumRequests->readyToExecute += bind(&AlbumModel::onReadyToExecuteAlbums, this, _1);
-    myAmpacheService.readyAlbums += bind(&AlbumModel::onReadyAlbums, this, _1);
+    myAlbumRepository.loaded += bind(&AlbumModel::onLoaded, this, _1);
     myArtRequests->readyToExecute += bind(&AlbumModel::onReadyToExecuteArts, this, _1);
-    myAmpacheService.readyAlbumArts += bind(&AlbumModel::onReadyAlbumArts, this, _1);
+    myAlbumRepository.artsLoaded += bind(&AlbumModel::onArtsLoaded, this, _1);
 
     // start populating with data
     for (int row; row < rowCount(); row++) {
@@ -66,22 +67,22 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
     }
 
     int row = index.row();
-    auto indexAndAlbum = myAlbums.find(row);
-    if (indexAndAlbum == myAlbums.end()) {
+    if (!myAlbumRepository.isLoaded(row)) {
         if (role == Qt::DisplayRole) {
             myAlbumRequests->add(row);
         }
         return notLoaded;
     }
 
+    auto& album = myAlbumRepository.get(row);
     if (role == Qt::DisplayRole) {
-        return QVariant{QString::fromStdString(indexAndAlbum->second.second->getName())};
+        return QString::fromStdString(album.getName());
     } else if (role == Qt::DecorationRole) {
-        if (indexAndAlbum->second.second->getArt() == nullptr) {
+        if (album.getArt() == nullptr) {
             myArtRequests->add(row);
             return notLoaded;
         } else {
-            return QIcon{*(indexAndAlbum->second.second->getArt())};
+            return QIcon{*(album.getArt())};
         }
     } else {
         return QVariant{};
@@ -91,53 +92,32 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
 
 
 int AlbumModel::rowCount(const QModelIndex&) const {
-    return myAmpacheService.numberOfAlbums();
+    return myAlbumRepository.maxCount();
 }
 
 
 
 void AlbumModel::onReadyToExecuteAlbums(RequestGroup& requestGroup) {
-    myAmpacheService.requestAlbums(requestGroup.getLower(), requestGroup.getSize());
+    myAlbumRepository.load(requestGroup.getLower(), requestGroup.getSize());
 }
 
 
 
-void AlbumModel::onReadyAlbums(vector<pair<string, unique_ptr<Album>>>& artUrlsAndAlbums) {
+void AlbumModel::onLoaded(pair<int, int>&) {
     auto finishedRequestGroup = myAlbumRequests->setFinished();
-
-    int row = finishedRequestGroup.getLower();
-    for (auto& urlAndAlbum: artUrlsAndAlbums) {
-        myAlbums[row++] = move(urlAndAlbum);
-    }
-
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
 }
 
 
 
 void AlbumModel::onReadyToExecuteArts(RequestGroup& requestGroup) {
-    vector<string> urls;
-    for (auto idx = requestGroup.getLower(); idx <= requestGroup.getUpper(); idx++) {
-        auto indexAndAlbum = myAlbums.find(idx);
-        urls.push_back(indexAndAlbum->second.first);
-    }
-    myAmpacheService.requestAlbumArts(urls);
+    myAlbumRepository.loadArts(requestGroup.getLower(), requestGroup.getSize());
 }
 
 
 
-void AlbumModel::onReadyAlbumArts(map<string, QPixmap>& artUrlsAndArts) {
+void AlbumModel::onArtsLoaded(pair<int, int>&) {
     auto finishedRequestGroup = myArtRequests->setFinished();
-
-    for (auto artUrlAndArt: artUrlsAndArts) {
-        for (auto& album: myAlbums) {
-            if (album.second.first == artUrlAndArt.first) {
-                album.second.second->setArt(new QPixmap{artUrlAndArt.second});
-                break;
-            }
-        }
-    }
-
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
 }
 

@@ -27,8 +27,6 @@ class Track {
 public:
     Track(const std::string id, const std::string title, int number, const std::string url);
 
-    ~Track();
-
     const std::string getId() const;
 
     const std::string getName() const;
@@ -37,6 +35,7 @@ public:
 
     const std::string getUrl() const;
 
+    // TODO: return reference
     Artist* getArtist() const;
 
 private:

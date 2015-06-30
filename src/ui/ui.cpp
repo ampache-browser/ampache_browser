@@ -21,6 +21,8 @@ namespace ui {
 Ui::Ui() {
     myMainWindow = new AmpacheBrowserMainWindow{};
     connect(myMainWindow->playAction, SIGNAL(triggered()), this, SLOT(onPlayActionTriggered()));
+    connect(myMainWindow->artistsListView, SIGNAL(clicked(QModelIndex)), this,
+        SLOT(onArtistsListViewClicked(QModelIndex)));
     myMainWindow->show();
 }
 
@@ -53,6 +55,14 @@ void Ui::setTrackModel(QAbstractItemModel& model) {
 void Ui::onPlayActionTriggered() {
     bool b = false;
     albumWindowRedraw(b);
+}
+
+
+
+void Ui::onArtistsListViewClicked(const QModelIndex& index) {
+    auto hiddenColumnIndex = index.sibling(index.row(), 1);
+    auto artistId = hiddenColumnIndex.data().toString().toStdString();
+    artistSelected(artistId);
 }
 
 }

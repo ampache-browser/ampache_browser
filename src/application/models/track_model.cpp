@@ -12,22 +12,23 @@
 #include <QtCore/QAbstractTableModel>
 
 #include "domain/track.h"
-#include "../ampache_service.h"
+#include "data/track_repository.h"
 #include "requests.h"
 #include "application/models/track_model.h"
 
 using namespace std;
 using namespace placeholders;
+using namespace data;
 using namespace domain;
 
 
 
 namespace application {
 
-TrackModel::TrackModel(AmpacheService& ampacheService, QObject* parent): QAbstractTableModel(parent),
-myAmpacheService(ampacheService) {
+TrackModel::TrackModel(TrackRepository& trackRepository, QObject* parent): QAbstractTableModel(parent),
+myTrackRepository(trackRepository) {
     myRequests->readyToExecute += bind(&TrackModel::onReadyToExecute, this, _1);
-    myAmpacheService.readyTracks += bind(&TrackModel::onReadyTracks, this, _1);
+    myTrackRepository.loaded += bind(&TrackModel::onReadyTracks, this, _1);
 
     // start populating with data
     for (int row; row < rowCount(); row++) {
@@ -51,43 +52,64 @@ QVariant TrackModel::data(const QModelIndex& index, int role) const {
         return QVariant{};
     }
 
-    int row = index.row();
-    auto indexAndTrack = myTracks.find(row);
-    if (indexAndTrack == myTracks.end()) {
-        myRequests->add(row);
-        return QVariant{QString{"..."}};
+    // TODO: Implement artist (and album) columns.
+    if (index.column() == 1)
+    {
+        return "col1";
     }
-    return QVariant{QString::fromStdString(indexAndTrack->second->getName())};
+
+    int row = index.row();
+    if (!myTrackRepository.isLoaded(row)) {
+        if (role == Qt::DisplayRole) {
+            myRequests->add(row);
+        }
+        return "...";
+    }
+
+    auto& track = myTrackRepository.get(row);
+    return QString::fromStdString(track.getName());
+}
+
+
+
+QVariant TrackModel::headerData(int section, Qt::Orientation, int role) const {
+    if (role != Qt::DisplayRole) {
+        return QVariant{};
+    }
+
+    // SMELL: Header names are not translatable.  Should they be pulled from data?
+    switch (section) {
+        case 0:
+            return "Track";
+        case 1:
+            return "Artist";
+        default:
+            return QVariant{};
+    }
 }
 
 
 
 int TrackModel::rowCount(const QModelIndex&) const {
-    return myAmpacheService.numberOfTracks();
+    return myTrackRepository.maxCount();
 }
 
 
 
 int TrackModel::columnCount(const QModelIndex&) const {
-    return 1;
+    return 2;
 }
 
 
 
 void TrackModel::onReadyToExecute(RequestGroup& requestGroup) {
-    myAmpacheService.requestTracks(requestGroup.getLower(), requestGroup.getSize());
+    myTrackRepository.load(requestGroup.getLower(), requestGroup.getSize());
 }
 
 
 
-void TrackModel::onReadyTracks(vector<unique_ptr<Track>>& tracks) {
+void TrackModel::onReadyTracks(pair<int, int>&) {
     auto finishedRequestGroup = myRequests->setFinished();
-
-    int row = finishedRequestGroup.getLower();
-    for (auto& track: tracks) {
-        myTracks[row++] = move(track);
-    }
-
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
 }
 

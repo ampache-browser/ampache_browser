@@ -16,25 +16,29 @@
 #include <vector>
 #include <set>
 #include <map>
-#include <queue>
 #include <memory>
-#include <functional>
 
 #include <QtCore/QObject>
 #include <QtCore/QRunnable>
+#include <QImage>
+#include <QPixmap>
 
 #include "infrastructure/event.h"
-#include "domain/album.h"
-#include "domain/track.h"
-#include "domain/artist.h"
 
 class QXmlStreamReader;
 class QNetworkAccessManager;
 
 
 
-namespace application {
+namespace data {
 
+class AlbumData;
+class ArtistData;
+class TrackData;
+
+
+
+// SMELL: No need to expose this one.
 class ScaleAlbumArtRunnable: public QObject, public QRunnable {
     Q_OBJECT
 
@@ -58,6 +62,8 @@ private:
 
 
 
+// SMELL: It is not needed to expose entire service as public interface.  Only creation and initialization is needed in
+// application level. - Split the interface?
 class AmpacheService: public QObject {
     Q_OBJECT
 
@@ -68,13 +74,13 @@ public:
 
     infrastructure::Event<bool> connected{};
 
-    infrastructure::Event<std::vector<std::pair<std::string, std::unique_ptr<domain::Album>>>> readyAlbums{};
+    infrastructure::Event<std::vector<std::unique_ptr<AlbumData>>> readyAlbums{};
 
     infrastructure::Event<std::map<std::string, QPixmap>> readyAlbumArts{};
 
-    infrastructure::Event<std::vector<std::unique_ptr<domain::Artist>>> readyArtists{};
+    infrastructure::Event<std::vector<std::unique_ptr<ArtistData>>> readyArtists{};
 
-    infrastructure::Event<std::vector<std::unique_ptr<domain::Track>>> readyTracks{};
+    infrastructure::Event<std::vector<std::unique_ptr<TrackData>>> readyTracks{};
 
     int numberOfAlbums() const;
 
@@ -121,12 +127,11 @@ private:
     void callMethod(std::string name, std::map<std::string, std::string> arguments) const;
     void processHandshake(QXmlStreamReader& xmlStreamReader);
     void processAlbums(QXmlStreamReader& xmlStreamReader);
-    std::vector<std::pair<std::string, std::unique_ptr<domain::Album>>> createAlbums(
-        QXmlStreamReader& xmlStreamReader) const;
+    std::vector<std::unique_ptr<AlbumData>> createAlbums(QXmlStreamReader& xmlStreamReader) const;
     void processArtists(QXmlStreamReader& xmlStreamReader);
-    std::vector<std::unique_ptr<domain::Artist>> createArtists(QXmlStreamReader& xmlStreamReader) const;
+    std::vector<std::unique_ptr<ArtistData>> createArtists(QXmlStreamReader& xmlStreamReader) const;
     void processTracks(QXmlStreamReader& xmlStreamReader);
-    std::vector<std::unique_ptr<domain::Track>> createTracks(QXmlStreamReader& xmlStreamReader) const;
+    std::vector<std::unique_ptr<TrackData>> createTracks(QXmlStreamReader& xmlStreamReader) const;
     std::string assembleUrlBase() const;
     std::string parseMethodName(const std::string& methodCallUrl) const;
 };

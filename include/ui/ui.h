@@ -36,6 +36,8 @@ public:
 
     Event<bool> albumWindowRedraw{};
 
+    Event<std::string> artistSelected{};
+
     void setAlbumModel(QAbstractItemModel& model);
 
     void setArtistModel(QAbstractItemModel& model);
@@ -44,6 +46,7 @@ public:
 
 private slots:
     void onPlayActionTriggered();
+    void onArtistsListViewClicked(const QModelIndex& index);
 
 private:
     AmpacheBrowserMainWindow* myMainWindow;

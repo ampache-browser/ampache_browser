@@ -7,6 +7,8 @@
 
 
 
+#include <iostream>
+
 #include <fstream>
 #include <memory>
 
@@ -14,13 +16,17 @@
 #include "application/models/album_model.h"
 #include "application/models/artist_model.h"
 #include "application/models/track_model.h"
-#include "ampache_service.h"
+#include "data/ampache_service.h"
+#include "data/album_repository.h"
+#include "data/artist_repository.h"
+#include "data/track_repository.h"
 #include "application/ampache_browser.h"
 
 using namespace std;
 using namespace placeholders;
 using namespace infrastructure;
 using namespace domain;
+using namespace data;
 using namespace ui;
 
 
@@ -41,15 +47,19 @@ myUi(&ui) {
     }
     myAmpacheService = new AmpacheService{url, user, pass};
     myAmpacheService->connected += bind(&AmpacheBrowser::onConnected, this);
+    myUi->artistSelected += bind(&AmpacheBrowser::onArtistSelected, this, _1);
 }
 
 
 
 AmpacheBrowser::~AmpacheBrowser() {
-    delete(myAmpacheService);
     delete(myAlbumModel);
     delete(myArtistModel);
     delete(myTrackModel);
+    delete(myAlbumRepository);
+    delete(myArtistRepository);
+    delete(myTrackRepository);
+    delete(myAmpacheService);
 }
 
 
@@ -71,12 +81,22 @@ AmpacheBrowser& AmpacheBrowser::operator=(AmpacheBrowser&&) = default;
 
 
 void AmpacheBrowser::onConnected() {
-    myAlbumModel = new AlbumModel(*myAmpacheService);
-    myArtistModel = new ArtistModel(*myAmpacheService);
-    myTrackModel = new TrackModel(*myAmpacheService);
+    myAlbumRepository = new AlbumRepository{*myAmpacheService};
+    myArtistRepository = new ArtistRepository{*myAmpacheService};
+    myTrackRepository = new TrackRepository{*myAmpacheService};
+    myAlbumModel = new AlbumModel(*myAlbumRepository);
+    myArtistModel = new ArtistModel(*myArtistRepository);
+    myTrackModel = new TrackModel(*myTrackRepository);
     myUi->setAlbumModel(*myAlbumModel);
     myUi->setArtistModel(*myArtistModel);
     myUi->setTrackModel(*myTrackModel);
+}
+
+
+
+void AmpacheBrowser::onArtistSelected(string id) {
+    // TODO
+    cout << id << endl;
 }
 
 }

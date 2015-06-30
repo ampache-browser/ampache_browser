@@ -23,11 +23,6 @@ myName{name} {
 
 
 
-Artist::~Artist() {
-}
-
-
-
 const string Artist::getId() const {
     return myId;
 }
@@ -36,6 +31,42 @@ const string Artist::getId() const {
 
 const string Artist::getName() const {
     return myName;
+}
+
+
+
+bool operator==(const Artist& lhs, const Artist& rhs) {
+    return lhs.getId() == rhs.getId();
+}
+
+
+
+bool operator!=(const Artist& lhs, const Artist& rhs) {
+    return !operator==(lhs, rhs);
+}
+
+
+
+bool operator<(const Artist& lhs, const Artist& rhs) {
+    return (lhs.getId() != rhs.getId()) && (lhs.getName() < rhs.getName());
+}
+
+
+
+bool operator>(const Artist& lhs, const Artist& rhs) {
+    return operator<(rhs, lhs);
+}
+
+
+
+bool operator<=(const Artist& lhs, const Artist& rhs) {
+    return !operator>(lhs, rhs);
+}
+
+
+
+bool operator>=(const Artist& lhs, const Artist& rhs) {
+    return !operator<(lhs, rhs);
 }
 
 }

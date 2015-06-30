@@ -19,37 +19,36 @@
 #include <QtCore/QAbstractTableModel>
 
 #include "domain/track.h"
+#include "data/track_repository.h"
 #include "src/application/models/requests.h"
 
 
 
 namespace application {
 
-class AmpacheService;
-
-
-
 class TrackModel: public QAbstractTableModel {
     Q_OBJECT
 
 public:
-    explicit TrackModel(AmpacheService& ampacheService, QObject* parent = 0);
+    explicit TrackModel(data::TrackRepository& trackRepository, QObject* parent = 0);
 
     ~TrackModel() override;
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
 private:
-    AmpacheService& myAmpacheService;
+    data::TrackRepository& myTrackRepository;
     std::unordered_map<int, std::unique_ptr<domain::Track>> myTracks;
     Requests* const myRequests = new Requests{60};
 
     void onReadyToExecute(RequestGroup& requestGroup);
-    void onReadyTracks(std::vector<std::unique_ptr<domain::Track>>& tracks);
+    void onReadyTracks(std::pair<int, int>& offsetAndLimit);
 };
 
 }

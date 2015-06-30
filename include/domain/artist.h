@@ -23,8 +23,6 @@ class Artist {
 public:
     Artist(const std::string id, const std::string name);
 
-    ~Artist();
-
     const std::string getId() const;
 
     const std::string getName() const;
@@ -33,6 +31,18 @@ private:
     const std::string myId;
     const std::string myName;
 };
+
+bool operator==(const Artist& lhs, const Artist& rhs);
+
+bool operator!=(const Artist& lhs, const Artist& rhs);
+
+bool operator<(const Artist& lhs, const Artist& rhs);
+
+bool operator>(const Artist& lhs, const Artist& rhs);
+
+bool operator<=(const Artist& lhs, const Artist& rhs);
+
+bool operator>=(const Artist& lhs, const Artist& rhs);
 
 }
 
