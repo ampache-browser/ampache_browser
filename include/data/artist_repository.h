@@ -33,6 +33,10 @@ class ArtistRepository {
 public:
     explicit ArtistRepository(AmpacheService& ampacheService);
 
+    ArtistRepository(const ArtistRepository& other) = delete;
+
+    ArtistRepository& operator=(const ArtistRepository& other) = delete;
+
     infrastructure::Event<std::pair<int, int>> loaded{};
 
     bool load(int offset, int limit);

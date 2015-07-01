@@ -37,6 +37,10 @@ class TrackRepository {
 public:
     explicit TrackRepository(AmpacheService& ampacheService);
 
+    TrackRepository(const TrackRepository& other) = delete;
+
+    TrackRepository& operator=(const TrackRepository& other) = delete;
+
     infrastructure::Event<std::pair<int, int>> loaded{};
 
     bool load(int offset, int limit);

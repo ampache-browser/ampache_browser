@@ -58,7 +58,7 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     // central widget
     auto centralWidget = new QWidget();
     auto centralLayout = new QHBoxLayout();
-    albumsListView = new QListView();
+    albumsListView = new QListView{};
     albumsListView->setViewMode(QListView::ViewMode::IconMode);
     albumsListView->setResizeMode(QListView::ResizeMode::Adjust);
     albumsListView->setWordWrap(true);
@@ -93,6 +93,10 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
 
 
 AmpacheBrowserMainWindow::~AmpacheBrowserMainWindow() {
+    delete(tracksTreeView);
+    delete(artistsListView);
+    delete(albumsListView);
+    delete(playAction);
 }
 
 }

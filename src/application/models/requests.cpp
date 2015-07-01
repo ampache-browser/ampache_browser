@@ -25,12 +25,6 @@ Requests::Requests(): Requests(0) { }
 
 
 
-Requests::~Requests() {
-    delete(myRequestGroups);
-}
-
-
-
 // SMELL: The algorithm is not clearly visible from here because it heavilly relies on RequestGroups behaviour (sorting
 // chops backwards, etc.).
 void Requests::add(int offset) {

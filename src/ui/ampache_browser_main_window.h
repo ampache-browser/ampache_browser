@@ -13,9 +13,10 @@
 
 
 #include <QMainWindow>
-#include <QListView>
-#include <QTreeView>
-#include <QAction>
+
+class QListView;
+class QTreeView;
+class QAction;
 
 
 
@@ -26,13 +27,14 @@ class AmpacheBrowserMainWindow: public QMainWindow {
 
 public:
     explicit AmpacheBrowserMainWindow(QWidget* parent = 0);
+
     ~AmpacheBrowserMainWindow();
 
-    QListView* albumsListView;
-    QListView* artistsListView;
-    QTreeView* tracksTreeView;
+    QListView* albumsListView = nullptr;
+    QListView* artistsListView = nullptr;
+    QTreeView* tracksTreeView = nullptr;
 
-    QAction* playAction;
+    QAction* playAction = nullptr;
 };
 
 }

@@ -14,6 +14,7 @@
 
 #include <limits>
 #include <vector>
+#include <memory>
 #include "infrastructure/event.h"
 #include "request_group.h"
 #include "request_groups.h"
@@ -29,7 +30,9 @@ public:
 
     explicit Requests();
 
-    ~Requests();
+    Requests(const Requests& other) = delete;
+
+    Requests& operator=(const Requests& other) = delete;
 
     infrastructure::Event<RequestGroup> readyToExecute{};
 
@@ -38,7 +41,7 @@ public:
     RequestGroup setFinished();
 
 private:
-    RequestGroups* myRequestGroups;
+    const std::unique_ptr<RequestGroups> myRequestGroups;
     RequestGroup myCurrentRequestGroup = RequestGroup{};
     int myLastEnqueuedOffset = std::numeric_limits<int>::max();
 

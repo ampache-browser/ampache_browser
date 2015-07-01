@@ -55,12 +55,6 @@ myNetworkAccessManager{new QNetworkAccessManager{this}} {
 
 
 
-AmpacheService::~AmpacheService() {
-    delete(myNetworkAccessManager);
-}
-
-
-
 int AmpacheService::numberOfAlbums() const {
     return myNumberOfAlbums;
 }

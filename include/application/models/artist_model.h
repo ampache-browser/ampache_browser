@@ -32,8 +32,6 @@ class ArtistModel: public QAbstractTableModel {
 public:
     explicit ArtistModel(data::ArtistRepository& artistRepository, QObject* parent = 0);
 
-    ~ArtistModel() override;
-
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -42,8 +40,7 @@ public:
 
 private:
     data::ArtistRepository& myArtistRepository;
-    std::unordered_map<int, std::unique_ptr<domain::Artist>> myArtists;
-    Requests* const myRequests = new Requests{60};
+    const std::unique_ptr<Requests> myRequests{new Requests{60}};
 
     void onReadyToExecute(RequestGroup& requestGroup);
     void onReadyArtists(std::pair<int, int>& offsetAndLimit);

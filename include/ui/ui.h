@@ -12,13 +12,12 @@
 
 
 
-#include <QtCore/QObject>
-#include <QMainWindow>
-#include <QtGui/QStandardItemModel>
+#include <memory>
+#include <QObject>
 #include "src/ui/ampache_browser_main_window.h"
 #include "infrastructure/event.h"
 
-using namespace infrastructure;
+class QAbstractItemModel;
 
 
 
@@ -30,13 +29,15 @@ class Ui: QObject {
 public:
     explicit Ui();
 
-    ~Ui();
+    Ui(const Ui& other) = delete;
+
+    Ui& operator=(const Ui& other) = delete;
 
 //     Event<SelectedItems> playTriggered;
 
-    Event<bool> albumWindowRedraw{};
+    infrastructure::Event<bool> albumWindowRedraw{};
 
-    Event<std::string> artistSelected{};
+    infrastructure::Event<std::string> artistSelected{};
 
     void setAlbumModel(QAbstractItemModel& model);
 
@@ -49,7 +50,7 @@ private slots:
     void onArtistsListViewClicked(const QModelIndex& index);
 
 private:
-    AmpacheBrowserMainWindow* myMainWindow;
+    const std::unique_ptr<AmpacheBrowserMainWindow> myMainWindow;
 };
 
 }

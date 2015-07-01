@@ -26,6 +26,10 @@ public:
     explicit TrackData(const std::string& id, const std::string& artistId, const std::string& albumId,
         std::unique_ptr<domain::Track> track);
 
+    TrackData(const TrackData& other) = delete;
+
+    TrackData& operator=(const TrackData& other) = delete;
+
     std::string getId() const;
 
     std::string getArtistId() const;

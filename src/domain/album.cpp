@@ -8,7 +8,7 @@
 
 
 #include <string>
-#include <vector>
+#include <deque>
 #include <QtGui/QPixmap>
 #include "domain/artist.h"
 #include "domain/track.h"
@@ -19,6 +19,8 @@ using namespace std;
 
 
 namespace domain {
+
+
 
 Album::Album(const string& id, const string& name, int releaseYear):
 myId{id},
@@ -58,20 +60,26 @@ void Album::setArtist(const Artist& artist) {
 
 
 
-QPixmap* Album::getArt() const {
-    return myArt;
+bool Album::hasArt() const {
+    return myArt != nullptr;
 }
 
 
 
-void Album::setArt(QPixmap* art) {
-    myArt = art;
+QPixmap& Album::getArt() const {
+    return *myArt;
 }
 
 
 
-void Album::addTrack(Track* track) {
-    myTracks.push_back(track);
+void Album::setArt(unique_ptr<QPixmap> art) {
+    myArt = move(art);
+}
+
+
+
+void Album::addTrack(const Track& track) {
+    myTracks.push_back(&track);
 }
 
 }

@@ -23,6 +23,10 @@ class Artist {
 public:
     Artist(const std::string id, const std::string name);
 
+    Artist(const Artist& other) = delete;
+
+    Artist& operator=(const Artist& other) = delete;
+
     const std::string getId() const;
 
     const std::string getName() const;

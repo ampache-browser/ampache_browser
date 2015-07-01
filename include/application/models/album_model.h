@@ -35,16 +35,14 @@ class AlbumModel: public QAbstractListModel {
 public:
     explicit AlbumModel(data::AlbumRepository& albumRepository, QObject* parent = 0);
 
-    ~AlbumModel() override;
-
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
 private:
     data::AlbumRepository& myAlbumRepository;
-    Requests* const myAlbumRequests = new Requests;
-    Requests* const myArtRequests = new Requests{3};
+    const std::unique_ptr<Requests> myAlbumRequests{new Requests};
+    const std::unique_ptr<Requests> myArtRequests{new Requests{3}};
 
     void onReadyToExecuteAlbums(RequestGroup& requestGroup);
     void onLoaded(std::pair<int, int>& offsetAndLimit);

@@ -24,8 +24,6 @@
 
 using namespace std;
 using namespace placeholders;
-using namespace infrastructure;
-using namespace domain;
 using namespace data;
 using namespace ui;
 
@@ -45,48 +43,20 @@ myUi(&ui) {
         getline(creds, pass);
         creds.close();
     }
-    myAmpacheService = new AmpacheService{url, user, pass};
+    myAmpacheService = unique_ptr<AmpacheService>{new AmpacheService{url, user, pass}};
     myAmpacheService->connected += bind(&AmpacheBrowser::onConnected, this);
     myUi->artistSelected += bind(&AmpacheBrowser::onArtistSelected, this, _1);
 }
 
 
 
-AmpacheBrowser::~AmpacheBrowser() {
-    delete(myAlbumModel);
-    delete(myArtistModel);
-    delete(myTrackModel);
-    delete(myAlbumRepository);
-    delete(myArtistRepository);
-    delete(myTrackRepository);
-    delete(myAmpacheService);
-}
-
-
-
-AmpacheBrowser::AmpacheBrowser(const AmpacheBrowser&) = default;
-
-
-
-AmpacheBrowser& AmpacheBrowser::operator=(const AmpacheBrowser&) = default;
-
-
-
-AmpacheBrowser::AmpacheBrowser(AmpacheBrowser&&) = default;
-
-
-
-AmpacheBrowser& AmpacheBrowser::operator=(AmpacheBrowser&&) = default;
-
-
-
 void AmpacheBrowser::onConnected() {
-    myAlbumRepository = new AlbumRepository{*myAmpacheService};
-    myArtistRepository = new ArtistRepository{*myAmpacheService};
-    myTrackRepository = new TrackRepository{*myAmpacheService};
-    myAlbumModel = new AlbumModel(*myAlbumRepository);
-    myArtistModel = new ArtistModel(*myArtistRepository);
-    myTrackModel = new TrackModel(*myTrackRepository);
+    myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpacheService}};
+    myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpacheService}};
+    myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpacheService}};
+    myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel(*myAlbumRepository)};
+    myArtistModel = unique_ptr<ArtistModel>{new ArtistModel(*myArtistRepository)};
+    myTrackModel = unique_ptr<TrackModel>{new TrackModel(*myTrackRepository)};
     myUi->setAlbumModel(*myAlbumModel);
     myUi->setArtistModel(*myArtistModel);
     myUi->setTrackModel(*myTrackModel);

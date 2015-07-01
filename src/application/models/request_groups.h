@@ -12,18 +12,24 @@
 
 
 
-class RequestGroup;
-
 #include <vector>
 
 
 
 namespace application {
 
+class RequestGroup;
+
+
+
 class RequestGroups {
 
 public:
     explicit RequestGroups(int granularity);
+
+    RequestGroups(const RequestGroups& other) = delete;
+
+    RequestGroups& operator=(const RequestGroups& other) = delete;
 
     bool isEmpty() const;
 

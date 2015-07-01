@@ -37,6 +37,10 @@ class AlbumRepository {
 public:
     explicit AlbumRepository(AmpacheService& ampacheService);
 
+    AlbumRepository(const AlbumRepository& other) = delete;
+
+    AlbumRepository& operator=(const AlbumRepository& other) = delete;
+
     infrastructure::Event<std::pair<int, int>> loaded{};
 
     infrastructure::Event<std::pair<int, int>> artsLoaded{};

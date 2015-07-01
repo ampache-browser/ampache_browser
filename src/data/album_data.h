@@ -27,6 +27,10 @@ public:
     explicit AlbumData(const std::string& id, const std::string& artUrl, const std::string& artistId,
         std::unique_ptr<domain::Album> album);
 
+    AlbumData(const AlbumData& other) = delete;
+
+    AlbumData& operator=(const AlbumData& other) = delete;
+
     std::string getId() const;
 
     std::string getArtUrl() const;

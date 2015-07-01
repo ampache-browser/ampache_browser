@@ -8,8 +8,9 @@
 
 
 #include <QtCore/QObject>
-#include <QMainWindow>
 #include <QListView>
+#include <QTreeView>
+#include <QAction>
 #include <QtGui/QStandardItemModel>
 #include "ampache_browser_main_window.h"
 #include "ui/ui.h"
@@ -18,18 +19,12 @@
 
 namespace ui {
 
-Ui::Ui() {
-    myMainWindow = new AmpacheBrowserMainWindow{};
+Ui::Ui():
+myMainWindow{new AmpacheBrowserMainWindow{}} {
     connect(myMainWindow->playAction, SIGNAL(triggered()), this, SLOT(onPlayActionTriggered()));
     connect(myMainWindow->artistsListView, SIGNAL(clicked(QModelIndex)), this,
         SLOT(onArtistsListViewClicked(QModelIndex)));
     myMainWindow->show();
-}
-
-
-
-Ui::~Ui() {
-    delete(myMainWindow);
 }
 
 

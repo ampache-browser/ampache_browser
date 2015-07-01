@@ -13,7 +13,8 @@
 
 
 #include <string>
-#include <vector>
+#include <deque>
+#include <memory>
 #include <QtGui/QPixmap>
 
 
@@ -30,6 +31,10 @@ class Album {
 public:
     Album(const std::string& id, const std::string& name, int releaseYear);
 
+    Album(const Album& other) = delete;
+
+    Album& operator=(const Album& other) = delete;
+
     const std::string getId() const;
 
     const std::string getName() const;
@@ -39,22 +44,23 @@ public:
     const Artist& getArtist() const;
 
     // TODO: Determine artist from tracks.
-    void setArtist(const domain::Artist& artist);
+    void setArtist(const Artist& artist);
 
-    QPixmap* getArt() const;
+    bool hasArt() const;
 
-    void setArt(QPixmap* art);
+    QPixmap& getArt() const;
 
-    void addTrack(Track* track);
+    void setArt(std::unique_ptr<QPixmap> art);
+
+    void addTrack(const Track& track);
 
 private:
     const std::string myId;
     const std::string myName;
     const int myReleaseYear;
-    std::vector<Track*> myTracks;
+    std::deque<const Track*> myTracks;
     const Artist* myArtist = nullptr;
-    // TODO: change to unique_ptr
-    QPixmap* myArt = nullptr;
+    std::unique_ptr<QPixmap> myArt = nullptr;
 };
 
 }

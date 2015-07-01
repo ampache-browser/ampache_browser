@@ -22,11 +22,11 @@
 #include <QtCore/QRunnable>
 #include <QImage>
 #include <QPixmap>
+#include <QNetworkAccessManager>
 
 #include "infrastructure/event.h"
 
 class QXmlStreamReader;
-class QNetworkAccessManager;
 
 
 
@@ -70,7 +70,9 @@ class AmpacheService: public QObject {
 public:
     explicit AmpacheService(std::string url, std::string user, std::string password);
 
-    ~AmpacheService();
+    AmpacheService(const AmpacheService& other) = delete;
+
+    AmpacheService& operator=(const AmpacheService& other) = delete;
 
     infrastructure::Event<bool> connected{};
 
@@ -114,7 +116,7 @@ private:
     const std::string myUser;
     const std::string myPassword;
 
-    QNetworkAccessManager* const myNetworkAccessManager = nullptr;
+    const std::unique_ptr<QNetworkAccessManager> myNetworkAccessManager;
     std::string myAuthToken = "";
     int myNumberOfAlbums = 0;
     int myNumberOfArtists = 0;

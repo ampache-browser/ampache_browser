@@ -32,8 +32,6 @@ class TrackModel: public QAbstractTableModel {
 public:
     explicit TrackModel(data::TrackRepository& trackRepository, QObject* parent = 0);
 
-    ~TrackModel() override;
-
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -44,8 +42,7 @@ public:
 
 private:
     data::TrackRepository& myTrackRepository;
-    std::unordered_map<int, std::unique_ptr<domain::Track>> myTracks;
-    Requests* const myRequests = new Requests{60};
+    const std::unique_ptr<Requests> myRequests{new Requests{60}};
 
     void onReadyToExecute(RequestGroup& requestGroup);
     void onReadyTracks(std::pair<int, int>& offsetAndLimit);

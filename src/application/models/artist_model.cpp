@@ -38,12 +38,6 @@ myArtistRepository(artistRepository) {
 
 
 
-ArtistModel::~ArtistModel() {
-    delete(myRequests);
-}
-
-
-
 QVariant ArtistModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid()) {
         return QVariant{};

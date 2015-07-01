@@ -49,8 +49,8 @@ const string Track::getUrl() const {
 
 
 
-Artist* Track::getArtist() const {
-    return myArtist;
+const Artist& Track::getArtist() const {
+    return *myArtist;
 }
 
 }

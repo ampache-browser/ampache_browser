@@ -27,6 +27,10 @@ class Track {
 public:
     Track(const std::string id, const std::string title, int number, const std::string url);
 
+    Track(const Track& other) = delete;
+
+    Track& operator=(const Track& other) = delete;
+
     const std::string getId() const;
 
     const std::string getName() const;
@@ -35,16 +39,14 @@ public:
 
     const std::string getUrl() const;
 
-    // TODO: return reference
-    Artist* getArtist() const;
+    const Artist& getArtist() const;
 
 private:
     const std::string myId;
     const std::string myTitle;
     const int myNumber;
     const std::string myUrl;
-
-    Artist* myArtist;
+    const Artist* myArtist = nullptr;
 };
 
 }

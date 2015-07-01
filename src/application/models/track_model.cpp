@@ -38,12 +38,6 @@ myTrackRepository(trackRepository) {
 
 
 
-TrackModel::~TrackModel() {
-    delete(myRequests);
-}
-
-
-
 QVariant TrackModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid()) {
         return QVariant{};

@@ -25,6 +25,10 @@ class ArtistData {
 public:
     explicit ArtistData(const std::string& id, std::unique_ptr<domain::Artist> artist);
 
+    ArtistData(const ArtistData& other) = delete;
+
+    ArtistData& operator=(const ArtistData& other) = delete;
+
     std::string getId() const;
 
     domain::Artist& getArtist() const;

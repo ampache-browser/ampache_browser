@@ -45,12 +45,6 @@ myAlbumRepository(albumRepository) {
 
 
 
-AlbumModel::~AlbumModel() {
-    delete(myAlbumRequests);
-}
-
-
-
 QVariant AlbumModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid()) {
         return QVariant{};
@@ -78,11 +72,11 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
     if (role == Qt::DisplayRole) {
         return QString::fromStdString(album.getName());
     } else if (role == Qt::DecorationRole) {
-        if (album.getArt() == nullptr) {
+        if (!album.hasArt()) {
             myArtRequests->add(row);
             return notLoaded;
         } else {
-            return QIcon{*(album.getArt())};
+            return QIcon{album.getArt()};
         }
     } else {
         return QVariant{};
