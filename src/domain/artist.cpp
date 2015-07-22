@@ -8,6 +8,7 @@
 
 
 #include <string>
+#include <functional>
 #include "domain/artist.h"
 
 using namespace std;
@@ -67,6 +68,16 @@ bool operator<=(const Artist& lhs, const Artist& rhs) {
 
 bool operator>=(const Artist& lhs, const Artist& rhs) {
     return !operator<(lhs, rhs);
+}
+
+}
+
+
+
+namespace std {
+
+size_t hash<domain::Artist>::operator()(const domain::Artist& artist) const {
+    return hash<string>()(artist.getId());
 }
 
 }

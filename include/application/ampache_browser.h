@@ -49,6 +49,9 @@ private:
     std::unique_ptr<TrackModel> myTrackModel;
 
     void onConnected();
+    void onArtistsFullyLoaded();
+    void onAlbumsFullyLoaded();
+    void onTracksFullyLoaded();
     void onArtistSelected(std::string id);
 };
 

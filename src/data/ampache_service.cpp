@@ -207,7 +207,7 @@ vector<unique_ptr<AlbumData>> AmpacheService::createAlbums(QXmlStreamReader& xml
     string albumName;
     int year;
     string artUrl;
-    string artistId = "TODO";
+    string artistId;
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
         xmlElement = xmlStreamReader.name().toString();
@@ -226,6 +226,11 @@ vector<unique_ptr<AlbumData>> AmpacheService::createAlbums(QXmlStreamReader& xml
             QXmlStreamAttributes attributes = xmlStreamReader.attributes();
             if (attributes.hasAttribute("id")) {
                 id = attributes.value("id").toString().toStdString();
+            }
+        } else if (xmlElement == "artist") {
+            QXmlStreamAttributes attributes = xmlStreamReader.attributes();
+            if (attributes.hasAttribute("id")) {
+                artistId = attributes.value("id").toString().toStdString();
             }
         }
         else {
@@ -307,13 +312,14 @@ vector<unique_ptr<ArtistData>> AmpacheService::createArtists(QXmlStreamReader& x
 
     string id;
     string artistName;
+    int albums;
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
         xmlElement = xmlStreamReader.name().toString();
 
         if (xmlStreamReader.isEndElement()) {
             if (xmlElement == "artist") {
-                artistsData.emplace_back(new ArtistData{id, unique_ptr<Artist>{new Artist{id, artistName}}});
+                artistsData.emplace_back(new ArtistData{id, albums, unique_ptr<Artist>{new Artist{id, artistName}}});
             }
         }
 
@@ -332,6 +338,12 @@ vector<unique_ptr<ArtistData>> AmpacheService::createArtists(QXmlStreamReader& x
 
             if (xmlElement == "name") {
                 artistName = value;
+            } else if (xmlElement == "albums") {
+                albums = 0;
+                try {
+                    albums = stoi(value);
+                } catch (const invalid_argument& ex) {}
+                catch (const out_of_range& ex) {}
             }
         }
     }
@@ -367,8 +379,8 @@ vector<unique_ptr<TrackData>> AmpacheService::createTracks(QXmlStreamReader& xml
     string title;
     int number;
     string url;
-    string artistId = "TODO";
-    string albumId = "TODO";
+    string artistId;
+    string albumId;
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
         xmlElement = xmlStreamReader.name().toString();
@@ -388,6 +400,16 @@ vector<unique_ptr<TrackData>> AmpacheService::createTracks(QXmlStreamReader& xml
             QXmlStreamAttributes attributes = xmlStreamReader.attributes();
             if (attributes.hasAttribute("id")) {
                 id = attributes.value("id").toString().toStdString();
+            }
+        } else if (xmlElement == "artist") {
+            QXmlStreamAttributes attributes = xmlStreamReader.attributes();
+            if (attributes.hasAttribute("id")) {
+                artistId = attributes.value("id").toString().toStdString();
+            }
+        } else if (xmlElement == "album") {
+            QXmlStreamAttributes attributes = xmlStreamReader.attributes();
+            if (attributes.hasAttribute("id")) {
+                albumId = attributes.value("id").toString().toStdString();
             }
         }
         else {

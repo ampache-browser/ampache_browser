@@ -9,6 +9,8 @@
 
 #include "data/ampache_service.h"
 #include "track_data.h"
+#include "data/artist_repository.h"
+#include "data/album_repository.h"
 #include "data/track_repository.h"
 
 using namespace std;
@@ -19,13 +21,19 @@ using namespace domain;
 
 namespace data {
 
-TrackRepository::TrackRepository(AmpacheService& ampacheService):
-myAmpacheService(ampacheService) {
+TrackRepository::TrackRepository(AmpacheService& ampacheService, ArtistRepository& artistRepository,
+    AlbumRepository& albumRepository):
+myAmpacheService(ampacheService),
+myArtistRepository(artistRepository),
+myAlbumRepository(albumRepository) {
     myAmpacheService.readyTracks += bind(&TrackRepository::onReadyTracks, this, _1);
 }
 
 
 
+/**
+ * @warning Class does not work correctly if this method is called multiple times for the same data.
+ */
 bool TrackRepository::load(int offset, int limit) {
     if (myLoadOffset != -1) {
         return false;
@@ -39,6 +47,13 @@ bool TrackRepository::load(int offset, int limit) {
 
 Track& TrackRepository::get(int offset) const {
     return myTracksData[offset]->getTrack();
+}
+
+
+
+unique_ptr<unordered_map<reference_wrapper<const Artist>, vector<reference_wrapper<AlbumData>>, hash<Artist>>>
+TrackRepository::getArtistIndex() {
+    return move(myArtistIndex);
 }
 
 
@@ -65,12 +80,22 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
     }
 
     for (auto& trackData: tracksData) {
+        auto& artist = myArtistRepository.getById(trackData->getArtistId());
+        auto& albumData = myAlbumRepository.getAlbumDataById(trackData->getAlbumId());
+        (*myArtistIndex)[artist].push_back(albumData);
+
         myTracksData[offset++] = move(trackData);
     }
 
     auto offsetAndLimit = pair<int, int>{myLoadOffset, tracksData.size()};
     myLoadOffset = -1;
     loaded(offsetAndLimit);
+
+    myLoadProgress += tracksData.size();
+    if (myLoadProgress >= myAmpacheService.numberOfTracks()) {
+        bool b = false;
+        fullyLoaded(b);
+    }
 }
 
 }

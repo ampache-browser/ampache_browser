@@ -36,9 +36,10 @@ myAlbumRepository(albumRepository) {
     myAlbumRepository.loaded += bind(&AlbumModel::onLoaded, this, _1);
     myArtRequests->readyToExecute += bind(&AlbumModel::onReadyToExecuteArts, this, _1);
     myAlbumRepository.artsLoaded += bind(&AlbumModel::onArtsLoaded, this, _1);
+    myAlbumRepository.filterChanged += bind(&AlbumModel::onFilterChanged, this, _1);
 
     // start populating with data
-    for (int row; row < rowCount(); row++) {
+    for (int row = 0; row < rowCount(); row++) {
         myAlbumRequests->add(row);
     }
 }
@@ -113,6 +114,13 @@ void AlbumModel::onReadyToExecuteArts(RequestGroup& requestGroup) {
 void AlbumModel::onArtsLoaded(pair<int, int>&) {
     auto finishedRequestGroup = myArtRequests->setFinished();
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+}
+
+
+
+void AlbumModel::onFilterChanged(bool) {
+    beginResetModel();
+    endResetModel();
 }
 
 }

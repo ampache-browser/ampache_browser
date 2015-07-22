@@ -31,7 +31,7 @@ myArtistRepository(artistRepository) {
     myArtistRepository.loaded += bind(&ArtistModel::onReadyArtists, this, _1);
 
     // start populating with data
-    for (int row; row < rowCount(); row++) {
+    for (int row = 0; row < rowCount(); row++) {
         myRequests->add(row);
     }
 }

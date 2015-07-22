@@ -31,7 +31,7 @@ myTrackRepository(trackRepository) {
     myTrackRepository.loaded += bind(&TrackModel::onReadyTracks, this, _1);
 
     // start populating with data
-    for (int row; row < rowCount(); row++) {
+    for (int row = 0; row < rowCount(); row++) {
         myRequests->add(row);
     }
 }

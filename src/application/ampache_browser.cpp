@@ -45,28 +45,55 @@ myUi(&ui) {
     }
     myAmpacheService = unique_ptr<AmpacheService>{new AmpacheService{url, user, pass}};
     myAmpacheService->connected += bind(&AmpacheBrowser::onConnected, this);
-    myUi->artistSelected += bind(&AmpacheBrowser::onArtistSelected, this, _1);
 }
 
 
 
 void AmpacheBrowser::onConnected() {
-    myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpacheService}};
+    myAmpacheService->connected -= bind(&AmpacheBrowser::onConnected, this);
+
     myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpacheService}};
-    myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpacheService}};
-    myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel(*myAlbumRepository)};
+    myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpacheService, *myArtistRepository}};
+    myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpacheService, *myArtistRepository,
+        *myAlbumRepository}};
+
+    myArtistRepository->fullyLoaded += bind(&AmpacheBrowser::onArtistsFullyLoaded, this);
     myArtistModel = unique_ptr<ArtistModel>{new ArtistModel(*myArtistRepository)};
-    myTrackModel = unique_ptr<TrackModel>{new TrackModel(*myTrackRepository)};
-    myUi->setAlbumModel(*myAlbumModel);
     myUi->setArtistModel(*myArtistModel);
-    myUi->setTrackModel(*myTrackModel);
 }
 
 
 
 void AmpacheBrowser::onArtistSelected(string id) {
-    // TODO
-    cout << id << endl;
+    // TODO: Set filter on album (and track) repository.
+    myAlbumRepository->setArtistFilter(myArtistRepository->getById(id));
+}
+
+
+
+void AmpacheBrowser::onArtistsFullyLoaded() {
+    myArtistRepository->fullyLoaded -= bind(&AmpacheBrowser::onArtistsFullyLoaded, this);
+    myAlbumRepository->fullyLoaded += bind(&AmpacheBrowser::onAlbumsFullyLoaded, this);
+    myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel(*myAlbumRepository)};
+    myUi->setAlbumModel(*myAlbumModel);
+}
+
+
+
+void AmpacheBrowser::onAlbumsFullyLoaded() {
+    myAlbumRepository->fullyLoaded -= bind(&AmpacheBrowser::onAlbumsFullyLoaded, this);
+    myTrackRepository->fullyLoaded += bind(&AmpacheBrowser::onTracksFullyLoaded, this);
+    myTrackModel = unique_ptr<TrackModel>{new TrackModel(*myTrackRepository)};
+    myUi->setTrackModel(*myTrackModel);
+}
+
+
+
+void AmpacheBrowser::onTracksFullyLoaded() {
+    myTrackRepository->fullyLoaded -= bind(&AmpacheBrowser::onTracksFullyLoaded, this);
+    myAlbumRepository->setArtistIndex(myTrackRepository->getArtistIndex());
+    
+    myUi->artistSelected += bind(&AmpacheBrowser::onArtistSelected, this, _1);
 }
 
 }

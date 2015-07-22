@@ -46,7 +46,17 @@ Artist& ArtistRepository::get(int offset) const {
 Artist& ArtistRepository::getById(const string& id) const {
     auto artistDataIter = find_if(myArtistsData.begin(), myArtistsData.end(),
         [id](const unique_ptr<ArtistData>& ad) {return ad->getId() == id;});
+    // TODO: Check whether the artist with ID 'id' was really found.
     return (*artistDataIter)->getArtist();
+}
+
+
+
+ArtistData& ArtistRepository::getArtistData(const Artist& artist) const {
+    auto artistsDataIter = find_if(myArtistsData.begin(), myArtistsData.end(),
+        [&artist](const unique_ptr<ArtistData>& ad) {return ad->getArtist() == artist;});
+    // TODO: Check whether the artist was really found.
+    return **artistsDataIter;
 }
 
 
@@ -79,6 +89,12 @@ void ArtistRepository::onReadyArtists(vector<unique_ptr<ArtistData>>& artistsDat
     auto offsetAndLimit = pair<int, int>{myLoadOffset, artistsData.size()};
     myLoadOffset = -1;
     loaded(offsetAndLimit);
+
+    myLoadProgress += artistsData.size();
+    if (myLoadProgress >= maxCount()) {
+        bool b = false;
+        fullyLoaded(b);
+    }
 }
 
 }

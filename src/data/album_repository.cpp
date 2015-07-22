@@ -12,6 +12,7 @@
 #include <memory>
 #include <functional>
 #include <algorithm>
+#include <iterator>
 
 #include "domain/artist.h"
 #include "data/ampache_service.h"
@@ -27,17 +28,24 @@ using namespace domain;
 
 namespace data {
 
-AlbumRepository::AlbumRepository(AmpacheService& ampacheService):
-myAmpacheService(ampacheService) {
-    // SMELL: Is there a need to subscribe to myAmpacheService.connected? (Vector size can be reserved and also (max.)
-    // number of albums initialized.)
+// TODO: www Rework to forbid filter setting until fully loaded. - Maybe no - loading stuff will always use full
+// offset (non-filtered).  get() will use filtered offset.
+AlbumRepository::AlbumRepository(AmpacheService& ampacheService, ArtistRepository& artistRepository):
+myAmpacheService(ampacheService),
+myArtistRepository(artistRepository) {
+    // SMELL: Should we subscribe to myAmpacheService.connected? (Subscribing to it would allow reservation
+    // of the vector size and also initialization of (max.) number of albums.)
     myAmpacheService.readyAlbums += bind(&AlbumRepository::onReadyAlbums, this, _1);
     myAmpacheService.readyAlbumArts += bind(&AlbumRepository::onReadyArts, this, _1);
 }
 
 
 
+/**
+ * @warning Class does not work correctly if this method is called multiple times for the same data.
+ */
 bool AlbumRepository::load(int offset, int limit) {
+    // SMELL: Use exceptions?
     if (myLoadOffset != -1) {
         return false;
     }
@@ -58,8 +66,9 @@ bool AlbumRepository::load(int offset, int limit) {
 
 
 
-Album& AlbumRepository::get(int offset) const {
-    return myAlbumsData[offset]->getAlbum();
+Album& AlbumRepository::get(int filteredOffset) const {
+    AlbumData& albumData = myAlbumDataReferences[filteredOffset];
+    return albumData.getAlbum();
 }
 
 
@@ -72,15 +81,24 @@ Album& AlbumRepository::get(int offset) const {
 
 
 
-vector<reference_wrapper<Album>> AlbumRepository::getByArtist(const Artist& artist) const {
-    vector<reference_wrapper<Album>> filteredAlbums;
-    for (auto& albumData: myAlbumsData) {
-        auto& album = albumData->getAlbum();
-        if (album.getArtist() ==  artist) {
-            filteredAlbums.push_back(album);
-        }
-    }
-    return filteredAlbums;
+// vector<reference_wrapper<Album>> AlbumRepository::getByArtist(const Artist& artist) const {
+//     vector<reference_wrapper<Album>> filteredAlbums;
+//     for (auto& albumData: myAlbumsData) {
+//         auto& album = albumData->getAlbum();
+//         if (album.getArtist() ==  artist) {
+//             filteredAlbums.push_back(album);
+//         }
+//     }
+//
+//     return filteredAlbums;
+// }
+
+
+
+AlbumData& AlbumRepository::getAlbumDataById(const string& id) const {
+    auto albumsDataIter = find_if(myAlbumsData.begin(), myAlbumsData.end(),
+        [&id](const unique_ptr<AlbumData>& ad) {return ad->getId() == id;});
+    return **albumsDataIter;
 }
 
 
@@ -111,10 +129,12 @@ void AlbumRepository::populateArtists(const ArtistRepository& artistRepository) 
 
 
 
-bool AlbumRepository::isLoaded(int offset, int limit) const {
-    uint end = offset + limit;
-    return (myAlbumsData.size() >= end) && all_of(myAlbumsData.begin() + offset, myAlbumsData.begin() + offset + limit,
-        [](const unique_ptr<AlbumData>& ad) {return ad != nullptr;});
+bool AlbumRepository::isLoaded(int filteredOffset, int limit) const {
+    uint end = filteredOffset + limit;
+
+    // TODO: Check, if &ad != nullptr works.
+    return (myAlbumDataReferences.size() >= end) && all_of(myAlbumDataReferences.begin() + filteredOffset,
+        myAlbumDataReferences.begin() + filteredOffset + limit, [](const AlbumData& ad) {return &ad != nullptr;});
 }
 
 
@@ -128,26 +148,86 @@ bool AlbumRepository::isLoaded(int offset, int limit) const {
 
 
 int AlbumRepository::maxCount() const {
+    if (myCurrentArtistFilter != nullptr) {
+        return myArtistRepository.getArtistData(*myCurrentArtistFilter).getNumberOfAlbums();
+    }
     return myAmpacheService.numberOfAlbums();
 }
 
 
 
+void AlbumRepository::setArtistFilter(const Artist& artist) {
+    unsetArtistFilter();
+    myCurrentArtistFilter = &artist;
+    // TODO: www Does not work with QPixmap.
+    (*myArtistIndex)[*myCurrentArtistFilter].swap(myAlbumDataReferences);
+
+    bool b = false;
+    filterChanged(b);
+}
+
+
+
+void AlbumRepository::unsetArtistFilter() {
+    if (myCurrentArtistFilter == nullptr) {
+        return;
+    }
+    myAlbumDataReferences.swap((*myArtistIndex)[*myCurrentArtistFilter]);
+    myCurrentArtistFilter = nullptr;
+
+    bool b = false;
+    filterChanged(b);
+}
+
+
+
+void AlbumRepository::setArtistIndex(unique_ptr<unordered_map<reference_wrapper<const Artist>,
+vector<reference_wrapper<AlbumData>>, hash<Artist>>> artistIndex) {
+    myArtistIndex = move(artistIndex);
+}
+
+
+
 void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
+    auto storedCurrentArtistFilter = myCurrentArtistFilter;
+    unsetArtistFilter();
+
     uint offset = myLoadOffset;
     auto end = offset + albumsData.size();
     if (end > myAlbumsData.size()) {
         // SMELL: Check how the elements are initialized (nullptr?).
         myAlbumsData.resize(end);
+
+        // resize references container
+        for (auto idx = offset; idx < end; idx++) {
+            myAlbumDataReferences.push_back(*myAlbumsData[idx]);
+        }
     }
 
     for (auto& albumData: albumsData) {
-        myAlbumsData[offset++] = move(albumData);
+        if (albumData->hasArtist()) {
+            auto& artist = myArtistRepository.getById(albumData->getArtistId());
+            albumData->getAlbum().setArtist(artist);
+        }
+
+        myAlbumDataReferences[offset] = *albumData;
+        myAlbumsData[offset] = move(albumData);
+        offset++;
     }
 
     auto offsetAndLimit = pair<int, int>{myLoadOffset, albumsData.size()};
     myLoadOffset = -1;
+    if (storedCurrentArtistFilter != nullptr) {
+        setArtistFilter(*storedCurrentArtistFilter);
+    }
+
     loaded(offsetAndLimit);
+
+    myLoadProgress += albumsData.size();
+    if (myLoadProgress >= myAmpacheService.numberOfAlbums()) {
+        bool b = false;
+        fullyLoaded(b);
+    }
 }
 
 

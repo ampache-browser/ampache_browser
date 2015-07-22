@@ -39,6 +39,8 @@ public:
 
     domain::Album& getAlbum() const;
 
+    bool hasArtist() const;
+
 private:
     const std::string myId;
     const std::string myArtUrl;

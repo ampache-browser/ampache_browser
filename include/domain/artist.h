@@ -51,4 +51,18 @@ bool operator>=(const Artist& lhs, const Artist& rhs);
 }
 
 
+
+namespace std {
+
+template<>
+class hash<domain::Artist> {
+
+public:
+    size_t operator()(const domain::Artist& artist) const;
+};
+
+}
+
+
+
 #endif // ARTIST_H

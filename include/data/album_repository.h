@@ -35,7 +35,7 @@ class ArtistRepository;
 class AlbumRepository {
 
 public:
-    explicit AlbumRepository(AmpacheService& ampacheService);
+    explicit AlbumRepository(AmpacheService& ampacheService, ArtistRepository& artistRepository);
 
     AlbumRepository(const AlbumRepository& other) = delete;
 
@@ -45,32 +45,51 @@ public:
 
     infrastructure::Event<std::pair<int, int>> artsLoaded{};
 
+    infrastructure::Event<bool> fullyLoaded{};
+
+    infrastructure::Event<bool> filterChanged{};
+
     bool load(int offset, int limit);
 
 //     std::vector<std::reference_wrapper<domain::Album>> get(int offset, int limit);
 
-    domain::Album& get(int offset) const;
+    domain::Album& get(int filteredOffset) const;
 
     // TODO: This will be internal. (ID maybe will not be part of domain model)
 //     domain::Album& getById(const std::string& id);
 
-    std::vector<std::reference_wrapper<domain::Album>> getByArtist(const domain::Artist& artist) const;
+//     std::vector<std::reference_wrapper<domain::Album>> getByArtist(const domain::Artist& artist) const;
+
+    AlbumData& getAlbumDataById(const std::string& id) const;
 
     bool loadArts(int offset, int limit);
 
     void populateArtists(const ArtistRepository& artistRepository);
 
-    bool isLoaded(int offset, int limit = 1) const;
+    bool isLoaded(int filteredOffset, int limit = 1) const;
 
 //     int count() const;
 
     int maxCount() const;
 
+    void setArtistFilter(const domain::Artist& artist);
+
+    void unsetArtistFilter();
+
+    void setArtistIndex(std::unique_ptr<std::unordered_map<std::reference_wrapper<const domain::Artist>,
+        std::vector<std::reference_wrapper<AlbumData>>, std::hash<domain::Artist>>> artistIndex);
+
 private:
     std::vector<std::unique_ptr<AlbumData>> myAlbumsData;
+    std::vector<std::reference_wrapper<AlbumData>> myAlbumDataReferences;
+    std::unique_ptr<std::unordered_map<std::reference_wrapper<const domain::Artist>,
+        std::vector<std::reference_wrapper<AlbumData>>, std::hash<domain::Artist>>> myArtistIndex = nullptr;
     AmpacheService& myAmpacheService;
+    ArtistRepository& myArtistRepository;
+    int myLoadProgress = 0;
     int myLoadOffset = -1;
     int myArtsLoadOffset = -1;
+    const domain::Artist* myCurrentArtistFilter = nullptr;
 
     void onReadyAlbums(std::vector<std::unique_ptr<AlbumData>>& albumsData);
     void onReadyArts(std::map<std::string, QPixmap>& arts);

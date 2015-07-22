@@ -7,8 +7,13 @@
 
 
 
+#include <iostream>
+
 #include <functional>
+#include <algorithm>
 #include "event.h"
+
+using namespace std;
 
 
 
@@ -16,7 +21,8 @@ namespace infrastructure {
 
 template <class T>
 void Event<T>::operator()(T& args) {
-    for (auto subscriber: mySubscribers) {
+    // SMELL: What happens if a subscriber unsubsribes itself wihile handling the event?
+    for (auto& subscriber: mySubscribers) {
         subscriber(args);
     }
 }
@@ -30,9 +36,21 @@ void Event<T>::operator+=(std::function<void(T&)> subscriber) {
 
 
 
+// TODO: Implement.
 template <class T>
-void Event<T>::operator-=(std::function<void(T&)> subscriber) {
-    mySubscribers.erase(subscriber);
+void Event<T>::operator-=(std::function<void(T&)>) {
+//     int idx = 0;
+//     for (auto& sub: mySubscribers) {
+//         if (sub == subscriber) {
+//             mySubscribers.erase(mySubscribers.begin() + idx);
+//         }
+//         idx++;
+//     }
+
+//     auto subscriberIter = find(mySubscribers.begin(), mySubscribers.end(), subscriber);
+//     if (subscriberIter != mySubscribers.end()) {
+//         mySubscribers.erase(subscriberIter);
+//     }
 }
 
 }

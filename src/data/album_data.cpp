@@ -50,4 +50,10 @@ Album& AlbumData::getAlbum() const {
     return *myAlbum;
 }
 
+
+
+bool AlbumData::hasArtist() const {
+    return myArtistId != "0";
+}
+
 }
