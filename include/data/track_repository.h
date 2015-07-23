@@ -15,10 +15,12 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <memory>
 
 #include "infrastructure/event.h"
 #include "../../src/data/track_data.h"
+#include "../../src/data/album_data.h"
 #include "domain/track.h"
 #include "domain/album.h"
 #include "domain/artist.h"
@@ -30,7 +32,6 @@ namespace data {
 class AmpacheService;
 class ArtistRepository;
 class AlbumRepository;
-class AlbumData;
 
 
 
@@ -56,8 +57,10 @@ public:
 
     std::vector<std::reference_wrapper<domain::Track>> getByArtist(const domain::Artist& artist) const;
 
-    std::unique_ptr<std::unordered_map<std::reference_wrapper<const domain::Artist>,
-        std::vector<std::reference_wrapper<AlbumData>>, std::hash<domain::Artist>>> getArtistIndex();
+    std::unique_ptr<std::unordered_map<
+        std::reference_wrapper<const domain::Artist>,
+        std::vector<std::reference_wrapper<AlbumData>>,
+        std::hash<domain::Artist>>> getArtistIndex();
 
     void populateArtists(const ArtistRepository& artistRepository);
 
@@ -69,10 +72,10 @@ public:
 
 private:
     std::vector<std::unique_ptr<TrackData>> myTracksData;
-    std::unique_ptr<std::unordered_map<std::reference_wrapper<const domain::Artist>,
-        std::vector<std::reference_wrapper<AlbumData>>, std::hash<domain::Artist>>> myArtistIndex{
-            new std::unordered_map<std::reference_wrapper<const domain::Artist>,
-            std::vector<std::reference_wrapper<AlbumData>>, std::hash<domain::Artist>>};
+    std::unordered_map<
+        std::reference_wrapper<const domain::Artist>,
+        std::unordered_set<std::reference_wrapper<AlbumData>, std::hash<data::AlbumData>>,
+        std::hash<domain::Artist>> myArtistIndex;
     AmpacheService& myAmpacheService;
     ArtistRepository& myArtistRepository;
     AlbumRepository& myAlbumRepository;

@@ -76,14 +76,18 @@ public:
 
     void unsetArtistFilter();
 
-    void setArtistIndex(std::unique_ptr<std::unordered_map<std::reference_wrapper<const domain::Artist>,
-        std::vector<std::reference_wrapper<AlbumData>>, std::hash<domain::Artist>>> artistIndex);
+    void setArtistIndex(std::unique_ptr<std::unordered_map<
+        std::reference_wrapper<const domain::Artist>,
+        std::vector<std::reference_wrapper<AlbumData>>,
+        std::hash<domain::Artist>>> artistIndex);
 
 private:
     std::vector<std::unique_ptr<AlbumData>> myAlbumsData;
     std::vector<std::reference_wrapper<AlbumData>> myAlbumDataReferences;
-    std::unique_ptr<std::unordered_map<std::reference_wrapper<const domain::Artist>,
-        std::vector<std::reference_wrapper<AlbumData>>, std::hash<domain::Artist>>> myArtistIndex = nullptr;
+    std::unique_ptr<std::unordered_map<
+        std::reference_wrapper<const domain::Artist>,
+        std::vector<std::reference_wrapper<AlbumData>>,
+        std::hash<domain::Artist>>> myArtistIndex = nullptr;
     AmpacheService& myAmpacheService;
     ArtistRepository& myArtistRepository;
     int myLoadProgress = 0;

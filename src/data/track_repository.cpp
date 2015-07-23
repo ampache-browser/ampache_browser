@@ -9,6 +9,7 @@
 
 #include "data/ampache_service.h"
 #include "track_data.h"
+#include "album_data.h"
 #include "data/artist_repository.h"
 #include "data/album_repository.h"
 #include "data/track_repository.h"
@@ -53,7 +54,21 @@ Track& TrackRepository::get(int offset) const {
 
 unique_ptr<unordered_map<reference_wrapper<const Artist>, vector<reference_wrapper<AlbumData>>, hash<Artist>>>
 TrackRepository::getArtistIndex() {
-    return move(myArtistIndex);
+    unique_ptr<unordered_map<
+        reference_wrapper<const Artist>,
+        vector<reference_wrapper<AlbumData>>,
+        hash<Artist>>> vectorArtistIndex{new unordered_map<
+            reference_wrapper<const Artist>, vector<reference_wrapper<AlbumData>>, hash<Artist>>};
+
+    for (auto& artistAndAlbumData: myArtistIndex) {
+        vector<reference_wrapper<AlbumData>> albumsData;
+        for (auto& albumData: artistAndAlbumData.second) {
+            albumsData.push_back(albumData);
+        }
+        (*vectorArtistIndex)[artistAndAlbumData.first] = albumsData;
+    }
+
+    return move(vectorArtistIndex);
 }
 
 
@@ -82,7 +97,7 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
     for (auto& trackData: tracksData) {
         auto& artist = myArtistRepository.getById(trackData->getArtistId());
         auto& albumData = myAlbumRepository.getAlbumDataById(trackData->getAlbumId());
-        (*myArtistIndex)[artist].push_back(albumData);
+        myArtistIndex[artist].insert(albumData);
 
         myTracksData[offset++] = move(trackData);
     }

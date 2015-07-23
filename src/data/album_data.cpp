@@ -56,4 +56,49 @@ bool AlbumData::hasArtist() const {
     return myArtistId != "0";
 }
 
+
+bool operator==(const AlbumData& lhs, const AlbumData& rhs) {
+    return lhs.getId() == rhs.getId();
+}
+
+
+
+bool operator!=(const AlbumData& lhs, const AlbumData& rhs) {
+    return !operator==(lhs, rhs);
+}
+
+
+
+bool operator<(const AlbumData& lhs, const AlbumData& rhs) {
+    return (lhs.getId() != rhs.getId()) && (lhs.getId() < rhs.getId());
+}
+
+
+
+bool operator>(const AlbumData& lhs, const AlbumData& rhs) {
+    return operator<(rhs, lhs);
+}
+
+
+
+bool operator<=(const AlbumData& lhs, const AlbumData& rhs) {
+    return !operator>(lhs, rhs);
+}
+
+
+
+bool operator>=(const AlbumData& lhs, const AlbumData& rhs) {
+    return !operator<(lhs, rhs);
+}
+
+}
+
+
+
+namespace std {
+
+size_t hash<data::AlbumData>::operator()(const data::AlbumData& albumData) const {
+    return hash<string>()(albumData.getId());
+}
+
 }
