@@ -236,10 +236,12 @@ void AlbumRepository::onReadyArts(std::map<std::string, QPixmap>& arts) {
     uint offset = myArtsLoadOffset;
 
     for (auto urlAndArt: arts) {
-        myAlbumsData[offset++]->getAlbum().setArt(unique_ptr<QPixmap>{new QPixmap{urlAndArt.second}});
+        auto albumDataIter = find_if(myAlbumsData.begin() + offset, myAlbumsData.begin() + offset + arts.size(),
+            [&urlAndArt](unique_ptr<AlbumData>& ad) {return ad->getArtUrl() == urlAndArt.first;});
+        (*albumDataIter)->getAlbum().setArt(unique_ptr<QPixmap>{new QPixmap{urlAndArt.second}});
     }
 
-    auto offsetAndLimit = pair<int, int>{myLoadOffset, arts.size()};
+    auto offsetAndLimit = pair<int, int>{myArtsLoadOffset, arts.size()};
     myArtsLoadOffset = -1;
     artsLoaded(offsetAndLimit);
 }
