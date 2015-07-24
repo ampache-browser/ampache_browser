@@ -24,6 +24,7 @@
 #include "domain/track.h"
 #include "domain/album.h"
 #include "domain/artist.h"
+#include "../../src/data/index_types.h"
 
 
 
@@ -49,38 +50,51 @@ public:
 
     infrastructure::Event<bool> fullyLoaded{};
 
+    infrastructure::Event<bool> filterChanged{};
+
     bool load(int offset, int limit);
 
-    domain::Track& get(int offset) const;
+    domain::Track& get(int filteredOffset) const;
 
     std::vector<std::reference_wrapper<domain::Track>> getByAlbum(const domain::Album& album) const;
 
     std::vector<std::reference_wrapper<domain::Track>> getByArtist(const domain::Artist& artist) const;
 
-    std::unique_ptr<std::unordered_map<
-        std::reference_wrapper<const domain::Artist>,
-        std::vector<std::reference_wrapper<AlbumData>>,
-        std::hash<domain::Artist>>> getArtistIndex();
+    std::unique_ptr<ArtistAlbumVectorIndex> getArtistAlbumIndex();
 
     void populateArtists(const ArtistRepository& artistRepository);
 
     void populateAlbums(const AlbumRepository& albumRepository);
 
-    bool isLoaded(int offset, int limit = 1) const;
+    bool isLoaded(int filteredOffset, int limit = 1) const;
 
     int maxCount() const;
 
+    void setArtistFilter(const domain::Artist& artist);
+
+    void unsetArtistFilter();
+
 private:
+    using ArtistTrackVectorIndex = std::unordered_map<
+        std::reference_wrapper<const domain::Artist>,
+        std::vector<std::reference_wrapper<TrackData>>,
+        std::hash<domain::Artist>>;
+
+
+
     std::vector<std::unique_ptr<TrackData>> myTracksData;
+    std::vector<std::reference_wrapper<TrackData>> myTrackDataReferences;
     std::unordered_map<
         std::reference_wrapper<const domain::Artist>,
         std::unordered_set<std::reference_wrapper<AlbumData>, std::hash<data::AlbumData>>,
-        std::hash<domain::Artist>> myArtistIndex;
+        std::hash<domain::Artist>> myArtistAlbumIndex;
+    ArtistTrackVectorIndex myArtistTrackIndex;
     AmpacheService& myAmpacheService;
     ArtistRepository& myArtistRepository;
     AlbumRepository& myAlbumRepository;
     int myLoadProgress = 0;
     int myLoadOffset = -1;
+    const domain::Artist* myCurrentArtistFilter = nullptr;
 
     void onReadyTracks(std::vector<std::unique_ptr<TrackData>>& trackData);
 };

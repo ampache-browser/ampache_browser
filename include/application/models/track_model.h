@@ -46,6 +46,7 @@ private:
 
     void onReadyToExecute(RequestGroup& requestGroup);
     void onReadyTracks(std::pair<int, int>& offsetAndLimit);
+    void onFilterChanged(bool);
 };
 
 }

@@ -313,13 +313,15 @@ vector<unique_ptr<ArtistData>> AmpacheService::createArtists(QXmlStreamReader& x
     string id;
     string artistName;
     int albums;
+    int songs;
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
         xmlElement = xmlStreamReader.name().toString();
 
         if (xmlStreamReader.isEndElement()) {
             if (xmlElement == "artist") {
-                artistsData.emplace_back(new ArtistData{id, albums, unique_ptr<Artist>{new Artist{id, artistName}}});
+                artistsData.emplace_back(new ArtistData{id, albums, songs,
+                    unique_ptr<Artist>{new Artist{id, artistName}}});
             }
         }
 
@@ -342,6 +344,12 @@ vector<unique_ptr<ArtistData>> AmpacheService::createArtists(QXmlStreamReader& x
                 albums = 0;
                 try {
                     albums = stoi(value);
+                } catch (const invalid_argument& ex) {}
+                catch (const out_of_range& ex) {}
+            } else if (xmlElement == "songs") {
+                songs = 0;
+                try {
+                    songs = stoi(value);
                 } catch (const invalid_argument& ex) {}
                 catch (const out_of_range& ex) {}
             }

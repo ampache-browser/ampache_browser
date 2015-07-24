@@ -23,7 +23,8 @@ namespace data {
 class ArtistData {
 
 public:
-    explicit ArtistData(const std::string& id, int numberOfAlbums, std::unique_ptr<domain::Artist> artist);
+    explicit ArtistData(const std::string& id, int numberOfAlbums, int numberOfTracks,
+        std::unique_ptr<domain::Artist> artist);
 
     ArtistData(const ArtistData& other) = delete;
 
@@ -33,11 +34,14 @@ public:
 
     int getNumberOfAlbums() const;
 
+    int getNumberOfTracks() const;
+
     domain::Artist& getArtist() const;
 
 private:
     const std::string myId;
     const int myNumberOfAlbums;
+    const int myNumberOfTracks;
     const std::unique_ptr<domain::Artist> myArtist;
 };
 

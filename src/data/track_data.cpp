@@ -50,4 +50,50 @@ Track& TrackData::getTrack() const {
     return *myTrack;
 }
 
+
+
+bool operator==(const TrackData& lhs, const TrackData& rhs) {
+    return lhs.getId() == rhs.getId();
+}
+
+
+
+bool operator!=(const TrackData& lhs, const TrackData& rhs) {
+    return !operator==(lhs, rhs);
+}
+
+
+
+bool operator<(const TrackData& lhs, const TrackData& rhs) {
+    return (lhs.getId() != rhs.getId()) && (lhs.getId() < rhs.getId());
+}
+
+
+
+bool operator>(const TrackData& lhs, const TrackData& rhs) {
+    return operator<(rhs, lhs);
+}
+
+
+
+bool operator<=(const TrackData& lhs, const TrackData& rhs) {
+    return !operator>(lhs, rhs);
+}
+
+
+
+bool operator>=(const TrackData& lhs, const TrackData& rhs) {
+    return !operator<(lhs, rhs);
+}
+
+}
+
+
+
+namespace std {
+
+size_t hash<data::TrackData>::operator()(const data::TrackData& trackData) const {
+    return hash<string>()(trackData.getId());
+}
+
 }

@@ -22,6 +22,7 @@
 #include "../../src/data/album_data.h"
 #include "domain/album.h"
 #include "domain/artist.h"
+#include "../../src/data/index_types.h"
 
 
 
@@ -76,18 +77,12 @@ public:
 
     void unsetArtistFilter();
 
-    void setArtistIndex(std::unique_ptr<std::unordered_map<
-        std::reference_wrapper<const domain::Artist>,
-        std::vector<std::reference_wrapper<AlbumData>>,
-        std::hash<domain::Artist>>> artistIndex);
+    void setArtistIndex(std::unique_ptr<ArtistAlbumVectorIndex> artistIndex);
 
 private:
     std::vector<std::unique_ptr<AlbumData>> myAlbumsData;
     std::vector<std::reference_wrapper<AlbumData>> myAlbumDataReferences;
-    std::unique_ptr<std::unordered_map<
-        std::reference_wrapper<const domain::Artist>,
-        std::vector<std::reference_wrapper<AlbumData>>,
-        std::hash<domain::Artist>>> myArtistIndex = nullptr;
+    std::unique_ptr<ArtistAlbumVectorIndex> myArtistIndex = nullptr;
     AmpacheService& myAmpacheService;
     ArtistRepository& myArtistRepository;
     int myLoadProgress = 0;

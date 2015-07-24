@@ -17,6 +17,7 @@
 #include "domain/artist.h"
 #include "data/ampache_service.h"
 #include "album_data.h"
+#include "index_types.h"
 #include "data/artist_repository.h"
 #include "data/album_repository.h"
 
@@ -159,7 +160,6 @@ int AlbumRepository::maxCount() const {
 void AlbumRepository::setArtistFilter(const Artist& artist) {
     unsetArtistFilter();
     myCurrentArtistFilter = &artist;
-    // TODO: www Does not work with QPixmap.
     (*myArtistIndex)[*myCurrentArtistFilter].swap(myAlbumDataReferences);
 
     bool b = false;
@@ -181,8 +181,7 @@ void AlbumRepository::unsetArtistFilter() {
 
 
 
-void AlbumRepository::setArtistIndex(unique_ptr<unordered_map<reference_wrapper<const Artist>,
-vector<reference_wrapper<AlbumData>>, hash<Artist>>> artistIndex) {
+void AlbumRepository::setArtistIndex(unique_ptr<ArtistAlbumVectorIndex> artistIndex) {
     myArtistIndex = move(artistIndex);
 }
 
@@ -199,7 +198,7 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
         myAlbumsData.resize(end);
 
         // resize references container
-        for (auto idx = offset; idx < end; idx++) {
+        for (auto idx = myAlbumDataReferences.size(); idx < end; idx++) {
             myAlbumDataReferences.push_back(*myAlbumsData[idx]);
         }
     }

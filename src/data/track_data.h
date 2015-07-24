@@ -45,6 +45,31 @@ private:
     const std::unique_ptr<domain::Track> myTrack;
 };
 
+bool operator==(const TrackData& lhs, const TrackData& rhs);
+
+bool operator!=(const TrackData& lhs, const TrackData& rhs);
+
+bool operator<(const TrackData& lhs, const TrackData& rhs);
+
+bool operator>(const TrackData& lhs, const TrackData& rhs);
+
+bool operator<=(const TrackData& lhs, const TrackData& rhs);
+
+bool operator>=(const TrackData& lhs, const TrackData& rhs);
+
+}
+
+
+
+namespace std {
+
+template<>
+class hash<data::TrackData> {
+
+public:
+    size_t operator()(const data::TrackData& trackData) const;
+};
+
 }
 
 

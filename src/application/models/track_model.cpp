@@ -29,6 +29,7 @@ TrackModel::TrackModel(TrackRepository& trackRepository, QObject* parent): QAbst
 myTrackRepository(trackRepository) {
     myRequests->readyToExecute += bind(&TrackModel::onReadyToExecute, this, _1);
     myTrackRepository.loaded += bind(&TrackModel::onReadyTracks, this, _1);
+    myTrackRepository.filterChanged += bind(&TrackModel::onFilterChanged, this, _1);
 
     // start populating with data
     for (int row = 0; row < rowCount(); row++) {
@@ -105,6 +106,13 @@ void TrackModel::onReadyToExecute(RequestGroup& requestGroup) {
 void TrackModel::onReadyTracks(pair<int, int>&) {
     auto finishedRequestGroup = myRequests->setFinished();
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+}
+
+
+
+void TrackModel::onFilterChanged(bool) {
+    beginResetModel();
+    endResetModel();
 }
 
 }
