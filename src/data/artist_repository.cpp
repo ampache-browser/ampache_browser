@@ -52,9 +52,9 @@ Artist& ArtistRepository::getById(const string& id) const {
 
 
 
-ArtistData& ArtistRepository::getArtistData(const Artist& artist) const {
+ArtistData& ArtistRepository::getArtistDataById(const string& id) const {
     auto artistsDataIter = find_if(myArtistsData.begin(), myArtistsData.end(),
-        [&artist](const unique_ptr<ArtistData>& ad) {return ad->getArtist() == artist;});
+        [&id](const unique_ptr<ArtistData>& ad) {return ad->getId() == id;});
     // TODO: Check whether the artist was really found.
     return **artistsDataIter;
 }

@@ -24,6 +24,8 @@ myMainWindow{new AmpacheBrowserMainWindow{}} {
     connect(myMainWindow->playAction, SIGNAL(triggered()), this, SLOT(onPlayActionTriggered()));
     connect(myMainWindow->artistsListView, SIGNAL(clicked(QModelIndex)), this,
         SLOT(onArtistsListViewClicked(QModelIndex)));
+    connect(myMainWindow->albumsListView, SIGNAL(clicked(QModelIndex)), this,
+        SLOT(onAlbumsListViewClicked(QModelIndex)));
     myMainWindow->show();
 }
 
@@ -58,6 +60,14 @@ void Ui::onArtistsListViewClicked(const QModelIndex& index) {
     auto hiddenColumnIndex = index.sibling(index.row(), 1);
     auto artistId = hiddenColumnIndex.data().toString().toStdString();
     artistSelected(artistId);
+}
+
+
+
+void Ui::onAlbumsListViewClicked(const QModelIndex& index) {
+    auto hiddenColumnIndex = index.sibling(index.row(), 1);
+    auto albumId = hiddenColumnIndex.data().toString().toStdString();
+    albumSelected(albumId);
 }
 
 }

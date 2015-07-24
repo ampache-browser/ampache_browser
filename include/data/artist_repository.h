@@ -47,7 +47,7 @@ public:
 
     domain::Artist& getById(const std::string& id) const;
 
-    ArtistData& getArtistData(const domain::Artist& artist) const;
+    ArtistData& getArtistDataById(const std::string& id) const;
 
     bool isLoaded(int offset, int limit = 1) const;
     

@@ -96,6 +96,12 @@ Album& AlbumRepository::get(int filteredOffset) const {
 
 
 
+Album& AlbumRepository::getById(const string& id) const {
+    return getAlbumDataById(id).getAlbum();
+}
+
+
+
 AlbumData& AlbumRepository::getAlbumDataById(const string& id) const {
     auto albumsDataIter = find_if(myAlbumsData.begin(), myAlbumsData.end(),
         [&id](const unique_ptr<AlbumData>& ad) {return ad->getId() == id;});
@@ -150,7 +156,7 @@ bool AlbumRepository::isLoaded(int filteredOffset, int limit) const {
 
 int AlbumRepository::maxCount() const {
     if (myCurrentArtistFilter != nullptr) {
-        return myArtistRepository.getArtistData(*myCurrentArtistFilter).getNumberOfAlbums();
+        return myArtistRepository.getArtistDataById(myCurrentArtistFilter->getId()).getNumberOfAlbums();
     }
     return myAmpacheService.numberOfAlbums();
 }

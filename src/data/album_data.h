@@ -25,7 +25,7 @@ class AlbumData {
 
 public:
     explicit AlbumData(const std::string& id, const std::string& artUrl, const std::string& artistId,
-        std::unique_ptr<domain::Album> album);
+        int numberOfTracks, std::unique_ptr<domain::Album> album);
 
     AlbumData(const AlbumData& other) = delete;
 
@@ -37,6 +37,8 @@ public:
 
     std::string getArtistId() const;
 
+    int getNumberOfTracks() const;
+
     domain::Album& getAlbum() const;
 
     bool hasArtist() const;
@@ -45,6 +47,7 @@ private:
     const std::string myId;
     const std::string myArtUrl;
     const std::string myArtistId;
+    const int myNumberOfTracks;
     const std::unique_ptr<domain::Album> myAlbum;
 };
 

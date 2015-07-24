@@ -29,7 +29,7 @@ class RequestGroup;
 
 
 
-class AlbumModel: public QAbstractListModel {
+class AlbumModel: public QAbstractTableModel {
     Q_OBJECT
 
 public:
@@ -38,6 +38,8 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
 private:
     data::AlbumRepository& myAlbumRepository;

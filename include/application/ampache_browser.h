@@ -53,6 +53,7 @@ private:
     void onAlbumsFullyLoaded();
     void onTracksFullyLoaded();
     void onArtistSelected(std::string id);
+    void onAlbumSelected(std::string id);
 };
 
 }

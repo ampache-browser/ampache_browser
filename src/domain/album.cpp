@@ -82,4 +82,50 @@ void Album::addTrack(const Track& track) {
     myTracks.push_back(&track);
 }
 
+
+
+bool operator==(const Album& lhs, const Album& rhs) {
+    return lhs.getId() == rhs.getId();
+}
+
+
+
+bool operator!=(const Album& lhs, const Album& rhs) {
+    return !operator==(lhs, rhs);
+}
+
+
+
+bool operator<(const Album& lhs, const Album& rhs) {
+    return (lhs.getId() != rhs.getId()) && (lhs.getName() < rhs.getName());
+}
+
+
+
+bool operator>(const Album& lhs, const Album& rhs) {
+    return operator<(rhs, lhs);
+}
+
+
+
+bool operator<=(const Album& lhs, const Album& rhs) {
+    return !operator>(lhs, rhs);
+}
+
+
+
+bool operator>=(const Album& lhs, const Album& rhs) {
+    return !operator<(lhs, rhs);
+}
+
+}
+
+
+
+namespace std {
+
+size_t hash<domain::Album>::operator()(const domain::Album& album) const {
+    return hash<string>()(album.getId());
+}
+
 }

@@ -81,7 +81,10 @@ bool TrackRepository::isLoaded(int filteredOffset, int limit) const {
 
 int TrackRepository::maxCount() const {
     if (myCurrentArtistFilter != nullptr) {
-        return myArtistRepository.getArtistData(*myCurrentArtistFilter).getNumberOfTracks();
+        return myArtistRepository.getArtistDataById(myCurrentArtistFilter->getId()).getNumberOfTracks();
+    }
+    if (myCurrentAlbumFilter != nullptr) {
+        return myAlbumRepository.getAlbumDataById(myCurrentAlbumFilter->getId()).getNumberOfTracks();
     }
     return myAmpacheService.numberOfTracks();
 }
@@ -89,6 +92,7 @@ int TrackRepository::maxCount() const {
 
 
 void TrackRepository::setArtistFilter(const Artist& artist) {
+    unsetAlbumFilter();
     unsetArtistFilter();
     myCurrentArtistFilter = &artist;
     myArtistTrackIndex[*myCurrentArtistFilter].swap(myTrackDataReferences);
@@ -105,6 +109,31 @@ void TrackRepository::unsetArtistFilter() {
     }
     myTrackDataReferences.swap(myArtistTrackIndex[*myCurrentArtistFilter]);
     myCurrentArtistFilter = nullptr;
+
+    bool b = false;
+    filterChanged(b);
+}
+
+
+
+void TrackRepository::setAlbumFilter(const Album& album) {
+    unsetArtistFilter();
+    unsetAlbumFilter();
+    myCurrentAlbumFilter = &album;
+    myAlbumTrackIndex[*myCurrentAlbumFilter].swap(myTrackDataReferences);
+
+    bool b = false;
+    filterChanged(b);
+}
+
+
+
+void TrackRepository::unsetAlbumFilter() {
+    if (myCurrentAlbumFilter == nullptr) {
+        return;
+    }
+    myTrackDataReferences.swap(myAlbumTrackIndex[*myCurrentAlbumFilter]);
+    myCurrentAlbumFilter = nullptr;
 
     bool b = false;
     filterChanged(b);
@@ -130,14 +159,7 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
     for (auto& trackData: tracksData) {
         // TODO: Set artist and album.
 
-        auto& artist = myArtistRepository.getById(trackData->getArtistId());
-        auto& albumData = myAlbumRepository.getAlbumDataById(trackData->getAlbumId());
-        myArtistAlbumIndex[artist].insert(albumData);
-        if (!any_of(myArtistTrackIndex[artist].begin(), myArtistTrackIndex[artist].end(),
-            [&trackData](TrackData& td) {return (&td != nullptr) && (td == *trackData);})) {
-
-            myArtistTrackIndex[artist].push_back(*trackData);
-        }
+        updateIndicies(*trackData);
 
         myTrackDataReferences[offset] = *trackData;
         myTracksData[offset] = move(trackData);
@@ -156,6 +178,25 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
     if (myLoadProgress >= myAmpacheService.numberOfTracks()) {
         bool b = false;
         fullyLoaded(b);
+    }
+}
+
+
+
+void TrackRepository::updateIndicies(TrackData& trackData) {
+    auto& artist = myArtistRepository.getById(trackData.getArtistId());
+    auto& albumData = myAlbumRepository.getAlbumDataById(trackData.getAlbumId());
+    myArtistAlbumIndex[artist].insert(albumData);
+    if (!any_of(myArtistTrackIndex[artist].begin(), myArtistTrackIndex[artist].end(),
+        [&trackData](TrackData& td) {return (&td != nullptr) && (td == trackData);})) {
+
+        myArtistTrackIndex[artist].push_back(trackData);
+    }
+    auto& album = albumData.getAlbum();
+    if (!any_of(myAlbumTrackIndex[album].begin(), myAlbumTrackIndex[album].end(),
+        [&trackData](TrackData& td) {return (&td != nullptr) && (td == trackData);})) {
+
+        myAlbumTrackIndex[album].push_back(trackData);
     }
 }
 

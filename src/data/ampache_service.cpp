@@ -206,6 +206,7 @@ vector<unique_ptr<AlbumData>> AmpacheService::createAlbums(QXmlStreamReader& xml
     string id;
     string albumName;
     int year;
+    int tracks;
     string artUrl;
     string artistId;
     while (!xmlStreamReader.atEnd()) {
@@ -214,7 +215,7 @@ vector<unique_ptr<AlbumData>> AmpacheService::createAlbums(QXmlStreamReader& xml
 
         if (xmlStreamReader.isEndElement()) {
             if (xmlElement == "album") {albumData.emplace_back(
-                new AlbumData{id, artUrl, artistId, unique_ptr<Album>{new Album{id, albumName, year}}});
+                new AlbumData{id, artUrl, artistId, tracks, unique_ptr<Album>{new Album{id, albumName, year}}});
             }
         }
 
@@ -242,6 +243,12 @@ vector<unique_ptr<AlbumData>> AmpacheService::createAlbums(QXmlStreamReader& xml
                 year = 0;
                 try {
                     year = stoi(value);
+                } catch (const invalid_argument& ex) {}
+                catch (const out_of_range& ex) {}
+            } else if (xmlElement == "tracks") {
+                tracks = 0;
+                try {
+                    tracks = stoi(value);
                 } catch (const invalid_argument& ex) {}
                 catch (const out_of_range& ex) {}
             } else if (xmlElement == "art") {

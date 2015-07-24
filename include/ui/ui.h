@@ -39,6 +39,8 @@ public:
 
     infrastructure::Event<std::string> artistSelected{};
 
+    infrastructure::Event<std::string> albumSelected{};
+
     void setAlbumModel(QAbstractItemModel& model);
 
     void setArtistModel(QAbstractItemModel& model);
@@ -48,6 +50,7 @@ public:
 private slots:
     void onPlayActionTriggered();
     void onArtistsListViewClicked(const QModelIndex& index);
+    void onAlbumsListViewClicked(const QModelIndex& index);
 
 private:
     const std::unique_ptr<AmpacheBrowserMainWindow> myMainWindow;

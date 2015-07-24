@@ -65,10 +65,16 @@ void AmpacheBrowser::onConnected() {
 
 
 void AmpacheBrowser::onArtistSelected(string id) {
-    // TODO: Set filter on album (and track) repository.
     auto& artist = myArtistRepository->getById(id);
     myAlbumRepository->setArtistFilter(artist);
     myTrackRepository->setArtistFilter(artist);
+}
+
+
+
+void AmpacheBrowser::onAlbumSelected(string id) {
+    auto& album = myAlbumRepository->getById(id);
+    myTrackRepository->setAlbumFilter(album);
 }
 
 
@@ -96,6 +102,7 @@ void AmpacheBrowser::onTracksFullyLoaded() {
     myAlbumRepository->setArtistIndex(myTrackRepository->getArtistAlbumIndex());
     
     myUi->artistSelected += bind(&AmpacheBrowser::onArtistSelected, this, _1);
+    myUi->albumSelected += bind(&AmpacheBrowser::onAlbumSelected, this, _1);
 }
 
 }

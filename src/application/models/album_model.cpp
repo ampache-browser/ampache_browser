@@ -30,7 +30,7 @@ using namespace domain;
 
 namespace application {
 
-AlbumModel::AlbumModel(AlbumRepository& albumRepository, QObject* parent): QAbstractListModel(parent),
+AlbumModel::AlbumModel(AlbumRepository& albumRepository, QObject* parent): QAbstractTableModel(parent),
 myAlbumRepository(albumRepository) {
     myAlbumRequests->readyToExecute += bind(&AlbumModel::onReadyToExecuteAlbums, this, _1);
     myAlbumRepository.loaded += bind(&AlbumModel::onLoaded, this, _1);
@@ -70,17 +70,25 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
     }
 
     auto& album = myAlbumRepository.get(row);
-    if (role == Qt::DisplayRole) {
-        return QString::fromStdString(album.getName());
-    } else if (role == Qt::DecorationRole) {
-        if (!album.hasArt()) {
-            myArtRequests->add(row);
-            return notLoaded;
+    if (index.column() == 0) {
+        if (role == Qt::DisplayRole) {
+            return QString::fromStdString(album.getName());
+        } else if (role == Qt::DecorationRole) {
+            if (!album.hasArt()) {
+                myArtRequests->add(row);
+                return notLoaded;
+            } else {
+                return QIcon{album.getArt()};
+            }
         } else {
-            return QIcon{album.getArt()};
+            return QVariant{};
         }
     } else {
-        return QVariant{};
+        if (role == Qt::DisplayRole) {
+            return QString::fromStdString(album.getId());
+        } else {
+            return QVariant{};
+        }
     }
 }
 
@@ -88,6 +96,12 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
 
 int AlbumModel::rowCount(const QModelIndex&) const {
     return myAlbumRepository.maxCount();
+}
+
+
+
+int AlbumModel::columnCount(const QModelIndex&) const {
+    return 2;
 }
 
 

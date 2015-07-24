@@ -63,6 +63,31 @@ private:
     std::unique_ptr<QPixmap> myArt = nullptr;
 };
 
+bool operator==(const Album& lhs, const Album& rhs);
+
+bool operator!=(const Album& lhs, const Album& rhs);
+
+bool operator<(const Album& lhs, const Album& rhs);
+
+bool operator>(const Album& lhs, const Album& rhs);
+
+bool operator<=(const Album& lhs, const Album& rhs);
+
+bool operator>=(const Album& lhs, const Album& rhs);
+
+}
+
+
+
+namespace std {
+
+template<>
+class hash<domain::Album> {
+
+public:
+    size_t operator()(const domain::Album& album) const;
+};
+
 }
 
 

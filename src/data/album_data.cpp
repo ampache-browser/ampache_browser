@@ -19,10 +19,12 @@ using namespace domain;
 
 namespace data {
 
-AlbumData::AlbumData(const string& id, const string& artUrl, const string& artistId, unique_ptr<Album> album):
+AlbumData::AlbumData(const string& id, const string& artUrl, const string& artistId, int numberOfTracks,
+    unique_ptr<Album> album):
 myId{id},
 myArtUrl{artUrl},
 myArtistId{artistId},
+myNumberOfTracks{numberOfTracks},
 myAlbum{move(album)} {
 }
 
@@ -46,6 +48,12 @@ string AlbumData::getArtistId() const {
 
 
 
+int AlbumData::getNumberOfTracks() const {
+    return myNumberOfTracks;
+}
+
+
+
 Album& AlbumData::getAlbum() const {
     return *myAlbum;
 }
@@ -55,6 +63,7 @@ Album& AlbumData::getAlbum() const {
 bool AlbumData::hasArtist() const {
     return myArtistId != "0";
 }
+
 
 
 bool operator==(const AlbumData& lhs, const AlbumData& rhs) {

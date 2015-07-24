@@ -56,8 +56,7 @@ public:
 
     domain::Album& get(int filteredOffset) const;
 
-    // TODO: This will be internal. (ID maybe will not be part of domain model)
-//     domain::Album& getById(const std::string& id);
+    domain::Album& getById(const std::string& id) const;
 
 //     std::vector<std::reference_wrapper<domain::Album>> getByArtist(const domain::Artist& artist) const;
 

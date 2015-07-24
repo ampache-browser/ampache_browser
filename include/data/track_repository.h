@@ -74,29 +74,36 @@ public:
 
     void unsetArtistFilter();
 
+    void setAlbumFilter(const domain::Album& album);
+
+    void unsetAlbumFilter();
+
 private:
-    using ArtistTrackVectorIndex = std::unordered_map<
-        std::reference_wrapper<const domain::Artist>,
-        std::vector<std::reference_wrapper<TrackData>>,
-        std::hash<domain::Artist>>;
-
-
-
     std::vector<std::unique_ptr<TrackData>> myTracksData;
     std::vector<std::reference_wrapper<TrackData>> myTrackDataReferences;
     std::unordered_map<
         std::reference_wrapper<const domain::Artist>,
         std::unordered_set<std::reference_wrapper<AlbumData>, std::hash<data::AlbumData>>,
         std::hash<domain::Artist>> myArtistAlbumIndex;
-    ArtistTrackVectorIndex myArtistTrackIndex;
+    std::unordered_map<
+        std::reference_wrapper<const domain::Artist>,
+        std::vector<std::reference_wrapper<TrackData>>,
+        std::hash<domain::Artist>> myArtistTrackIndex;
+    std::unordered_map<
+        std::reference_wrapper<const domain::Album>,
+        std::vector<std::reference_wrapper<TrackData>>,
+        std::hash<domain::Album>> myAlbumTrackIndex;
     AmpacheService& myAmpacheService;
     ArtistRepository& myArtistRepository;
     AlbumRepository& myAlbumRepository;
     int myLoadProgress = 0;
     int myLoadOffset = -1;
     const domain::Artist* myCurrentArtistFilter = nullptr;
+    const domain::Album* myCurrentAlbumFilter = nullptr;
 
     void onReadyTracks(std::vector<std::unique_ptr<TrackData>>& trackData);
+
+    void updateIndicies(TrackData& trackData);
 };
 
 }
