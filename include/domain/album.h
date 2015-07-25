@@ -43,7 +43,6 @@ public:
 
     const Artist& getArtist() const;
 
-    // TODO: Determine artist from tracks.
     void setArtist(const Artist& artist);
 
     bool hasArt() const;

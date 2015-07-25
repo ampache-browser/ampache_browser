@@ -52,13 +52,9 @@ public:
 
     bool load(int offset, int limit);
 
-//     std::vector<std::reference_wrapper<domain::Album>> get(int offset, int limit);
-
     domain::Album& get(int filteredOffset) const;
 
     domain::Album& getById(const std::string& id) const;
-
-//     std::vector<std::reference_wrapper<domain::Album>> getByArtist(const domain::Artist& artist) const;
 
     AlbumData& getAlbumDataById(const std::string& id) const;
 
@@ -67,8 +63,6 @@ public:
     void populateArtists(const ArtistRepository& artistRepository);
 
     bool isLoaded(int filteredOffset, int limit = 1) const;
-
-//     int count() const;
 
     int maxCount() const;
 

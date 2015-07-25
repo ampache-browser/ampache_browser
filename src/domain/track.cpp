@@ -9,6 +9,7 @@
 
 #include <string>
 #include <domain/artist.h>
+#include <domain/album.h>
 #include <domain/track.h>
 
 using namespace std;
@@ -51,6 +52,24 @@ const string Track::getUrl() const {
 
 const Artist& Track::getArtist() const {
     return *myArtist;
+}
+
+
+
+const Album& Track::getAlbum() const {
+    return *myAlbum;
+}
+
+
+
+void Track::setArtist(const Artist& artist) {
+    myArtist = &artist;
+}
+
+
+
+void Track::setAlbum(const Album& album) {
+    myAlbum = &album;
 }
 
 }

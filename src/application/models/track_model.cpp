@@ -47,12 +47,6 @@ QVariant TrackModel::data(const QModelIndex& index, int role) const {
         return QVariant{};
     }
 
-    // TODO: Implement artist (and album) columns.
-    if (index.column() == 1)
-    {
-        return "col1";
-    }
-
     int row = index.row();
     if (!myTrackRepository.isLoaded(row)) {
         if (role == Qt::DisplayRole) {
@@ -62,7 +56,16 @@ QVariant TrackModel::data(const QModelIndex& index, int role) const {
     }
 
     auto& track = myTrackRepository.get(row);
-    return QString::fromStdString(track.getName());
+    switch (index.column()) {
+        case 0:
+            return QString::fromStdString(track.getName());
+        case 1:
+            return QString::fromStdString(track.getArtist().getName());
+        case 2:
+            return QString::fromStdString(track.getAlbum().getName());
+        default:
+            return QVariant{};
+    }
 }
 
 
@@ -78,6 +81,8 @@ QVariant TrackModel::headerData(int section, Qt::Orientation, int role) const {
             return "Track";
         case 1:
             return "Artist";
+        case 2:
+            return "Album";
         default:
             return QVariant{};
     }
@@ -92,7 +97,7 @@ int TrackModel::rowCount(const QModelIndex&) const {
 
 
 int TrackModel::columnCount(const QModelIndex&) const {
-    return 2;
+    return 3;
 }
 
 

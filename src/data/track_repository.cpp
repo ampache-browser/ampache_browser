@@ -91,6 +91,9 @@ int TrackRepository::maxCount() const {
 
 
 
+/**
+ * @warning May be called no sooner than after the repository is fully loaded.
+ */
 void TrackRepository::setArtistFilter(const Artist& artist) {
     unsetAlbumFilter();
     unsetArtistFilter();
@@ -116,6 +119,9 @@ void TrackRepository::unsetArtistFilter() {
 
 
 
+/**
+ * @warning May be called no sooner than after the repository is fully loaded.
+ */
 void TrackRepository::setAlbumFilter(const Album& album) {
     unsetArtistFilter();
     unsetAlbumFilter();
@@ -157,7 +163,11 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
     }
 
     for (auto& trackData: tracksData) {
-        // TODO: Set artist and album.
+        auto& track = trackData->getTrack();
+        auto& artist = myArtistRepository.getById(trackData->getArtistId());
+        track.setArtist(artist);
+        auto& album = myAlbumRepository.getById(trackData->getAlbumId());
+        track.setAlbum(album);
 
         updateIndicies(*trackData);
 

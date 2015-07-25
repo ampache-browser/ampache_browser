@@ -19,6 +19,7 @@
 namespace domain {
 
 class Artist;
+class Album;
 
 
 
@@ -41,12 +42,19 @@ public:
 
     const Artist& getArtist() const;
 
+    const Album& getAlbum() const;
+
+    void setArtist(const Artist& artist);
+
+    void setAlbum(const Album& album);
+
 private:
     const std::string myId;
     const std::string myTitle;
     const int myNumber;
     const std::string myUrl;
     const Artist* myArtist = nullptr;
+    const Album* myAlbum = nullptr;
 };
 
 }

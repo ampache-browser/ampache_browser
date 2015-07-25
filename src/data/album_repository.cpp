@@ -29,8 +29,6 @@ using namespace domain;
 
 namespace data {
 
-// TODO: www Rework to forbid filter setting until fully loaded. - Maybe no - loading stuff will always use full
-// offset (non-filtered).  get() will use filtered offset.
 AlbumRepository::AlbumRepository(AmpacheService& ampacheService, ArtistRepository& artistRepository):
 myAmpacheService(ampacheService),
 myArtistRepository(artistRepository) {
@@ -57,42 +55,10 @@ bool AlbumRepository::load(int offset, int limit) {
 
 
 
-// vector<reference_wrapper<Album>> AlbumRepository::get(int offset, int limit) {
-//     vector<reference_wrapper<Album>> albums;
-//     for (auto idx = offset; idx >= offset + limit; idx++) {
-//         albums.push_back(myAlbumsData[idx]->getAlbum());
-//     }
-//     return albums;
-// }
-
-
-
 Album& AlbumRepository::get(int filteredOffset) const {
     AlbumData& albumData = myAlbumDataReferences[filteredOffset];
     return albumData.getAlbum();
 }
-
-
-
-// Album& AlbumRepository::getById(const string& id) {
-//     auto albumDataIter = find_if(myAlbumsData.begin(), myAlbumsData.end(),
-//         [id](unique_ptr<AlbumData>& ad) {return ad->getId() == id;});
-//     return (*albumDataIter)->getAlbum();
-// }
-
-
-
-// vector<reference_wrapper<Album>> AlbumRepository::getByArtist(const Artist& artist) const {
-//     vector<reference_wrapper<Album>> filteredAlbums;
-//     for (auto& albumData: myAlbumsData) {
-//         auto& album = albumData->getAlbum();
-//         if (album.getArtist() ==  artist) {
-//             filteredAlbums.push_back(album);
-//         }
-//     }
-//
-//     return filteredAlbums;
-// }
 
 
 
@@ -139,18 +105,9 @@ void AlbumRepository::populateArtists(const ArtistRepository& artistRepository) 
 bool AlbumRepository::isLoaded(int filteredOffset, int limit) const {
     uint end = filteredOffset + limit;
 
-    // TODO: Check, if &ad != nullptr works.
     return (myAlbumDataReferences.size() >= end) && all_of(myAlbumDataReferences.begin() + filteredOffset,
         myAlbumDataReferences.begin() + filteredOffset + limit, [](const AlbumData& ad) {return &ad != nullptr;});
 }
-
-
-
-// SMELL: Expensive - hold a count as instance variable instead?
-// int AlbumRepository::count() const {
-//     return count_if(myAlbumsData.begin(), myAlbumsData.end(),
-//         [](const unique_ptr<AlbumData>& ad) {return ad != nullptr;});
-// }
 
 
 
@@ -163,6 +120,9 @@ int AlbumRepository::maxCount() const {
 
 
 
+/**
+ * @warning May be called no sooner than after the repository is fully loaded.
+ */
 void AlbumRepository::setArtistFilter(const Artist& artist) {
     unsetArtistFilter();
     myCurrentArtistFilter = &artist;
