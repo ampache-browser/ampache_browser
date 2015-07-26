@@ -65,16 +65,25 @@ void AmpacheBrowser::onConnected() {
 
 
 void AmpacheBrowser::onArtistSelected(string id) {
-    auto& artist = myArtistRepository->getById(id);
-    myAlbumRepository->setArtistFilter(artist);
-    myTrackRepository->setArtistFilter(artist);
+    if (id == "0") {
+        myAlbumRepository->unsetArtistFilter();
+        myTrackRepository->unsetArtistFilter();
+    } else {
+        auto& artist = myArtistRepository->getById(id);
+        myAlbumRepository->setArtistFilter(artist);
+        myTrackRepository->setArtistFilter(artist);
+    }
 }
 
 
 
 void AmpacheBrowser::onAlbumSelected(string id) {
-    auto& album = myAlbumRepository->getById(id);
-    myTrackRepository->setAlbumFilter(album);
+    if (id == "0") {
+        myTrackRepository->unsetAlbumFilter();
+    } else {
+        auto& album = myAlbumRepository->getById(id);
+        myTrackRepository->setAlbumFilter(album);
+    }
 }
 
 

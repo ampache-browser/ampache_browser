@@ -123,6 +123,7 @@ int AlbumRepository::maxCount() const {
 /**
  * @warning May be called no sooner than after the repository is fully loaded.
  */
+// TODO: www Implement multi selection.
 void AlbumRepository::setArtistFilter(const Artist& artist) {
     unsetArtistFilter();
     myCurrentArtistFilter = &artist;
@@ -160,7 +161,6 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
     uint offset = myLoadOffset;
     auto end = offset + albumsData.size();
     if (end > myAlbumsData.size()) {
-        // SMELL: Check how the elements are initialized (nullptr?).
         myAlbumsData.resize(end);
 
         // resize references container

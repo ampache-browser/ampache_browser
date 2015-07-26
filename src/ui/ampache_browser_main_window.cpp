@@ -64,6 +64,8 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     albumsListView->setWordWrap(true);
     albumsListView->setGridSize(QSize(128, 192));
     albumsListView->setIconSize(QSize(100, 100));
+    albumsListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    albumsListView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     centralLayout->addWidget(albumsListView);
     centralWidget->setLayout(centralLayout);
@@ -75,6 +77,8 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     artistsListView = new QListView();
     artistsListView->setResizeMode(QListView::ResizeMode::Adjust);
     artistsListView->setUniformItemSizes(true);
+    artistsListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    artistsListView->setSelectionBehavior(QAbstractItemView::SelectRows);
     tracksTreeView = new QTreeView();
 
     artistsDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);

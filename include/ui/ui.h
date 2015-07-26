@@ -18,6 +18,7 @@
 #include "infrastructure/event.h"
 
 class QAbstractItemModel;
+class QItemSelection;
 
 
 
@@ -41,16 +42,16 @@ public:
 
     infrastructure::Event<std::string> albumSelected{};
 
-    void setAlbumModel(QAbstractItemModel& model);
-
     void setArtistModel(QAbstractItemModel& model);
+
+    void setAlbumModel(QAbstractItemModel& model);
 
     void setTrackModel(QAbstractItemModel& model);
 
 private slots:
     void onPlayActionTriggered();
-    void onArtistsListViewClicked(const QModelIndex& index);
-    void onAlbumsListViewClicked(const QModelIndex& index);
+    void onArtistsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+    void onAlbumsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
 private:
     const std::unique_ptr<AmpacheBrowserMainWindow> myMainWindow;
