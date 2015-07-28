@@ -68,19 +68,20 @@ public:
 
     bool isLoaded(int filteredOffset, int limit = 1) const;
 
-    int maxCount() const;
+    int maxCount();
 
-    void setArtistFilter(const domain::Artist& artist);
+    void setArtistFilter(std::vector<std::reference_wrapper<const domain::Artist>> artists);
 
     void unsetArtistFilter();
 
-    void setAlbumFilter(const domain::Album& album);
+    void setAlbumFilter(std::vector<std::reference_wrapper<const domain::Album>> albums);
 
     void unsetAlbumFilter();
 
 private:
     std::vector<std::unique_ptr<TrackData>> myTracksData;
     std::vector<std::reference_wrapper<TrackData>> myTrackDataReferences;
+    std::vector<std::reference_wrapper<TrackData>> myStoredTrackDataReferences;
     std::unordered_map<
         std::reference_wrapper<const domain::Artist>,
         std::unordered_set<std::reference_wrapper<AlbumData>, std::hash<data::AlbumData>>,
@@ -98,12 +99,15 @@ private:
     AlbumRepository& myAlbumRepository;
     int myLoadProgress = 0;
     int myLoadOffset = -1;
-    const domain::Artist* myCurrentArtistFilter = nullptr;
-    const domain::Album* myCurrentAlbumFilter = nullptr;
+    std::vector<std::reference_wrapper<const domain::Artist>> myCurrentArtistFilter;
+    std::vector<std::reference_wrapper<const domain::Album>> myCurrentAlbumFilter;
+    int myCachedMaxCount = -1;
 
     void onReadyTracks(std::vector<std::unique_ptr<TrackData>>& trackData);
 
     void updateIndicies(TrackData& trackData);
+
+    int computeMaxCount() const;
 };
 
 }

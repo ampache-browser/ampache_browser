@@ -58,25 +58,23 @@ void Ui::onPlayActionTriggered() {
 
 
 void Ui::onArtistsSelectionModelSelectionChanged(const QItemSelection&, const QItemSelection&) {
-    string artistId = "0";
     auto selectedRows = myMainWindow->artistsListView->selectionModel()->selectedRows(1);
-    if (!selectedRows.isEmpty()) {
-        auto hiddenColumnIndex = selectedRows.first();
-        artistId = hiddenColumnIndex.data().toString().toStdString();
+    vector<string> artistIds;
+    for (auto hiddenColumnIndex: selectedRows) {
+        artistIds.push_back(hiddenColumnIndex.data().toString().toStdString());
     }
-    artistSelected(artistId);
+    artistsSelected(artistIds);
 }
 
 
 
 void Ui::onAlbumsSelectionModelSelectionChanged(const QItemSelection&, const QItemSelection&) {
-    string albumId = "0";
     auto selectedRows = myMainWindow->albumsListView->selectionModel()->selectedRows(1);
-    if (!selectedRows.isEmpty()) {
-        auto hiddenColumnIndex = selectedRows.first();
-        albumId = hiddenColumnIndex.data().toString().toStdString();
+    vector<string> albumIds;
+    for (auto hiddenColumnIndex: selectedRows) {
+        albumIds.push_back(hiddenColumnIndex.data().toString().toStdString());
     }
-    albumSelected(albumId);
+    albumsSelected(albumIds);
 }
 
 }

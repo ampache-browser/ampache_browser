@@ -111,11 +111,11 @@ bool AlbumRepository::isLoaded(int filteredOffset, int limit) const {
 
 
 
-int AlbumRepository::maxCount() const {
-    if (myCurrentArtistFilter != nullptr) {
-        return myArtistRepository.getArtistDataById(myCurrentArtistFilter->getId()).getNumberOfAlbums();
+int AlbumRepository::maxCount() {
+    if (myCachedMaxCount == -1) {
+        myCachedMaxCount = computeMaxCount();
     }
-    return myAmpacheService.numberOfAlbums();
+    return myCachedMaxCount;
 }
 
 
@@ -123,11 +123,15 @@ int AlbumRepository::maxCount() const {
 /**
  * @warning May be called no sooner than after the repository is fully loaded.
  */
-// TODO: www Implement multi selection.
-void AlbumRepository::setArtistFilter(const Artist& artist) {
+void AlbumRepository::setArtistFilter(vector<reference_wrapper<const Artist>> artists) {
     unsetArtistFilter();
-    myCurrentArtistFilter = &artist;
-    (*myArtistIndex)[*myCurrentArtistFilter].swap(myAlbumDataReferences);
+    myCurrentArtistFilter = artists;
+    myAlbumDataReferences.swap(myStoredAlbumDataReferences);
+    for (auto& artist: artists) {
+        auto artistIndex = (*myArtistIndex)[artist];
+        myAlbumDataReferences.insert(myAlbumDataReferences.end(), artistIndex.begin(), artistIndex.end());
+    }
+    myCachedMaxCount = -1;
 
     bool b = false;
     filterChanged(b);
@@ -136,11 +140,13 @@ void AlbumRepository::setArtistFilter(const Artist& artist) {
 
 
 void AlbumRepository::unsetArtistFilter() {
-    if (myCurrentArtistFilter == nullptr) {
+    if (myCurrentArtistFilter.empty()) {
         return;
     }
-    myAlbumDataReferences.swap((*myArtistIndex)[*myCurrentArtistFilter]);
-    myCurrentArtistFilter = nullptr;
+    myAlbumDataReferences.clear();
+    myAlbumDataReferences.swap(myStoredAlbumDataReferences);
+    myCurrentArtistFilter.clear();
+    myCachedMaxCount = -1;
 
     bool b = false;
     filterChanged(b);
@@ -182,9 +188,10 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
 
     auto offsetAndLimit = pair<int, int>{myLoadOffset, albumsData.size()};
     myLoadOffset = -1;
-    if (storedCurrentArtistFilter != nullptr) {
-        setArtistFilter(*storedCurrentArtistFilter);
+    if (!storedCurrentArtistFilter.empty()) {
+        setArtistFilter(storedCurrentArtistFilter);
     }
+    myCachedMaxCount = -1;
 
     loaded(offsetAndLimit);
 
@@ -209,6 +216,19 @@ void AlbumRepository::onReadyArts(std::map<std::string, QPixmap>& arts) {
     auto offsetAndLimit = pair<int, int>{myArtsLoadOffset, arts.size()};
     myArtsLoadOffset = -1;
     artsLoaded(offsetAndLimit);
+}
+
+
+
+int AlbumRepository::computeMaxCount() const {
+    if (!myCurrentArtistFilter.empty()) {
+        int count = 0;
+        for (const Artist& artist: myCurrentArtistFilter) {
+            count += myArtistRepository.getArtistDataById(artist.getId()).getNumberOfAlbums();
+        }
+        return count;
+    }
+    return myAmpacheService.numberOfAlbums();
 }
 
 }

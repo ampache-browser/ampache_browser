@@ -64,9 +64,9 @@ public:
 
     bool isLoaded(int filteredOffset, int limit = 1) const;
 
-    int maxCount() const;
+    int maxCount();
 
-    void setArtistFilter(const domain::Artist& artist);
+    void setArtistFilter(std::vector<std::reference_wrapper<const domain::Artist>> artists);
 
     void unsetArtistFilter();
 
@@ -75,16 +75,20 @@ public:
 private:
     std::vector<std::unique_ptr<AlbumData>> myAlbumsData;
     std::vector<std::reference_wrapper<AlbumData>> myAlbumDataReferences;
+    std::vector<std::reference_wrapper<AlbumData>> myStoredAlbumDataReferences;
     std::unique_ptr<ArtistAlbumVectorIndex> myArtistIndex = nullptr;
     AmpacheService& myAmpacheService;
     ArtistRepository& myArtistRepository;
     int myLoadProgress = 0;
     int myLoadOffset = -1;
     int myArtsLoadOffset = -1;
-    const domain::Artist* myCurrentArtistFilter = nullptr;
+    std::vector<std::reference_wrapper<const domain::Artist>> myCurrentArtistFilter;
+    int myCachedMaxCount = -1;
 
     void onReadyAlbums(std::vector<std::unique_ptr<AlbumData>>& albumsData);
     void onReadyArts(std::map<std::string, QPixmap>& arts);
+
+    int computeMaxCount() const;
 };
 
 }

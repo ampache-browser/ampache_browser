@@ -13,6 +13,7 @@
 
 
 #include <memory>
+#include <vector>
 #include <QObject>
 #include "src/ui/ampache_browser_main_window.h"
 #include "infrastructure/event.h"
@@ -38,9 +39,9 @@ public:
 
     infrastructure::Event<bool> albumWindowRedraw{};
 
-    infrastructure::Event<std::string> artistSelected{};
+    infrastructure::Event<std::vector<std::string>> artistsSelected{};
 
-    infrastructure::Event<std::string> albumSelected{};
+    infrastructure::Event<std::vector<std::string>> albumsSelected{};
 
     void setArtistModel(QAbstractItemModel& model);
 

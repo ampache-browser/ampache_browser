@@ -13,6 +13,7 @@
 #include <memory>
 
 #include "ui/ui.h"
+#include "domain/artist.h"
 #include "application/models/album_model.h"
 #include "application/models/artist_model.h"
 #include "application/models/track_model.h"
@@ -24,6 +25,7 @@
 
 using namespace std;
 using namespace placeholders;
+using namespace domain;
 using namespace data;
 using namespace ui;
 
@@ -64,25 +66,33 @@ void AmpacheBrowser::onConnected() {
 
 
 
-void AmpacheBrowser::onArtistSelected(string id) {
-    if (id == "0") {
+void AmpacheBrowser::onArtistsSelected(vector<string> ids) {
+    if (ids.empty()) {
         myAlbumRepository->unsetArtistFilter();
         myTrackRepository->unsetArtistFilter();
     } else {
-        auto& artist = myArtistRepository->getById(id);
-        myAlbumRepository->setArtistFilter(artist);
-        myTrackRepository->setArtistFilter(artist);
+        vector<reference_wrapper<const Artist>> artists;
+        for (auto id: ids) {
+            auto& artist = myArtistRepository->getById(id);
+            artists.push_back(artist);
+        }
+        myAlbumRepository->setArtistFilter(artists);
+        myTrackRepository->setArtistFilter(artists);
     }
 }
 
 
 
-void AmpacheBrowser::onAlbumSelected(string id) {
-    if (id == "0") {
+void AmpacheBrowser::onAlbumsSelected(vector<string> ids) {
+    if (ids.empty()) {
         myTrackRepository->unsetAlbumFilter();
     } else {
-        auto& album = myAlbumRepository->getById(id);
-        myTrackRepository->setAlbumFilter(album);
+        vector<reference_wrapper<const Album>> albums;
+        for (auto id: ids) {
+            auto& album = myAlbumRepository->getById(id);
+            albums.push_back(album);
+        }
+        myTrackRepository->setAlbumFilter(albums);
     }
 }
 
@@ -110,8 +120,8 @@ void AmpacheBrowser::onTracksFullyLoaded() {
     myTrackRepository->fullyLoaded -= bind(&AmpacheBrowser::onTracksFullyLoaded, this);
     myAlbumRepository->setArtistIndex(myTrackRepository->getArtistAlbumIndex());
     
-    myUi->artistSelected += bind(&AmpacheBrowser::onArtistSelected, this, _1);
-    myUi->albumSelected += bind(&AmpacheBrowser::onAlbumSelected, this, _1);
+    myUi->artistsSelected += bind(&AmpacheBrowser::onArtistsSelected, this, _1);
+    myUi->albumsSelected += bind(&AmpacheBrowser::onAlbumsSelected, this, _1);
 }
 
 }
