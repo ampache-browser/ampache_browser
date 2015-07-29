@@ -13,6 +13,7 @@
 #include <functional>
 #include <algorithm>
 #include <iterator>
+#include <unordered_set>
 
 #include "domain/artist.h"
 #include "data/ampache_service.h"
@@ -126,11 +127,16 @@ int AlbumRepository::maxCount() {
 void AlbumRepository::setArtistFilter(vector<reference_wrapper<const Artist>> artists) {
     unsetArtistFilter();
     myCurrentArtistFilter = artists;
-    myAlbumDataReferences.swap(myStoredAlbumDataReferences);
-    for (auto& artist: artists) {
+    unordered_set<reference_wrapper<AlbumData>, hash<AlbumData>> filteredUniqueAlbumData;
+    for (auto artist: artists) {
         auto artistIndex = (*myArtistIndex)[artist];
-        myAlbumDataReferences.insert(myAlbumDataReferences.end(), artistIndex.begin(), artistIndex.end());
+        filteredUniqueAlbumData.insert(artistIndex.begin(), artistIndex.end());
     }
+    myAlbumDataReferences.swap(myStoredAlbumDataReferences);
+    for (auto albumData: filteredUniqueAlbumData) {
+        myAlbumDataReferences.push_back(albumData);
+    }
+
     myCachedMaxCount = -1;
 
     bool b = false;
@@ -222,11 +228,7 @@ void AlbumRepository::onReadyArts(std::map<std::string, QPixmap>& arts) {
 
 int AlbumRepository::computeMaxCount() const {
     if (!myCurrentArtistFilter.empty()) {
-        int count = 0;
-        for (const Artist& artist: myCurrentArtistFilter) {
-            count += myArtistRepository.getArtistDataById(artist.getId()).getNumberOfAlbums();
-        }
-        return count;
+        return myAlbumDataReferences.size();
     }
     return myAmpacheService.numberOfAlbums();
 }

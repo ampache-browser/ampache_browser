@@ -57,9 +57,9 @@ Track& TrackRepository::get(int filteredOffset) const {
 unique_ptr<ArtistAlbumVectorIndex> TrackRepository::getArtistAlbumIndex() {
     unique_ptr<ArtistAlbumVectorIndex> vectorArtistIndex{new ArtistAlbumVectorIndex};
 
-    for (auto& artistAndAlbumData: myArtistAlbumIndex) {
+    for (auto artistAndAlbumData: myArtistAlbumIndex) {
         vector<reference_wrapper<AlbumData>> albumsData;
-        for (auto& albumData: artistAndAlbumData.second) {
+        for (auto albumData: artistAndAlbumData.second) {
             albumsData.push_back(albumData);
         }
         (*vectorArtistIndex)[artistAndAlbumData.first] = albumsData;
@@ -96,7 +96,7 @@ void TrackRepository::setArtistFilter(vector<reference_wrapper<const Artist>> ar
     unsetArtistFilter();
     myCurrentArtistFilter = artists;
     myTrackDataReferences.swap(myStoredTrackDataReferences);
-    for (auto& artist: artists) {
+    for (auto artist: artists) {
         auto artistIndex = myArtistTrackIndex[artist];
         myTrackDataReferences.insert(myTrackDataReferences.end(), artistIndex.begin(), artistIndex.end());
     }
@@ -131,7 +131,7 @@ void TrackRepository::setAlbumFilter(vector<reference_wrapper<const Album>> albu
     unsetAlbumFilter();
     myCurrentAlbumFilter = albums;
     myTrackDataReferences.swap(myStoredTrackDataReferences);
-    for (auto& album: albums) {
+    for (auto album: albums) {
         auto albumIndex = myAlbumTrackIndex[album];
         myTrackDataReferences.insert(myTrackDataReferences.end(), albumIndex.begin(), albumIndex.end());
     }
