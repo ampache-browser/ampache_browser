@@ -49,6 +49,8 @@ public:
 
     void setTrackModel(QAbstractItemModel& model);
 
+    void setSearchCompletionModel(QAbstractItemModel& model);
+
 private slots:
     void onPlayActionTriggered();
     void onArtistsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);

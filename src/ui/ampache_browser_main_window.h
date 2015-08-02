@@ -16,6 +16,7 @@
 
 class QListView;
 class QTreeView;
+class QLineEdit;
 class QAction;
 
 
@@ -34,6 +35,7 @@ public:
     QListView* artistsListView = nullptr;
     QTreeView* tracksTreeView = nullptr;
 
+    QLineEdit* searchLineEdit = nullptr;
     QAction* playAction = nullptr;
 };
 

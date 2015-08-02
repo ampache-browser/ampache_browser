@@ -58,6 +58,8 @@ public:
 
     AlbumData& getAlbumDataById(const std::string& id) const;
 
+    std::vector<std::reference_wrapper<domain::Album>> getAll() const;
+
     bool loadArts(int offset, int limit);
 
     void populateArtists(const ArtistRepository& artistRepository);

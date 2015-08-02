@@ -15,6 +15,7 @@
 #include "models/album_model.h"
 #include "models/artist_model.h"
 #include "models/track_model.h"
+#include "models/names_model.h"
 #include "data/ampache_service.h"
 #include "data/album_repository.h"
 #include "data/artist_repository.h"
@@ -24,8 +25,6 @@
 
 
 namespace application {
-
-
 
 class AmpacheBrowser {
 
@@ -37,16 +36,17 @@ public:
     AmpacheBrowser& operator=(const AmpacheBrowser& other) = delete;
 
 private:
-    ui::Ui* const myUi;
+    ui::Ui* const myUi = nullptr;
 
-    std::unique_ptr<data::AmpacheService> myAmpacheService;
-    std::unique_ptr<data::AlbumRepository> myAlbumRepository;
-    std::unique_ptr<data::ArtistRepository> myArtistRepository;
-    std::unique_ptr<data::TrackRepository> myTrackRepository;
+    std::unique_ptr<data::AmpacheService> myAmpacheService = nullptr;
+    std::unique_ptr<data::AlbumRepository> myAlbumRepository = nullptr;
+    std::unique_ptr<data::ArtistRepository> myArtistRepository = nullptr;
+    std::unique_ptr<data::TrackRepository> myTrackRepository = nullptr;
 
-    std::unique_ptr<AlbumModel> myAlbumModel;
-    std::unique_ptr<ArtistModel> myArtistModel;
-    std::unique_ptr<TrackModel> myTrackModel;
+    std::unique_ptr<AlbumModel> myAlbumModel = nullptr;
+    std::unique_ptr<ArtistModel> myArtistModel = nullptr;
+    std::unique_ptr<TrackModel> myTrackModel = nullptr;
+    std::unique_ptr<NamesModel> myNamesModel = nullptr;
 
     void onConnected();
     void onArtistsFullyLoaded();

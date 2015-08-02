@@ -13,6 +13,8 @@
 #include <QAction>
 #include <QtGui/QStandardItemModel>
 #include <QItemSelection>
+#include <QLineEdit>
+#include <QCompleter>
 #include "ampache_browser_main_window.h"
 #include "ui/ui.h"
 
@@ -46,6 +48,12 @@ void Ui::setAlbumModel(QAbstractItemModel& model) {
 
 void Ui::setTrackModel(QAbstractItemModel& model) {
     myMainWindow->tracksTreeView->setModel(&model);
+}
+
+
+
+void Ui::setSearchCompletionModel(QAbstractItemModel& model) {
+    myMainWindow->searchLineEdit->completer()->setModel(&model);
 }
 
 

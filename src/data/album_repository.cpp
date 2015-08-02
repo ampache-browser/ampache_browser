@@ -77,6 +77,16 @@ AlbumData& AlbumRepository::getAlbumDataById(const string& id) const {
 
 
 
+vector<reference_wrapper<Album>> AlbumRepository::getAll() const {
+    vector<reference_wrapper<Album>> albums;
+    for (auto& albumData: myAlbumsData) {
+        albums.push_back(albumData->getAlbum());
+    }
+    return albums;
+}
+
+
+
 bool AlbumRepository::loadArts(int offset, int limit) {
     if (myArtsLoadOffset != -1) {
         return false;

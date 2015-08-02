@@ -49,6 +49,8 @@ public:
 
     ArtistData& getArtistDataById(const std::string& id) const;
 
+    std::vector<std::reference_wrapper<domain::Artist>> getAll() const;
+
     bool isLoaded(int offset, int limit = 1) const;
     
     int maxCount() const;

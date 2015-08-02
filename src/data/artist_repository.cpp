@@ -7,6 +7,8 @@
 
 
 
+#include <functional>
+
 #include "data/ampache_service.h"
 #include "artist_data.h"
 #include "data/artist_repository.h"
@@ -57,6 +59,16 @@ ArtistData& ArtistRepository::getArtistDataById(const string& id) const {
         [&id](const unique_ptr<ArtistData>& ad) {return ad->getId() == id;});
     // TODO: Check whether the artist was really found.
     return **artistsDataIter;
+}
+
+
+
+vector<reference_wrapper<Artist>> ArtistRepository::getAll() const {
+    vector<reference_wrapper<Artist>> artists;
+    for (auto& artistData: myArtistsData) {
+        artists.push_back(artistData->getArtist());
+    }
+    return artists;
 }
 
 

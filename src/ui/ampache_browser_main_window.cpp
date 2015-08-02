@@ -20,6 +20,7 @@
 #include <QSplitter>
 #include <QStatusBar>
 #include <QDockWidget>
+#include <QCompleter>
 #include "ampache_browser_main_window.h"
 
 
@@ -36,7 +37,7 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     // tool bar
     playAction = new QAction(style()->standardIcon(QStyle::SP_MediaPlay), tr("Play"), this);
     auto enqueueAction = new QAction(style()->standardIcon(QStyle::SP_DialogApplyButton), tr("Enqueue"), this);
-    auto searchLineEdit = new QLineEdit();
+    searchLineEdit = new QLineEdit();
     auto spacerWidget = new QWidget();
     auto spacerWidget2 = new QWidget();
     auto mainToolBar = addToolBar(tr("Main"));
@@ -44,6 +45,12 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
 
     searchLineEdit->setPlaceholderText(tr("Search..."));
     searchLineEdit->setToolTip(tr("Search for artists, albums and tracks."));
+
+    auto searchCompleter = new QCompleter{};
+    searchCompleter->setCompletionRole(Qt::DisplayRole);
+    searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    searchLineEdit->setCompleter(searchCompleter);
+
     spacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     spacerWidget2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mainToolBar->setMovable(false);

@@ -56,15 +56,9 @@ public:
 
     domain::Track& get(int filteredOffset) const;
 
-    std::vector<std::reference_wrapper<domain::Track>> getByAlbum(const domain::Album& album) const;
-
-    std::vector<std::reference_wrapper<domain::Track>> getByArtist(const domain::Artist& artist) const;
+    std::vector<std::reference_wrapper<domain::Track>> getAll() const;
 
     std::unique_ptr<ArtistAlbumVectorIndex> getArtistAlbumIndex();
-
-    void populateArtists(const ArtistRepository& artistRepository);
-
-    void populateAlbums(const AlbumRepository& albumRepository);
 
     bool isLoaded(int filteredOffset, int limit = 1) const;
 
