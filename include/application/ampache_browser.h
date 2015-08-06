@@ -54,6 +54,7 @@ private:
     void onTracksFullyLoaded();
     void onArtistsSelected(std::vector<std::string> id);
     void onAlbumsSelected(std::vector<std::string> id);
+    void onSearchTriggered(std::string searchText);
 };
 
 }

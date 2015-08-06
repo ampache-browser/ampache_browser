@@ -25,6 +25,8 @@ namespace ui {
 Ui::Ui():
 myMainWindow{new AmpacheBrowserMainWindow{}} {
     connect(myMainWindow->playAction, SIGNAL(triggered()), this, SLOT(onPlayActionTriggered()));
+    connect(myMainWindow->searchAction, SIGNAL(triggered()), this, SLOT(onSearchActionTriggered()));
+    connect(myMainWindow->searchLineEdit, SIGNAL(returnPressed()), this, SLOT(onSearchEditingFinished()));
     myMainWindow->show();
 }
 
@@ -83,6 +85,25 @@ void Ui::onAlbumsSelectionModelSelectionChanged(const QItemSelection&, const QIt
         albumIds.push_back(hiddenColumnIndex.data().toString().toStdString());
     }
     albumsSelected(albumIds);
+}
+
+
+
+void Ui::onSearchActionTriggered() {
+    fireSearchEvent();
+}
+
+
+
+void Ui::onSearchEditingFinished() {
+    fireSearchEvent();
+}
+
+
+
+void Ui::fireSearchEvent() {
+    auto searchText = myMainWindow->searchLineEdit->text().toStdString();
+    searchTriggered(searchText);
 }
 
 }

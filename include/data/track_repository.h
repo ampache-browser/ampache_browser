@@ -66,11 +66,11 @@ public:
 
     void setArtistFilter(std::vector<std::reference_wrapper<const domain::Artist>> artists);
 
-    void unsetArtistFilter();
-
     void setAlbumFilter(std::vector<std::reference_wrapper<const domain::Album>> albums);
 
-    void unsetAlbumFilter();
+    void setNameFilter(const std::string& namePattern);
+
+    void unsetFilter();
 
 private:
     std::vector<std::unique_ptr<TrackData>> myTracksData;
@@ -93,8 +93,7 @@ private:
     AlbumRepository& myAlbumRepository;
     int myLoadProgress = 0;
     int myLoadOffset = -1;
-    std::vector<std::reference_wrapper<const domain::Artist>> myCurrentArtistFilter;
-    std::vector<std::reference_wrapper<const domain::Album>> myCurrentAlbumFilter;
+    bool myIsFilterSet = false;
     int myCachedMaxCount = -1;
 
     void onReadyTracks(std::vector<std::unique_ptr<TrackData>>& trackData);

@@ -65,38 +65,6 @@ void AmpacheBrowser::onConnected() {
 
 
 
-void AmpacheBrowser::onArtistsSelected(vector<string> ids) {
-    if (ids.empty()) {
-        myAlbumRepository->unsetArtistFilter();
-        myTrackRepository->unsetArtistFilter();
-    } else {
-        vector<reference_wrapper<const Artist>> artists;
-        for (auto id: ids) {
-            auto& artist = myArtistRepository->getById(id);
-            artists.push_back(artist);
-        }
-        myAlbumRepository->setArtistFilter(artists);
-        myTrackRepository->setArtistFilter(artists);
-    }
-}
-
-
-
-void AmpacheBrowser::onAlbumsSelected(vector<string> ids) {
-    if (ids.empty()) {
-        myTrackRepository->unsetAlbumFilter();
-    } else {
-        vector<reference_wrapper<const Album>> albums;
-        for (auto id: ids) {
-            auto& album = myAlbumRepository->getById(id);
-            albums.push_back(album);
-        }
-        myTrackRepository->setAlbumFilter(albums);
-    }
-}
-
-
-
 void AmpacheBrowser::onArtistsFullyLoaded() {
     myArtistRepository->fullyLoaded -= bind(&AmpacheBrowser::onArtistsFullyLoaded, this);
     myAlbumRepository->fullyLoaded += bind(&AmpacheBrowser::onAlbumsFullyLoaded, this);
@@ -124,6 +92,53 @@ void AmpacheBrowser::onTracksFullyLoaded() {
 
     myUi->artistsSelected += bind(&AmpacheBrowser::onArtistsSelected, this, _1);
     myUi->albumsSelected += bind(&AmpacheBrowser::onAlbumsSelected, this, _1);
+    myUi->searchTriggered += bind(&AmpacheBrowser::onSearchTriggered, this, _1);
+}
+
+
+
+void AmpacheBrowser::onArtistsSelected(vector<string> ids) {
+    if (ids.empty()) {
+        myAlbumRepository->unsetFilter();
+        myTrackRepository->unsetFilter();
+    } else {
+        vector<reference_wrapper<const Artist>> artists;
+        for (auto id: ids) {
+            auto& artist = myArtistRepository->getById(id);
+            artists.push_back(artist);
+        }
+        myAlbumRepository->setArtistFilter(artists);
+        myTrackRepository->setArtistFilter(artists);
+    }
+}
+
+
+
+void AmpacheBrowser::onAlbumsSelected(vector<string> ids) {
+    if (ids.empty()) {
+        myTrackRepository->unsetFilter();
+    } else {
+        vector<reference_wrapper<const Album>> albums;
+        for (auto id: ids) {
+            auto& album = myAlbumRepository->getById(id);
+            albums.push_back(album);
+        }
+        myTrackRepository->setAlbumFilter(albums);
+    }
+}
+
+
+
+void AmpacheBrowser::onSearchTriggered(string searchText) {
+    if (searchText.empty()) {
+        myArtistRepository->unsetFilter();
+        myAlbumRepository->unsetFilter();
+        myTrackRepository->unsetFilter();
+    } else {
+    myArtistRepository->setNameFilter(searchText);
+    myAlbumRepository->setNameFilter(searchText);
+    myTrackRepository->setNameFilter(searchText);
+    }
 }
 
 }

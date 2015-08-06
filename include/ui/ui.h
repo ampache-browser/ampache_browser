@@ -43,6 +43,8 @@ public:
 
     infrastructure::Event<std::vector<std::string>> albumsSelected{};
 
+    infrastructure::Event<std::string> searchTriggered{};
+
     void setArtistModel(QAbstractItemModel& model);
 
     void setAlbumModel(QAbstractItemModel& model);
@@ -55,9 +57,13 @@ private slots:
     void onPlayActionTriggered();
     void onArtistsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void onAlbumsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+    void onSearchActionTriggered();
+    void onSearchEditingFinished();
 
 private:
     const std::unique_ptr<AmpacheBrowserMainWindow> myMainWindow;
+
+    void fireSearchEvent();
 };
 
 }

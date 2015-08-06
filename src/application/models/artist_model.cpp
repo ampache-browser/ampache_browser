@@ -29,6 +29,7 @@ ArtistModel::ArtistModel(ArtistRepository& artistRepository, QObject* parent): Q
 myArtistRepository(artistRepository) {
     myRequests->readyToExecute += bind(&ArtistModel::onReadyToExecute, this, _1);
     myArtistRepository.loaded += bind(&ArtistModel::onReadyArtists, this, _1);
+    myArtistRepository.filterChanged += bind(&ArtistModel::onFilterChanged, this, _1);
 
     // start populating with data
     for (int row = 0; row < rowCount(); row++) {
@@ -86,6 +87,13 @@ void ArtistModel::onReadyToExecute(RequestGroup& requestGroup) {
 void ArtistModel::onReadyArtists(pair<int, int>&) {
     auto finishedRequestGroup = myRequests->setFinished();
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+}
+
+
+
+void ArtistModel::onFilterChanged(bool) {
+    beginResetModel();
+    endResetModel();
 }
 
 }

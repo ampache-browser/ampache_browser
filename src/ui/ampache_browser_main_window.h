@@ -37,6 +37,7 @@ public:
 
     QLineEdit* searchLineEdit = nullptr;
     QAction* playAction = nullptr;
+    QAction* searchAction = nullptr;
 };
 
 }

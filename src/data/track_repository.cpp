@@ -102,9 +102,8 @@ int TrackRepository::maxCount() {
  * @warning May be called no sooner than after the repository is fully loaded.
  */
 void TrackRepository::setArtistFilter(vector<reference_wrapper<const Artist>> artists) {
-    unsetAlbumFilter();
-    unsetArtistFilter();
-    myCurrentArtistFilter = artists;
+    unsetFilter();
+    myIsFilterSet = true;
     myTrackDataReferences.swap(myStoredTrackDataReferences);
     for (auto artist: artists) {
         auto artistIndex = myArtistTrackIndex[artist];
@@ -118,28 +117,12 @@ void TrackRepository::setArtistFilter(vector<reference_wrapper<const Artist>> ar
 
 
 
-void TrackRepository::unsetArtistFilter() {
-    if (myCurrentArtistFilter.empty()) {
-        return;
-    }
-    myTrackDataReferences.clear();
-    myTrackDataReferences.swap(myStoredTrackDataReferences);
-    myCurrentArtistFilter.clear();
-    myCachedMaxCount = -1;
-
-    bool b = false;
-    filterChanged(b);
-}
-
-
-
 /**
  * @warning May be called no sooner than after the repository is fully loaded.
  */
 void TrackRepository::setAlbumFilter(vector<reference_wrapper<const Album>> albums) {
-    unsetArtistFilter();
-    unsetAlbumFilter();
-    myCurrentAlbumFilter = albums;
+    unsetFilter();
+    myIsFilterSet = true;
     myTrackDataReferences.swap(myStoredTrackDataReferences);
     for (auto album: albums) {
         auto albumIndex = myAlbumTrackIndex[album];
@@ -153,13 +136,39 @@ void TrackRepository::setAlbumFilter(vector<reference_wrapper<const Album>> albu
 
 
 
-void TrackRepository::unsetAlbumFilter() {
-    if (myCurrentAlbumFilter.empty()) {
+/**
+ * @warning May be called no sooner than after the repository is fully loaded.
+ */
+void TrackRepository::setNameFilter(const string& namePattern) {
+    unsetFilter();
+    myIsFilterSet = true;
+    vector<reference_wrapper<TrackData>> filteredTrackData;
+    for (auto& trackData: myTracksData) {
+        auto name = trackData->getTrack().getName();
+        if (search(name.begin(), name.end(), namePattern.begin(), namePattern.end(),
+            [](char c1, char c2) {return toupper(c1) == toupper(c2); }) != name.end()) {
+
+            filteredTrackData.push_back(*trackData);
+        }
+    }
+    myTrackDataReferences.swap(myStoredTrackDataReferences);
+    myTrackDataReferences.swap(filteredTrackData);
+
+    myCachedMaxCount = -1;
+
+    bool b = false;
+    filterChanged(b);
+}
+
+
+
+void TrackRepository::unsetFilter() {
+    if (!myIsFilterSet) {
         return;
     }
     myTrackDataReferences.clear();
     myTrackDataReferences.swap(myStoredTrackDataReferences);
-    myCurrentAlbumFilter.clear();
+    myIsFilterSet = false;
     myCachedMaxCount = -1;
 
     bool b = false;
@@ -169,11 +178,6 @@ void TrackRepository::unsetAlbumFilter() {
 
 
 void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
-    auto storedCurrentArtistFilter = myCurrentArtistFilter;
-    unsetArtistFilter();
-    auto storedCurrentAlbumFilter = myCurrentAlbumFilter;
-    unsetAlbumFilter();
-
     uint offset = myLoadOffset;
     auto end = offset + tracksData.size();
     if (end > myTracksData.size()) {
@@ -201,13 +205,6 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
 
     auto offsetAndLimit = pair<int, int>{myLoadOffset, tracksData.size()};
     myLoadOffset = -1;
-    if (!storedCurrentArtistFilter.empty()) {
-        setArtistFilter(storedCurrentArtistFilter);
-    } else {
-        if (!storedCurrentAlbumFilter.empty()) {
-            setAlbumFilter(storedCurrentAlbumFilter);
-        }
-    }
     myCachedMaxCount = -1;
 
     loaded(offsetAndLimit);
@@ -241,19 +238,8 @@ void TrackRepository::updateIndicies(TrackData& trackData) {
 
 
 int TrackRepository::computeMaxCount() const {
-    if (!myCurrentArtistFilter.empty()) {
-        int count = 0;
-        for (const Artist& artist: myCurrentArtistFilter) {
-            count += myArtistRepository.getArtistDataById(artist.getId()).getNumberOfTracks();
-        }
-        return count;
-    }
-    if (!myCurrentAlbumFilter.empty()) {
-        int count = 0;
-        for (const Album& album: myCurrentAlbumFilter) {
-            count += myAlbumRepository.getAlbumDataById(album.getId()).getNumberOfTracks();
-        }
-        return count;
+    if (myIsFilterSet) {
+        return myTrackDataReferences.size();
     }
     return myAmpacheService.numberOfTracks();
 }

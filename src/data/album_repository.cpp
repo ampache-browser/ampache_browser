@@ -104,18 +104,8 @@ bool AlbumRepository::loadArts(int offset, int limit) {
 
 
 
-void AlbumRepository::populateArtists(const ArtistRepository& artistRepository) {
-    for (auto& albumData: myAlbumsData) {
-        auto& album = albumData->getAlbum();
-        album.setArtist(artistRepository.getById(albumData->getArtistId()));
-    }
-}
-
-
-
 bool AlbumRepository::isLoaded(int filteredOffset, int limit) const {
     uint end = filteredOffset + limit;
-
     return (myAlbumDataReferences.size() >= end) && all_of(myAlbumDataReferences.begin() + filteredOffset,
         myAlbumDataReferences.begin() + filteredOffset + limit, [](const AlbumData& ad) {return &ad != nullptr;});
 }
@@ -135,8 +125,8 @@ int AlbumRepository::maxCount() {
  * @warning May be called no sooner than after the repository is fully loaded.
  */
 void AlbumRepository::setArtistFilter(vector<reference_wrapper<const Artist>> artists) {
-    unsetArtistFilter();
-    myCurrentArtistFilter = artists;
+    unsetFilter();
+    myIsFilterSet = true;
     unordered_set<reference_wrapper<AlbumData>, hash<AlbumData>> filteredUniqueAlbumData;
     for (auto artist: artists) {
         auto artistIndex = (*myArtistIndex)[artist];
@@ -155,13 +145,40 @@ void AlbumRepository::setArtistFilter(vector<reference_wrapper<const Artist>> ar
 
 
 
-void AlbumRepository::unsetArtistFilter() {
-    if (myCurrentArtistFilter.empty()) {
+/**
+ * @warning May be called no sooner than after the repository is fully loaded.
+ */
+void AlbumRepository::setNameFilter(const string& namePattern) {
+    unsetFilter();
+    myIsFilterSet = true;
+    vector<reference_wrapper<AlbumData>> filteredAlbumData;
+    for (auto& albumData: myAlbumsData) {
+        auto name = albumData->getAlbum().getName();
+        if (search(name.begin(), name.end(), namePattern.begin(), namePattern.end(),
+            [](char c1, char c2) {return toupper(c1) == toupper(c2); }) != name.end()) {
+
+            filteredAlbumData.push_back(*albumData);
+        }
+    }
+    myAlbumDataReferences.swap(myStoredAlbumDataReferences);
+    myAlbumDataReferences.swap(filteredAlbumData);
+
+    myCachedMaxCount = -1;
+
+    bool b = false;
+    filterChanged(b);
+}
+
+
+
+void AlbumRepository::unsetFilter() {
+    if (!myIsFilterSet) {
         return;
     }
     myAlbumDataReferences.clear();
     myAlbumDataReferences.swap(myStoredAlbumDataReferences);
-    myCurrentArtistFilter.clear();
+    myIsFilterSet = false;
+
     myCachedMaxCount = -1;
 
     bool b = false;
@@ -177,9 +194,6 @@ void AlbumRepository::setArtistIndex(unique_ptr<ArtistAlbumVectorIndex> artistIn
 
 
 void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
-    auto storedCurrentArtistFilter = myCurrentArtistFilter;
-    unsetArtistFilter();
-
     uint offset = myLoadOffset;
     auto end = offset + albumsData.size();
     if (end > myAlbumsData.size()) {
@@ -204,9 +218,6 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
 
     auto offsetAndLimit = pair<int, int>{myLoadOffset, albumsData.size()};
     myLoadOffset = -1;
-    if (!storedCurrentArtistFilter.empty()) {
-        setArtistFilter(storedCurrentArtistFilter);
-    }
     myCachedMaxCount = -1;
 
     loaded(offsetAndLimit);
@@ -237,7 +248,7 @@ void AlbumRepository::onReadyArts(std::map<std::string, QPixmap>& arts) {
 
 
 int AlbumRepository::computeMaxCount() const {
-    if (!myCurrentArtistFilter.empty()) {
+    if (myIsFilterSet) {
         return myAlbumDataReferences.size();
     }
     return myAmpacheService.numberOfAlbums();

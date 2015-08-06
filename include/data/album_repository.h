@@ -62,15 +62,15 @@ public:
 
     bool loadArts(int offset, int limit);
 
-    void populateArtists(const ArtistRepository& artistRepository);
-
     bool isLoaded(int filteredOffset, int limit = 1) const;
 
     int maxCount();
 
     void setArtistFilter(std::vector<std::reference_wrapper<const domain::Artist>> artists);
 
-    void unsetArtistFilter();
+    void setNameFilter(const std::string& namePattern);
+
+    void unsetFilter();
 
     void setArtistIndex(std::unique_ptr<ArtistAlbumVectorIndex> artistIndex);
 
@@ -84,7 +84,7 @@ private:
     int myLoadProgress = 0;
     int myLoadOffset = -1;
     int myArtsLoadOffset = -1;
-    std::vector<std::reference_wrapper<const domain::Artist>> myCurrentArtistFilter;
+    bool myIsFilterSet = false;
     int myCachedMaxCount = -1;
 
     void onReadyAlbums(std::vector<std::unique_ptr<AlbumData>>& albumsData);

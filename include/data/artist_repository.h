@@ -41,9 +41,11 @@ public:
 
     infrastructure::Event<bool> fullyLoaded{};
 
+    infrastructure::Event<bool> filterChanged{};
+
     bool load(int offset, int limit);
 
-    domain::Artist& get(int offset) const;
+    domain::Artist& get(int filteredOffset) const;
 
     domain::Artist& getById(const std::string& id) const;
 
@@ -51,17 +53,27 @@ public:
 
     std::vector<std::reference_wrapper<domain::Artist>> getAll() const;
 
-    bool isLoaded(int offset, int limit = 1) const;
+    bool isLoaded(int filteredOffset, int limit = 1) const;
     
-    int maxCount() const;
+    int maxCount();
+
+    void setNameFilter(const std::string& namePattern);
+
+    void unsetFilter();
 
 private:
     std::vector<std::unique_ptr<ArtistData>> myArtistsData;
+    std::vector<std::reference_wrapper<ArtistData>> myArtistDataReferences;
+    std::vector<std::reference_wrapper<ArtistData>> myStoredArtistDataReferences;
     AmpacheService& myAmpacheService;
     int myLoadProgress = 0;
     int myLoadOffset = -1;
+    bool myIsFilterSet = false;
+    int myCachedMaxCount = -1;
 
     void onReadyArtists(std::vector<std::unique_ptr<ArtistData>>& artistData);
+
+    int computeMaxCount() const;
 };
 
 }
