@@ -61,16 +61,6 @@ ArtistData& ArtistRepository::getArtistDataById(const string& id) const {
 
 
 
-vector<reference_wrapper<Artist>> ArtistRepository::getAll() const {
-    vector<reference_wrapper<Artist>> artists;
-    for (auto& artistData: myArtistsData) {
-        artists.push_back(artistData->getArtist());
-    }
-    return artists;
-}
-
-
-
 bool ArtistRepository::isLoaded(int filteredOffset, int limit) const {
     uint end = filteredOffset + limit;
     return (myArtistDataReferences.size() >= end) && all_of(myArtistDataReferences.begin() + filteredOffset,

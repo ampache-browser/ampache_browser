@@ -56,8 +56,6 @@ public:
 
     domain::Track& get(int filteredOffset) const;
 
-    std::vector<std::reference_wrapper<domain::Track>> getAll() const;
-
     std::unique_ptr<ArtistAlbumVectorIndex> getArtistAlbumIndex();
 
     bool isLoaded(int filteredOffset, int limit = 1) const;

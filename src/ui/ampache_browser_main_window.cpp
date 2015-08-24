@@ -46,13 +46,6 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     searchLineEdit->setPlaceholderText(tr("Search..."));
     searchLineEdit->setToolTip(tr("Search for artists, albums and tracks."));
 
-    auto searchCompleter = new QCompleter{};
-    searchCompleter->setCompletionRole(Qt::DisplayRole);
-    searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-    searchLineEdit->setCompleter(searchCompleter);
-    searchAction = searchLineEdit->addAction(style()->standardIcon(QStyle::SP_ArrowRight),
-        QLineEdit::ActionPosition::TrailingPosition);
-
     spacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     spacerWidget2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mainToolBar->setMovable(false);
@@ -110,7 +103,6 @@ AmpacheBrowserMainWindow::~AmpacheBrowserMainWindow() {
     delete(artistsListView);
     delete(albumsListView);
     delete(playAction);
-    delete(searchAction);
 }
 
 }

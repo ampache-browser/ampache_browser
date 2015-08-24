@@ -15,7 +15,6 @@
 #include "models/album_model.h"
 #include "models/artist_model.h"
 #include "models/track_model.h"
-#include "models/names_model.h"
 #include "data/ampache_service.h"
 #include "data/album_repository.h"
 #include "data/artist_repository.h"
@@ -46,7 +45,6 @@ private:
     std::unique_ptr<AlbumModel> myAlbumModel = nullptr;
     std::unique_ptr<ArtistModel> myArtistModel = nullptr;
     std::unique_ptr<TrackModel> myTrackModel = nullptr;
-    std::unique_ptr<NamesModel> myNamesModel = nullptr;
 
     void onConnected();
     void onArtistsFullyLoaded();

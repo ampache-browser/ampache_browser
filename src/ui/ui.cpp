@@ -25,8 +25,9 @@ namespace ui {
 Ui::Ui():
 myMainWindow{new AmpacheBrowserMainWindow{}} {
     connect(myMainWindow->playAction, SIGNAL(triggered()), this, SLOT(onPlayActionTriggered()));
-    connect(myMainWindow->searchAction, SIGNAL(triggered()), this, SLOT(onSearchActionTriggered()));
-    connect(myMainWindow->searchLineEdit, SIGNAL(returnPressed()), this, SLOT(onSearchEditingFinished()));
+    connect(myMainWindow->searchLineEdit, SIGNAL(textChanged(QString)), this, SLOT(onSearchTextChanged(QString)));
+    connect(myMainWindow->searchLineEdit, SIGNAL(returnPressed()), this, SLOT(onSearchReturnPressed()));
+
     myMainWindow->show();
 }
 
@@ -89,19 +90,14 @@ void Ui::onAlbumsSelectionModelSelectionChanged(const QItemSelection&, const QIt
 
 
 
-void Ui::onSearchActionTriggered() {
-    fireSearchEvent();
+void Ui::onSearchTextChanged(const QString& searchText) {
+    auto stdSearchText = searchText.toStdString();
+    searchTriggered(stdSearchText);
 }
 
 
 
-void Ui::onSearchEditingFinished() {
-    fireSearchEvent();
-}
-
-
-
-void Ui::fireSearchEvent() {
+void Ui::onSearchReturnPressed() {
     auto searchText = myMainWindow->searchLineEdit->text().toStdString();
     searchTriggered(searchText);
 }

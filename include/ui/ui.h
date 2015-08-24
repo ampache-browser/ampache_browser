@@ -57,13 +57,11 @@ private slots:
     void onPlayActionTriggered();
     void onArtistsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void onAlbumsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
-    void onSearchActionTriggered();
-    void onSearchEditingFinished();
+    void onSearchTextChanged(const QString& text);
+    void onSearchReturnPressed();
 
 private:
     const std::unique_ptr<AmpacheBrowserMainWindow> myMainWindow;
-
-    void fireSearchEvent();
 };
 
 }

@@ -15,7 +15,6 @@
 #include "application/models/album_model.h"
 #include "application/models/artist_model.h"
 #include "application/models/track_model.h"
-#include "application/models/names_model.h"
 #include "data/ampache_service.h"
 #include "data/album_repository.h"
 #include "data/artist_repository.h"
@@ -87,9 +86,6 @@ void AmpacheBrowser::onTracksFullyLoaded() {
     myTrackRepository->fullyLoaded -= bind(&AmpacheBrowser::onTracksFullyLoaded, this);
     myAlbumRepository->setArtistIndex(myTrackRepository->getArtistAlbumIndex());
 
-    myNamesModel = unique_ptr<NamesModel>{new NamesModel(*myArtistRepository, *myAlbumRepository, *myTrackRepository)};
-    myUi->setSearchCompletionModel(*myNamesModel);
-
     myUi->artistsSelected += bind(&AmpacheBrowser::onArtistsSelected, this, _1);
     myUi->albumsSelected += bind(&AmpacheBrowser::onAlbumsSelected, this, _1);
     myUi->searchTriggered += bind(&AmpacheBrowser::onSearchTriggered, this, _1);
@@ -135,9 +131,9 @@ void AmpacheBrowser::onSearchTriggered(string searchText) {
         myAlbumRepository->unsetFilter();
         myTrackRepository->unsetFilter();
     } else {
-    myArtistRepository->setNameFilter(searchText);
-    myAlbumRepository->setNameFilter(searchText);
-    myTrackRepository->setNameFilter(searchText);
+        myArtistRepository->setNameFilter(searchText);
+        myAlbumRepository->setNameFilter(searchText);
+        myTrackRepository->setNameFilter(searchText);
     }
 }
 

@@ -54,16 +54,6 @@ Track& TrackRepository::get(int filteredOffset) const {
 
 
 
-vector<reference_wrapper<Track>> TrackRepository::getAll() const {
-    vector<reference_wrapper<Track>> tracks;
-    for (auto& trackData: myTracksData) {
-        tracks.push_back(trackData->getTrack());
-    }
-    return tracks;
-}
-
-
-
 unique_ptr<ArtistAlbumVectorIndex> TrackRepository::getArtistAlbumIndex() {
     unique_ptr<ArtistAlbumVectorIndex> vectorArtistIndex{new ArtistAlbumVectorIndex};
 
