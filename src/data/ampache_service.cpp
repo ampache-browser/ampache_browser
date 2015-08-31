@@ -38,6 +38,7 @@
 #include "data/ampache_service.h"
 
 using namespace std;
+using namespace chrono;
 using namespace infrastructure;
 using namespace domain;
 
@@ -51,6 +52,12 @@ myUser{user},
 myPassword{password},
 myNetworkAccessManager{new QNetworkAccessManager{this}} {
     connectToServer();
+}
+
+
+
+system_clock::time_point AmpacheService::getLastUpdate() const {
+    return myLastUpdate;
 }
 
 
@@ -156,6 +163,8 @@ void AmpacheService::onFinished() {
 
 
 void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader) {
+    QDateTime update;
+    QDateTime add;
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
         auto name = xmlStreamReader.name();
@@ -166,6 +175,10 @@ void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader) {
         auto value = xmlStreamReader.readElementText().toStdString();
         if (name == "auth") {
             myAuthToken = value;
+        } else if (name == "update") {
+            update = QDateTime::fromString(QString::fromStdString(value), Qt::ISODate);
+        } else if (name == "add") {
+            add = QDateTime::fromString(QString::fromStdString(value), Qt::ISODate);
         } else if (name == "albums") {
             myNumberOfAlbums = stoi(value);
         } else if (name ==  "artists") {
@@ -174,6 +187,7 @@ void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader) {
             myNumberOfTracks = stoi(value);
         }
     }
+    myLastUpdate = system_clock::time_point{milliseconds{max(update, add).toMSecsSinceEpoch()}};
 
     if (xmlStreamReader.hasError()) {
       // TODO: handle error

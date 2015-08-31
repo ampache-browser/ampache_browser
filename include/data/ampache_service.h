@@ -17,6 +17,7 @@
 #include <set>
 #include <map>
 #include <memory>
+#include <chrono>
 
 #include <QtCore/QObject>
 #include <QtCore/QRunnable>
@@ -84,6 +85,8 @@ public:
 
     infrastructure::Event<std::vector<std::unique_ptr<TrackData>>> readyTracks{};
 
+    std::chrono::system_clock::time_point getLastUpdate() const;
+
     int numberOfAlbums() const;
 
     void requestAlbums(int offset, int limit);
@@ -118,6 +121,7 @@ private:
 
     const std::unique_ptr<QNetworkAccessManager> myNetworkAccessManager;
     std::string myAuthToken = "";
+    std::chrono::system_clock::time_point myLastUpdate = std::chrono::system_clock::time_point::min();
     int myNumberOfAlbums = 0;
     int myNumberOfArtists = 0;
     int myNumberOfTracks = 0;

@@ -51,13 +51,10 @@ public:
 
     void setArt(std::unique_ptr<QPixmap> art);
 
-    void addTrack(const Track& track);
-
 private:
     const std::string myId;
     const std::string myName;
     const int myReleaseYear;
-    std::deque<const Track*> myTracks;
     const Artist* myArtist = nullptr;
     std::unique_ptr<QPixmap> myArt = nullptr;
 };

@@ -8,6 +8,7 @@
 
 
 #include "data/ampache_service.h"
+#include "data/cache/cache.h"
 #include "track_data.h"
 #include "album_data.h"
 #include "index_types.h"
@@ -23,9 +24,10 @@ using namespace domain;
 
 namespace data {
 
-TrackRepository::TrackRepository(AmpacheService& ampacheService, ArtistRepository& artistRepository,
+TrackRepository::TrackRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository,
     AlbumRepository& albumRepository):
 myAmpacheService(ampacheService),
+myCache(cache),
 myArtistRepository(artistRepository),
 myAlbumRepository(albumRepository) {
     myAmpacheService.readyTracks += bind(&TrackRepository::onReadyTracks, this, _1);
@@ -40,8 +42,15 @@ bool TrackRepository::load(int offset, int limit) {
     if (myLoadOffset != -1) {
         return false;
     }
-    myLoadOffset = offset;
-    myAmpacheService.requestTracks(offset, limit);
+
+    if (myCache.getLastUpdate() > myAmpacheService.getLastUpdate()) {
+        if (myLoadProgress == 0) {
+            loadFromCache();
+        }
+    } else {
+        myLoadOffset = offset;
+        myAmpacheService.requestTracks(offset, limit);
+    }
     return true;
 }
 
@@ -201,9 +210,39 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
 
     myLoadProgress += tracksData.size();
     if (myLoadProgress >= myAmpacheService.numberOfTracks()) {
+        myCache.saveTracksData(myTracksData);
+
         bool b = false;
         fullyLoaded(b);
     }
+}
+
+
+
+void TrackRepository::loadFromCache() {
+    myTracksData = myCache.loadTracksData();
+
+    for (auto& trackData: myTracksData) {
+        auto& track = trackData->getTrack();
+        auto& artist = myArtistRepository.getById(trackData->getArtistId());
+        track.setArtist(artist);
+        auto& album = myAlbumRepository.getById(trackData->getAlbumId());
+        track.setAlbum(album);
+
+        updateIndicies(*trackData);
+
+        myTrackDataReferences.push_back(*trackData);
+    }
+
+    myLoadOffset = -1;
+    myCachedMaxCount = -1;
+
+    auto offsetAndLimit = pair<int, int>{0, myTracksData.size()};
+    loaded(offsetAndLimit);
+
+    myLoadProgress += myTracksData.size();
+    bool b = false;
+    fullyLoaded(b);
 }
 
 

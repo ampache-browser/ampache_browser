@@ -17,6 +17,7 @@
 
 #include "domain/artist.h"
 #include "data/ampache_service.h"
+#include "data/cache/cache.h"
 #include "album_data.h"
 #include "index_types.h"
 #include "data/artist_repository.h"
@@ -30,8 +31,9 @@ using namespace domain;
 
 namespace data {
 
-AlbumRepository::AlbumRepository(AmpacheService& ampacheService, ArtistRepository& artistRepository):
+AlbumRepository::AlbumRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository):
 myAmpacheService(ampacheService),
+myCache(cache),
 myArtistRepository(artistRepository) {
     // SMELL: Should we subscribe to myAmpacheService.connected? (Subscribing to it would allow reservation
     // of the vector size and also initialization of (max.) number of albums.)
@@ -49,8 +51,22 @@ bool AlbumRepository::load(int offset, int limit) {
     if (myLoadOffset != -1) {
         return false;
     }
-    myLoadOffset = offset;
-    myAmpacheService.requestAlbums(offset, limit);
+
+    if (myCache.getLastUpdate() > myAmpacheService.getLastUpdate()) {
+        myCachedLoad = true;
+
+        // SMELL: The condition below is to ignore subsequent requests from model which are not needed since the
+        // repository was fully loaded at the first load() call.  This is inconsistent from non-cached loads and it
+        // would be better if it was handled by the caller.
+        if (myLoadProgress == 0) {
+            loadFromCache();
+        }
+
+    } else {
+        myCachedLoad = false;
+        myLoadOffset = offset;
+        myAmpacheService.requestAlbums(offset, limit);
+    }
     return true;
 }
 
@@ -77,18 +93,38 @@ AlbumData& AlbumRepository::getAlbumDataById(const string& id) const {
 
 
 
+/**
+ * @warning Albums have to be loaded (via load() method) prior to calling this method.
+ */
 bool AlbumRepository::loadArts(int offset, int limit) {
     if (myArtsLoadOffset != -1) {
         return false;
     }
 
-    myArtsLoadOffset = offset;
-    vector<string> urls;
-    for (auto idx = offset; idx < offset + limit; idx++) {
-        urls.push_back(myAlbumsData[idx]->getArtUrl());
-    }
+    if (myCachedLoad) {
+        vector<string> artIds;
+        for (auto idx = offset; idx < offset + limit; idx++) {
+            auto id = myAlbumsData[idx]->getId();
+            artIds.push_back(id);
+        }
+        auto arts = myCache.loadAlbumArts(artIds);
+        for (auto idAndArt: arts) {
+            auto& albumData = getAlbumDataById(idAndArt.first);
+            albumData.getAlbum().setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
+        }
 
-    myAmpacheService.requestAlbumArts(urls);
+        auto offsetAndLimit = pair<int, int>{offset, limit};
+        myArtsLoadOffset = -1;
+        artsLoaded(offsetAndLimit);
+    } else {
+        myArtsLoadOffset = offset;
+        vector<string> urls;
+        for (auto idx = offset; idx < offset + limit; idx++) {
+            urls.push_back(myAlbumsData[idx]->getArtUrl());
+        }
+
+        myAmpacheService.requestAlbumArts(urls);
+    }
     return true;
 }
 
@@ -214,6 +250,8 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
 
     myLoadProgress += albumsData.size();
     if (myLoadProgress >= myAmpacheService.numberOfAlbums()) {
+        myCache.saveAlbumsData(myAlbumsData);
+
         bool b = false;
         fullyLoaded(b);
     }
@@ -224,15 +262,47 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
 void AlbumRepository::onReadyArts(std::map<std::string, QPixmap>& arts) {
     uint offset = myArtsLoadOffset;
 
+    map<string, QPixmap> idAndArts;
     for (auto urlAndArt: arts) {
         auto albumDataIter = find_if(myAlbumsData.begin() + offset, myAlbumsData.begin() + offset + arts.size(),
             [&urlAndArt](unique_ptr<AlbumData>& ad) {return ad->getArtUrl() == urlAndArt.first;});
-        (*albumDataIter)->getAlbum().setArt(unique_ptr<QPixmap>{new QPixmap{urlAndArt.second}});
+        auto& album = (*albumDataIter)->getAlbum();
+
+        album.setArt(unique_ptr<QPixmap>{new QPixmap{urlAndArt.second}});
+
+        idAndArts.emplace(album.getId(), urlAndArt.second);
     }
+
+    myCache.updateAlbumArts(idAndArts);
 
     auto offsetAndLimit = pair<int, int>{myArtsLoadOffset, arts.size()};
     myArtsLoadOffset = -1;
     artsLoaded(offsetAndLimit);
+}
+
+
+
+void AlbumRepository::loadFromCache() {
+    myAlbumsData = myCache.loadAlbumsData();
+
+    for (auto& albumData: myAlbumsData) {
+        if (albumData->hasArtist()) {
+            auto& artist = myArtistRepository.getById(albumData->getArtistId());
+            albumData->getAlbum().setArtist(artist);
+        }
+
+        myAlbumDataReferences.push_back(*albumData);
+    }
+
+    myLoadOffset = -1;
+    myCachedMaxCount = -1;
+
+    auto offsetAndLimit = pair<int, int>{0, myAlbumsData.size()};
+    loaded(offsetAndLimit);
+
+    myLoadProgress += myAlbumsData.size();
+    bool b = false;
+    fullyLoaded(b);
 }
 
 

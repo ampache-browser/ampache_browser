@@ -31,6 +31,7 @@
 namespace data {
 
 class AmpacheService;
+class Cache;
 class ArtistRepository;
 class AlbumRepository;
 
@@ -39,8 +40,8 @@ class AlbumRepository;
 class TrackRepository {
 
 public:
-    explicit TrackRepository(data::AmpacheService& ampacheService, data::ArtistRepository& artistRepository,
-        data::AlbumRepository& albumRepository);
+    explicit TrackRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository,
+        AlbumRepository& albumRepository);
 
     TrackRepository(const TrackRepository& other) = delete;
 
@@ -87,6 +88,7 @@ private:
         std::vector<std::reference_wrapper<TrackData>>,
         std::hash<domain::Album>> myAlbumTrackIndex;
     AmpacheService& myAmpacheService;
+    Cache& myCache;
     ArtistRepository& myArtistRepository;
     AlbumRepository& myAlbumRepository;
     int myLoadProgress = 0;
@@ -97,7 +99,7 @@ private:
     void onReadyTracks(std::vector<std::unique_ptr<TrackData>>& trackData);
 
     void updateIndicies(TrackData& trackData);
-
+    void loadFromCache();
     int computeMaxCount() const;
 };
 

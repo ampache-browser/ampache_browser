@@ -11,6 +11,7 @@
 
 #include "data/ampache_service.h"
 #include "artist_data.h"
+#include "data/cache/cache.h"
 #include "data/artist_repository.h"
 
 using namespace std;
@@ -21,8 +22,9 @@ using namespace domain;
 
 namespace data {
 
-ArtistRepository::ArtistRepository(AmpacheService& ampacheService):
-myAmpacheService(ampacheService) {
+ArtistRepository::ArtistRepository(AmpacheService& ampacheService, Cache& cache):
+myAmpacheService(ampacheService),
+myCache(cache) {
     myAmpacheService.readyArtists += bind(&ArtistRepository::onReadyArtists, this, _1);
 }
 
@@ -32,8 +34,15 @@ bool ArtistRepository::load(int offset, int limit) {
     if (myLoadOffset != -1) {
         return false;
     }
-    myLoadOffset = offset;
-    myAmpacheService.requestArtists(offset, limit);
+
+    if (myCache.getLastUpdate() > myAmpacheService.getLastUpdate()) {
+        if (myLoadProgress == 0) {
+            loadFromCache();
+        }
+    } else {
+        myLoadOffset = offset;
+        myAmpacheService.requestArtists(offset, limit);
+    }
     return true;
 }
 
@@ -144,9 +153,31 @@ void ArtistRepository::onReadyArtists(vector<unique_ptr<ArtistData>>& artistsDat
 
     myLoadProgress += artistsData.size();
     if (myLoadProgress >= myAmpacheService.numberOfArtists()) {
+        myCache.saveArtistsData(myArtistsData);
+
         bool b = false;
         fullyLoaded(b);
     }
+}
+
+
+
+void ArtistRepository::loadFromCache() {
+    myArtistsData = myCache.loadArtistsData();
+
+    for (auto& artistData: myArtistsData) {
+        myArtistDataReferences.push_back(*artistData);
+    }
+
+    myLoadOffset = -1;
+    myCachedMaxCount = -1;
+
+    auto offsetAndLimit = pair<int, int>{0, myArtistsData.size()};
+    loaded(offsetAndLimit);
+
+    myLoadProgress += myArtistsData.size();
+    bool b = false;
+    fullyLoaded(b);
 }
 
 

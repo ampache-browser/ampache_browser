@@ -1,4 +1,4 @@
-// ampache_browser.h
+// ampache_browser.cpp
 //
 // Project: Ampache Browser
 // License: GNU GPLv3
@@ -16,6 +16,7 @@
 #include "application/models/artist_model.h"
 #include "application/models/track_model.h"
 #include "data/ampache_service.h"
+#include "data/cache/cache.h"
 #include "data/album_repository.h"
 #include "data/artist_repository.h"
 #include "data/track_repository.h"
@@ -45,6 +46,7 @@ myUi(&ui) {
     }
     myAmpacheService = unique_ptr<AmpacheService>{new AmpacheService{url, user, pass}};
     myAmpacheService->connected += bind(&AmpacheBrowser::onConnected, this);
+    myCache = unique_ptr<Cache>{new Cache{}};
 }
 
 
@@ -52,10 +54,11 @@ myUi(&ui) {
 void AmpacheBrowser::onConnected() {
     myAmpacheService->connected -= bind(&AmpacheBrowser::onConnected, this);
 
-    myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpacheService}};
-    myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpacheService, *myArtistRepository}};
-    myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpacheService, *myArtistRepository,
-        *myAlbumRepository}};
+    myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpacheService, *myCache}};
+    myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpacheService, *myCache,
+      *myArtistRepository}};
+    myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpacheService, *myCache,
+      *myArtistRepository, *myAlbumRepository}};
 
     myArtistRepository->fullyLoaded += bind(&AmpacheBrowser::onArtistsFullyLoaded, this);
     myArtistModel = unique_ptr<ArtistModel>{new ArtistModel(*myArtistRepository)};

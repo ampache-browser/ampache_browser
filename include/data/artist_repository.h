@@ -25,13 +25,14 @@
 namespace data {
 
 class AmpacheService;
+class Cache;
 
 
 
 class ArtistRepository {
 
 public:
-    explicit ArtistRepository(AmpacheService& ampacheService);
+    explicit ArtistRepository(AmpacheService& ampacheService, Cache& cache);
 
     ArtistRepository(const ArtistRepository& other) = delete;
 
@@ -64,6 +65,7 @@ private:
     std::vector<std::reference_wrapper<ArtistData>> myArtistDataReferences;
     std::vector<std::reference_wrapper<ArtistData>> myStoredArtistDataReferences;
     AmpacheService& myAmpacheService;
+    Cache& myCache;
     int myLoadProgress = 0;
     int myLoadOffset = -1;
     bool myIsFilterSet = false;
@@ -71,6 +73,7 @@ private:
 
     void onReadyArtists(std::vector<std::unique_ptr<ArtistData>>& artistData);
 
+    void loadFromCache();
     int computeMaxCount() const;
 };
 

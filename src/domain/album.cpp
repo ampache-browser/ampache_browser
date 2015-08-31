@@ -78,12 +78,6 @@ void Album::setArt(unique_ptr<QPixmap> art) {
 
 
 
-void Album::addTrack(const Track& track) {
-    myTracks.push_back(&track);
-}
-
-
-
 bool operator==(const Album& lhs, const Album& rhs) {
     return lhs.getId() == rhs.getId();
 }

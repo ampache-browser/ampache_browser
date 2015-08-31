@@ -50,7 +50,7 @@ public:
 
 private:
     const std::string myId;
-    const std::string myTitle;
+    const std::string myName;
     const int myNumber;
     const std::string myUrl;
     const Artist* myArtist = nullptr;
