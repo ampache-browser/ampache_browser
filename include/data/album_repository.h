@@ -22,7 +22,6 @@
 #include "../../src/data/album_data.h"
 #include "domain/album.h"
 #include "domain/artist.h"
-#include "../../src/data/index_types.h"
 
 
 
@@ -31,13 +30,15 @@ namespace data {
 class AmpacheService;
 class Cache;
 class ArtistRepository;
+class Indices;
 
 
 
 class AlbumRepository {
 
 public:
-    explicit AlbumRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository);
+    explicit AlbumRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository,
+        Indices& indices);
 
     AlbumRepository(const AlbumRepository& other) = delete;
 
@@ -59,7 +60,7 @@ public:
 
     AlbumData& getAlbumDataById(const std::string& id) const;
 
-    bool loadArts(int offset, int limit);
+    bool loadArts(int filteredOffset, int limit);
 
     bool isLoaded(int filteredOffset, int limit = 1) const;
 
@@ -71,26 +72,30 @@ public:
 
     void unsetFilter();
 
-    void setArtistIndex(std::unique_ptr<ArtistAlbumVectorIndex> artistIndex);
+    bool isFiltered() const;
 
 private:
     std::vector<std::unique_ptr<AlbumData>> myAlbumsData;
     std::vector<std::reference_wrapper<AlbumData>> myAlbumDataReferences;
     std::vector<std::reference_wrapper<AlbumData>> myStoredAlbumDataReferences;
-    std::unique_ptr<ArtistAlbumVectorIndex> myArtistIndex = nullptr;
     AmpacheService& myAmpacheService;
     Cache& myCache;
     ArtistRepository& myArtistRepository;
+    Indices& myIndices;
     int myLoadProgress = 0;
     int myLoadOffset = -1;
     int myArtsLoadOffset = -1;
     bool myIsFilterSet = false;
+    std::vector<std::reference_wrapper<const domain::Artist>> myArtistFilter;
+    std::string myNameFilter = "";
     int myCachedMaxCount = -1;
     bool myCachedLoad = false;
 
     void onReadyAlbums(std::vector<std::unique_ptr<AlbumData>>& albumsData);
     void onReadyArts(std::map<std::string, QPixmap>& arts);
+    void onIndexChanged(bool&);
 
+    void updateArtistFilter();
     void loadFromCache();
     int computeMaxCount() const;
 };

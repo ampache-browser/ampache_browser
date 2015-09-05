@@ -13,6 +13,7 @@ set(ampache_browser_SRCS src/infrastructure/os_paths.cpp
     src/data/track_data.cpp src/data/artist_data.cpp src/data/album_data.cpp src/data/ampache_service.cpp
     src/data/cache/cache.cpp src/data/track_repository.cpp
     src/data/artist_repository.cpp src/data/album_repository.cpp src/application/models/track_model.cpp
+    src/data/indices.cpp
     src/application/models/artist_model.cpp src/application/models/request_groups.cpp
     src/application/models/requests.cpp src/application/models/request_group.cpp
     src/application/models/album_model.cpp src/ui/ui.cpp src/application/ampache_browser.cpp

@@ -7,6 +7,7 @@
 
 
 
+#include <iostream>
 #include <fstream>
 #include <memory>
 
@@ -20,6 +21,7 @@
 #include "data/album_repository.h"
 #include "data/artist_repository.h"
 #include "data/track_repository.h"
+#include "data/indices.h"
 #include "application/ampache_browser.h"
 
 using namespace std;
@@ -54,11 +56,13 @@ myUi(&ui) {
 void AmpacheBrowser::onConnected() {
     myAmpacheService->connected -= bind(&AmpacheBrowser::onConnected, this);
 
+    myIndices = unique_ptr<Indices>{new Indices{}};
+
     myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpacheService, *myCache}};
     myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpacheService, *myCache,
-      *myArtistRepository}};
+      *myArtistRepository, *myIndices}};
     myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpacheService, *myCache,
-      *myArtistRepository, *myAlbumRepository}};
+      *myArtistRepository, *myAlbumRepository, *myIndices}};
 
     myArtistRepository->fullyLoaded += bind(&AmpacheBrowser::onArtistsFullyLoaded, this);
     myArtistModel = unique_ptr<ArtistModel>{new ArtistModel(*myArtistRepository)};
@@ -72,6 +76,7 @@ void AmpacheBrowser::onArtistsFullyLoaded() {
     myAlbumRepository->fullyLoaded += bind(&AmpacheBrowser::onAlbumsFullyLoaded, this);
     myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel(*myAlbumRepository)};
     myUi->setAlbumModel(*myAlbumModel);
+    myUi->artistsSelected += bind(&AmpacheBrowser::onArtistsSelected, this, _1);
 }
 
 
@@ -87,9 +92,7 @@ void AmpacheBrowser::onAlbumsFullyLoaded() {
 
 void AmpacheBrowser::onTracksFullyLoaded() {
     myTrackRepository->fullyLoaded -= bind(&AmpacheBrowser::onTracksFullyLoaded, this);
-    myAlbumRepository->setArtistIndex(myTrackRepository->getArtistAlbumIndex());
 
-    myUi->artistsSelected += bind(&AmpacheBrowser::onArtistsSelected, this, _1);
     myUi->albumsSelected += bind(&AmpacheBrowser::onAlbumsSelected, this, _1);
     myUi->searchTriggered += bind(&AmpacheBrowser::onSearchTriggered, this, _1);
 }

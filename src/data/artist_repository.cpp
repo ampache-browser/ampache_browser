@@ -183,7 +183,7 @@ void ArtistRepository::loadFromCache() {
 
 
 int ArtistRepository::computeMaxCount() const {
-    if (myIsFilterSet) {
+    if (myIsFilterSet && myLoadProgress != 0) {
         return myArtistDataReferences.size();
     }
     return myAmpacheService.numberOfArtists();

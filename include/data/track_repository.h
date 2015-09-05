@@ -24,7 +24,6 @@
 #include "domain/track.h"
 #include "domain/album.h"
 #include "domain/artist.h"
-#include "../../src/data/index_types.h"
 
 
 
@@ -34,6 +33,7 @@ class AmpacheService;
 class Cache;
 class ArtistRepository;
 class AlbumRepository;
+class Indices;
 
 
 
@@ -41,7 +41,7 @@ class TrackRepository {
 
 public:
     explicit TrackRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository,
-        AlbumRepository& albumRepository);
+        AlbumRepository& albumRepository, Indices& indices);
 
     TrackRepository(const TrackRepository& other) = delete;
 
@@ -56,8 +56,6 @@ public:
     bool load(int offset, int limit);
 
     domain::Track& get(int filteredOffset) const;
-
-    std::unique_ptr<ArtistAlbumVectorIndex> getArtistAlbumIndex();
 
     bool isLoaded(int filteredOffset, int limit = 1) const;
 
@@ -77,10 +75,6 @@ private:
     std::vector<std::reference_wrapper<TrackData>> myStoredTrackDataReferences;
     std::unordered_map<
         std::reference_wrapper<const domain::Artist>,
-        std::unordered_set<std::reference_wrapper<AlbumData>, std::hash<data::AlbumData>>,
-        std::hash<domain::Artist>> myArtistAlbumIndex;
-    std::unordered_map<
-        std::reference_wrapper<const domain::Artist>,
         std::vector<std::reference_wrapper<TrackData>>,
         std::hash<domain::Artist>> myArtistTrackIndex;
     std::unordered_map<
@@ -91,6 +85,7 @@ private:
     Cache& myCache;
     ArtistRepository& myArtistRepository;
     AlbumRepository& myAlbumRepository;
+    Indices& myIndices;
     int myLoadProgress = 0;
     int myLoadOffset = -1;
     bool myIsFilterSet = false;

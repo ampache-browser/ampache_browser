@@ -85,6 +85,12 @@ RequestGroup RequestGroups::pop() {
 
 
 
+void RequestGroups::clear() {
+    myRequestGroups.clear();
+}
+
+
+
 void RequestGroups::chop() {
     if (myGranularity == 0) {
         return;

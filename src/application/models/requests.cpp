@@ -50,6 +50,12 @@ void Requests::add(int offset) {
 
 
 
+void Requests::cancel() {
+    myRequestGroups->clear();
+}
+
+
+
 // SMELL: Not necesary to expose RequestGroup.  Return just pair and Requests will be the only
 // "interface" class to request handling.  Same for readyToExecute event.
 RequestGroup Requests::setFinished() {

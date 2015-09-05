@@ -11,10 +11,10 @@
 #include "data/cache/cache.h"
 #include "track_data.h"
 #include "album_data.h"
-#include "index_types.h"
 #include "data/artist_repository.h"
 #include "data/album_repository.h"
 #include "data/track_repository.h"
+#include "data/indices.h"
 
 using namespace std;
 using namespace placeholders;
@@ -25,11 +25,12 @@ using namespace domain;
 namespace data {
 
 TrackRepository::TrackRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository,
-    AlbumRepository& albumRepository):
+    AlbumRepository& albumRepository, Indices& indices):
 myAmpacheService(ampacheService),
 myCache(cache),
 myArtistRepository(artistRepository),
-myAlbumRepository(albumRepository) {
+myAlbumRepository(albumRepository),
+myIndices(indices) {
     myAmpacheService.readyTracks += bind(&TrackRepository::onReadyTracks, this, _1);
 }
 
@@ -59,22 +60,6 @@ bool TrackRepository::load(int offset, int limit) {
 Track& TrackRepository::get(int filteredOffset) const {
     TrackData& trackData = myTrackDataReferences[filteredOffset];
     return trackData.getTrack();
-}
-
-
-
-unique_ptr<ArtistAlbumVectorIndex> TrackRepository::getArtistAlbumIndex() {
-    unique_ptr<ArtistAlbumVectorIndex> vectorArtistIndex{new ArtistAlbumVectorIndex};
-
-    for (auto artistAndAlbumData: myArtistAlbumIndex) {
-        vector<reference_wrapper<AlbumData>> albumsData;
-        for (auto albumData: artistAndAlbumData.second) {
-            albumsData.push_back(albumData);
-        }
-        (*vectorArtistIndex)[artistAndAlbumData.first] = albumsData;
-    }
-
-    return move(vectorArtistIndex);
 }
 
 
@@ -250,7 +235,7 @@ void TrackRepository::loadFromCache() {
 void TrackRepository::updateIndicies(TrackData& trackData) {
     auto& artist = myArtistRepository.getById(trackData.getArtistId());
     auto& albumData = myAlbumRepository.getAlbumDataById(trackData.getAlbumId());
-    myArtistAlbumIndex[artist].insert(albumData);
+    myIndices.updateArtistAlbum(artist, albumData);
     if (!any_of(myArtistTrackIndex[artist].begin(), myArtistTrackIndex[artist].end(),
         [&trackData](TrackData& td) {return (&td != nullptr) && (td == trackData);})) {
 
@@ -267,7 +252,7 @@ void TrackRepository::updateIndicies(TrackData& trackData) {
 
 
 int TrackRepository::computeMaxCount() const {
-    if (myIsFilterSet) {
+    if (myIsFilterSet && myLoadProgress != 0) {
         return myTrackDataReferences.size();
     }
     return myAmpacheService.numberOfTracks();

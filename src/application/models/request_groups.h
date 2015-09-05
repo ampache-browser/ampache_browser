@@ -39,6 +39,8 @@ public:
 
     RequestGroup pop();
 
+    void clear();
+
 private:
     const int myGranularity;
 

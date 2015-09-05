@@ -20,6 +20,7 @@
 #include "data/album_repository.h"
 #include "data/artist_repository.h"
 #include "data/track_repository.h"
+#include "data/indices.h"
 #include "ui/ui.h"
 
 
@@ -43,6 +44,7 @@ private:
     std::unique_ptr<data::AlbumRepository> myAlbumRepository = nullptr;
     std::unique_ptr<data::ArtistRepository> myArtistRepository = nullptr;
     std::unique_ptr<data::TrackRepository> myTrackRepository = nullptr;
+    std::unique_ptr<data::Indices> myIndices = nullptr;
 
     std::unique_ptr<AlbumModel> myAlbumModel = nullptr;
     std::unique_ptr<ArtistModel> myArtistModel = nullptr;

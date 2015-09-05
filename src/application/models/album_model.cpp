@@ -7,6 +7,7 @@
 
 
 
+#include <iostream>
 #include <vector>
 #include <memory>
 
@@ -62,7 +63,7 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
 
     int row = index.row();
     if (!myAlbumRepository.isLoaded(row)) {
-        if (role == Qt::DisplayRole) {
+        if (role == Qt::DisplayRole && !myAlbumRepository.isFiltered()) {
             myAlbumRequests->add(row);
         }
         return notLoaded;
@@ -113,7 +114,13 @@ void AlbumModel::onReadyToExecuteAlbums(RequestGroup& requestGroup) {
 
 void AlbumModel::onLoaded(pair<int, int>&) {
     auto finishedRequestGroup = myAlbumRequests->setFinished();
-    dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+    if (myAlbumRepository.isFiltered()) {
+        beginResetModel();
+        endResetModel();
+    } else {
+        dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+    }
+
 }
 
 
@@ -132,6 +139,7 @@ void AlbumModel::onArtsLoaded(pair<int, int>&) {
 
 
 void AlbumModel::onFilterChanged(bool) {
+    myArtRequests->cancel();
     beginResetModel();
     endResetModel();
 }

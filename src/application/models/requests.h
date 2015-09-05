@@ -38,6 +38,8 @@ public:
 
     void add(int offset);
 
+    void cancel();
+
     RequestGroup setFinished();
 
 private:
