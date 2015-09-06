@@ -19,8 +19,8 @@
 #include <memory>
 
 #include "infrastructure/event.h"
-#include "../../src/data/track_data.h"
-#include "../../src/data/album_data.h"
+#include "../../src/data/data_objects/track_data.h"
+#include "../../src/data/data_objects/album_data.h"
 #include "domain/track.h"
 #include "domain/album.h"
 #include "domain/artist.h"

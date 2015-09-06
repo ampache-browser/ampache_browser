@@ -9,9 +9,9 @@
 
 #include <functional>
 
-#include "data/ampache_service.h"
-#include "artist_data.h"
-#include "data/cache/cache.h"
+#include "data/providers/ampache_service.h"
+#include "data_objects/artist_data.h"
+#include "data/providers/cache.h"
 #include "data/artist_repository.h"
 
 using namespace std;

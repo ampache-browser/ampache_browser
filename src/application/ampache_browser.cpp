@@ -16,8 +16,8 @@
 #include "application/models/album_model.h"
 #include "application/models/artist_model.h"
 #include "application/models/track_model.h"
-#include "data/ampache_service.h"
-#include "data/cache/cache.h"
+#include "data/providers/ampache_service.h"
+#include "data/providers/cache.h"
 #include "data/album_repository.h"
 #include "data/artist_repository.h"
 #include "data/track_repository.h"
@@ -67,6 +67,7 @@ void AmpacheBrowser::onConnected() {
     myArtistRepository->fullyLoaded += bind(&AmpacheBrowser::onArtistsFullyLoaded, this);
     myArtistModel = unique_ptr<ArtistModel>{new ArtistModel(*myArtistRepository)};
     myUi->setArtistModel(*myArtistModel);
+    myUi->artistsSelected += bind(&AmpacheBrowser::onArtistsSelected, this, _1);
 }
 
 
@@ -76,7 +77,6 @@ void AmpacheBrowser::onArtistsFullyLoaded() {
     myAlbumRepository->fullyLoaded += bind(&AmpacheBrowser::onAlbumsFullyLoaded, this);
     myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel(*myAlbumRepository)};
     myUi->setAlbumModel(*myAlbumModel);
-    myUi->artistsSelected += bind(&AmpacheBrowser::onArtistsSelected, this, _1);
 }
 
 

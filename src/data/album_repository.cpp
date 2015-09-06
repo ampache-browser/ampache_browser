@@ -16,9 +16,9 @@
 #include <unordered_set>
 
 #include "domain/artist.h"
-#include "data/ampache_service.h"
-#include "data/cache/cache.h"
-#include "album_data.h"
+#include "data/providers/ampache_service.h"
+#include "data/providers/cache.h"
+#include "data_objects/album_data.h"
 #include "data/artist_repository.h"
 #include "data/album_repository.h"
 #include "data/indices.h"

@@ -15,10 +15,10 @@
 #include "domain/artist.h"
 #include "domain/album.h"
 #include "domain/track.h"
-#include "../artist_data.h"
-#include "../album_data.h"
-#include "../track_data.h"
-#include "data/cache/cache.h"
+#include "../data_objects/artist_data.h"
+#include "../data_objects/album_data.h"
+#include "../data_objects/track_data.h"
+#include "data/providers/cache.h"
 
 using namespace std;
 using namespace chrono;

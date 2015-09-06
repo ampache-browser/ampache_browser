@@ -17,7 +17,7 @@
 #include <memory>
 
 #include "infrastructure/event.h"
-#include "../../src/data/artist_data.h"
+#include "../../src/data/data_objects/artist_data.h"
 #include "domain/artist.h"
 
 

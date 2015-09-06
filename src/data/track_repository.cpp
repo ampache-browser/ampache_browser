@@ -7,10 +7,10 @@
 
 
 
-#include "data/ampache_service.h"
-#include "data/cache/cache.h"
-#include "track_data.h"
-#include "album_data.h"
+#include "data/providers/ampache_service.h"
+#include "data/providers/cache.h"
+#include "data_objects/track_data.h"
+#include "data_objects/album_data.h"
 #include "data/artist_repository.h"
 #include "data/album_repository.h"
 #include "data/track_repository.h"
