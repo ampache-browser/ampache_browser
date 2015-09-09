@@ -22,6 +22,7 @@
 #include "../../src/data/data_objects/album_data.h"
 #include "domain/album.h"
 #include "domain/artist.h"
+#include "../../src/data/filters/filter.h"
 
 
 
@@ -85,17 +86,16 @@ private:
     int myLoadProgress = 0;
     int myLoadOffset = -1;
     int myArtsLoadOffset = -1;
+    std::unique_ptr<Filter<AlbumData>> myFilter = nullptr;
     bool myIsFilterSet = false;
-    std::vector<std::reference_wrapper<const domain::Artist>> myArtistFilter;
     std::string myNameFilter = "";
     int myCachedMaxCount = -1;
     bool myCachedLoad = false;
 
     void onReadyAlbums(std::vector<std::unique_ptr<AlbumData>>& albumsData);
     void onReadyArts(std::map<std::string, QPixmap>& arts);
-    void onIndexChanged(bool&);
+    void onFilterChanged(bool&);
 
-    void updateArtistFilter();
     void loadFromCache();
     int computeMaxCount() const;
 };

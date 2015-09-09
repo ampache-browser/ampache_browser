@@ -7,6 +7,7 @@
 
 
 
+#include <vector>
 #include <QtCore/QObject>
 #include <QListView>
 #include <QTreeView>
@@ -17,6 +18,8 @@
 #include <QCompleter>
 #include "ampache_browser_main_window.h"
 #include "ui/ui.h"
+
+using namespace std;
 
 
 

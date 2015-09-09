@@ -236,6 +236,8 @@ void TrackRepository::updateIndicies(TrackData& trackData) {
     auto& artist = myArtistRepository.getById(trackData.getArtistId());
     auto& albumData = myAlbumRepository.getAlbumDataById(trackData.getAlbumId());
     myIndices.updateArtistAlbum(artist, albumData);
+    // TODO: Crashes when filter is unset while artists (or albums?) are still loading.  myArtistRepository.getById
+    // returns invalid reference and somehow td in the lambda below is also invalid.
     if (!any_of(myArtistTrackIndex[artist].begin(), myArtistTrackIndex[artist].end(),
         [&trackData](TrackData& td) {return (&td != nullptr) && (td == trackData);})) {
 
