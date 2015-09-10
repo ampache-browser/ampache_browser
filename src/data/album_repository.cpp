@@ -15,7 +15,7 @@
 #include <iterator>
 #include <unordered_set>
 
-#include "infrastructure/event.h"
+#include "infrastructure/event/delegate.h"
 #include "domain/artist.h"
 #include "data/providers/ampache_service.h"
 #include "data/providers/cache.h"
@@ -43,8 +43,8 @@ myArtistRepository(artistRepository),
 myIndices(indices) {
     // SMELL: Should we subscribe to myAmpacheService.connected? (Subscribing to it would allow reservation
     // of the vector size and also initialization of (max.) number of albums.)
-    myAmpacheService.readyAlbums += bind(&AlbumRepository::onReadyAlbums, this, _1);
-    myAmpacheService.readyAlbumArts += bind(&AlbumRepository::onReadyArts, this, _1);
+    myAmpacheService.readyAlbums += DELEGATE1(&AlbumRepository::onReadyAlbums, vector<unique_ptr<AlbumData>>);
+    myAmpacheService.readyAlbumArts += DELEGATE1(&AlbumRepository::onReadyArts, map<string, QPixmap>);
 }
 
 
@@ -164,7 +164,7 @@ void AlbumRepository::setArtistFilter(vector<reference_wrapper<const Artist>> ar
     unsetFilter();
     myAlbumDataReferences.swap(myStoredAlbumDataReferences);
     myFilter = unique_ptr<Filter<AlbumData>>{new AlbumArtistFilter{myAlbumsData, artists, myIndices}};
-    myFilter->changed += bind(&AlbumRepository::onFilterChanged, this, _1);
+    myFilter->changed += DELEGATE0(&AlbumRepository::onFilterChanged);
     myFilter->apply();
 }
 
@@ -190,8 +190,7 @@ void AlbumRepository::setNameFilter(const string& namePattern) {
 
     myCachedMaxCount = -1;
 
-    bool b = false;
-    filterChanged(b);
+    filterChanged();
 }
 
 
@@ -200,7 +199,7 @@ void AlbumRepository::unsetFilter() {
     if (!isFiltered()) {
         return;
     }
-    myFilter->changed -= bind(&AlbumRepository::onFilterChanged, this, _1);
+    myFilter->changed -= DELEGATE0(&AlbumRepository::onFilterChanged);
     myFilter = nullptr;
     myNameFilter = "";
     myAlbumDataReferences.clear();
@@ -209,8 +208,7 @@ void AlbumRepository::unsetFilter() {
     myArtsLoadOffset = -1;
     myCachedMaxCount = -1;
 
-    bool b = false;
-    filterChanged(b);
+    filterChanged();
 }
 
 
@@ -262,9 +260,7 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
     myLoadProgress += albumsData.size();
     if (myLoadProgress >= myAmpacheService.numberOfAlbums()) {
         myCache.saveAlbumsData(myAlbumsData);
-
-        bool b = false;
-        fullyLoaded(b);
+        fullyLoaded();
     }
 }
 
@@ -300,14 +296,13 @@ void AlbumRepository::onReadyArts(std::map<std::string, QPixmap>& arts) {
 
 
 
-void AlbumRepository::onFilterChanged(bool&) {
+void AlbumRepository::onFilterChanged() {
     myAlbumDataReferences = myFilter->getFilteredData();
 
     myArtsLoadOffset = -1;
     myCachedMaxCount = -1;
 
-    bool b = false;
-    filterChanged(b);
+    filterChanged();
 }
 
 
@@ -331,8 +326,7 @@ void AlbumRepository::loadFromCache() {
     loaded(offsetAndLimit);
 
     myLoadProgress += myAlbumsData.size();
-    bool b = false;
-    fullyLoaded(b);
+    fullyLoaded();
 }
 
 

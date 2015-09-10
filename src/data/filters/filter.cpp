@@ -36,8 +36,7 @@ std::vector<std::reference_wrapper<T>>& Filter<T>::getFilteredData() {
 
 template <class T>
 void Filter<T>::apply() {
-    bool b = false;
-    changed(b);
+    changed();
 }
 
 }

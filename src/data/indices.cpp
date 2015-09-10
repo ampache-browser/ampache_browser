@@ -25,8 +25,7 @@ ArtistAlbumIndex& Indices::getArtistAlbum() {
 
 void Indices::updateArtistAlbum(Artist& artist, AlbumData& albumData) {
     myArtistAlbum[artist].insert(albumData);
-    bool b = false;
-    changed(b);
+    changed();
 }
 
 }

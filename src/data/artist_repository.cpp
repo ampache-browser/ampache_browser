@@ -9,6 +9,7 @@
 
 #include <functional>
 
+#include "infrastructure/event/delegate.h"
 #include "data/providers/ampache_service.h"
 #include "data_objects/artist_data.h"
 #include "data/providers/cache.h"
@@ -16,6 +17,7 @@
 
 using namespace std;
 using namespace placeholders;
+using namespace infrastructure;
 using namespace domain;
 
 
@@ -25,7 +27,7 @@ namespace data {
 ArtistRepository::ArtistRepository(AmpacheService& ampacheService, Cache& cache):
 myAmpacheService(ampacheService),
 myCache(cache) {
-    myAmpacheService.readyArtists += bind(&ArtistRepository::onReadyArtists, this, _1);
+    myAmpacheService.readyArtists += DELEGATE1(&ArtistRepository::onReadyArtists, vector<unique_ptr<ArtistData>>);
 }
 
 
@@ -106,9 +108,7 @@ void ArtistRepository::setNameFilter(const string& namePattern) {
     myArtistDataReferences.swap(filteredArtistData);
 
     myCachedMaxCount = -1;
-
-    bool b = false;
-    filterChanged(b);
+    filterChanged();
 }
 
 
@@ -122,8 +122,7 @@ void ArtistRepository::unsetFilter() {
     myIsFilterSet = false;
     myCachedMaxCount = -1;
 
-    bool b = false;
-    filterChanged(b);
+    filterChanged();
 }
 
 
@@ -154,9 +153,7 @@ void ArtistRepository::onReadyArtists(vector<unique_ptr<ArtistData>>& artistsDat
     myLoadProgress += artistsData.size();
     if (myLoadProgress >= myAmpacheService.numberOfArtists()) {
         myCache.saveArtistsData(myArtistsData);
-
-        bool b = false;
-        fullyLoaded(b);
+        fullyLoaded();
     }
 }
 
@@ -176,8 +173,7 @@ void ArtistRepository::loadFromCache() {
     loaded(offsetAndLimit);
 
     myLoadProgress += myArtistsData.size();
-    bool b = false;
-    fullyLoaded(b);
+    fullyLoaded();
 }
 
 

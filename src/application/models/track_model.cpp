@@ -11,6 +11,7 @@
 #include <QtCore/QModelIndex>
 #include <QtCore/QAbstractTableModel>
 
+#include "infrastructure/event/delegate.h"
 #include "domain/track.h"
 #include "data/track_repository.h"
 #include "requests.h"
@@ -18,6 +19,7 @@
 
 using namespace std;
 using namespace placeholders;
+using namespace infrastructure;
 using namespace data;
 using namespace domain;
 
@@ -27,9 +29,9 @@ namespace application {
 
 TrackModel::TrackModel(TrackRepository& trackRepository, QObject* parent): QAbstractTableModel(parent),
 myTrackRepository(trackRepository) {
-    myRequests->readyToExecute += bind(&TrackModel::onReadyToExecute, this, _1);
-    myTrackRepository.loaded += bind(&TrackModel::onReadyTracks, this, _1);
-    myTrackRepository.filterChanged += bind(&TrackModel::onFilterChanged, this, _1);
+    myRequests->readyToExecute += DELEGATE1(&TrackModel::onReadyToExecute, RequestGroup);
+    myTrackRepository.loaded += DELEGATE1(&TrackModel::onReadyTracks, pair<int, int>);
+    myTrackRepository.filterChanged += DELEGATE0(&TrackModel::onFilterChanged);
 
     // start populating with data
     for (int row = 0; row < rowCount(); row++) {
@@ -112,7 +114,7 @@ void TrackModel::onReadyTracks(pair<int, int>&) {
 
 
 
-void TrackModel::onFilterChanged(bool) {
+void TrackModel::onFilterChanged() {
     beginResetModel();
     endResetModel();
 }

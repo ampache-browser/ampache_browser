@@ -7,6 +7,7 @@
 
 
 
+#include "infrastructure/event/delegate.h"
 #include "data/providers/ampache_service.h"
 #include "data/providers/cache.h"
 #include "data_objects/track_data.h"
@@ -18,6 +19,7 @@
 
 using namespace std;
 using namespace placeholders;
+using namespace infrastructure;
 using namespace domain;
 
 
@@ -31,7 +33,7 @@ myCache(cache),
 myArtistRepository(artistRepository),
 myAlbumRepository(albumRepository),
 myIndices(indices) {
-    myAmpacheService.readyTracks += bind(&TrackRepository::onReadyTracks, this, _1);
+    myAmpacheService.readyTracks += DELEGATE1(&TrackRepository::onReadyTracks, vector<unique_ptr<TrackData>>);
 }
 
 
@@ -95,8 +97,7 @@ void TrackRepository::setArtistFilter(vector<reference_wrapper<const Artist>> ar
     }
     myCachedMaxCount = -1;
 
-    bool b = false;
-    filterChanged(b);
+    filterChanged();
 }
 
 
@@ -114,8 +115,7 @@ void TrackRepository::setAlbumFilter(vector<reference_wrapper<const Album>> albu
     }
     myCachedMaxCount = -1;
 
-    bool b = false;
-    filterChanged(b);
+    filterChanged();
 }
 
 
@@ -140,8 +140,7 @@ void TrackRepository::setNameFilter(const string& namePattern) {
 
     myCachedMaxCount = -1;
 
-    bool b = false;
-    filterChanged(b);
+    filterChanged();
 }
 
 
@@ -155,8 +154,7 @@ void TrackRepository::unsetFilter() {
     myIsFilterSet = false;
     myCachedMaxCount = -1;
 
-    bool b = false;
-    filterChanged(b);
+    filterChanged();
 }
 
 
@@ -196,9 +194,7 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
     myLoadProgress += tracksData.size();
     if (myLoadProgress >= myAmpacheService.numberOfTracks()) {
         myCache.saveTracksData(myTracksData);
-
-        bool b = false;
-        fullyLoaded(b);
+        fullyLoaded();
     }
 }
 
@@ -226,8 +222,7 @@ void TrackRepository::loadFromCache() {
     loaded(offsetAndLimit);
 
     myLoadProgress += myTracksData.size();
-    bool b = false;
-    fullyLoaded(b);
+    fullyLoaded();
 }
 
 

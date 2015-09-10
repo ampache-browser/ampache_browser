@@ -28,7 +28,6 @@
 #include <QXmlStreamReader>
 #include <QCryptographicHash>
 
-#include "infrastructure/event.h"
 #include "domain/artist.h"
 #include "domain/album.h"
 #include "domain/track.h"
@@ -193,8 +192,7 @@ void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader) {
       // TODO: handle error
     }
 
-    bool b = false;
-    connected(b);
+    connected();
 }
 
 

@@ -18,7 +18,7 @@
 #include <memory>
 #include <functional>
 
-#include "infrastructure/event.h"
+#include "infrastructure/event/event.h"
 #include "../../src/data/data_objects/album_data.h"
 #include "domain/album.h"
 #include "domain/artist.h"
@@ -49,9 +49,9 @@ public:
 
     infrastructure::Event<std::pair<int, int>> artsLoaded{};
 
-    infrastructure::Event<bool> fullyLoaded{};
+    infrastructure::Event<void> fullyLoaded{};
 
-    infrastructure::Event<bool> filterChanged{};
+    infrastructure::Event<void> filterChanged{};
 
     bool load(int offset, int limit);
 
@@ -94,7 +94,7 @@ private:
 
     void onReadyAlbums(std::vector<std::unique_ptr<AlbumData>>& albumsData);
     void onReadyArts(std::map<std::string, QPixmap>& arts);
-    void onFilterChanged(bool&);
+    void onFilterChanged();
 
     void loadFromCache();
     int computeMaxCount() const;

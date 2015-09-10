@@ -45,7 +45,7 @@ private:
     std::vector<std::reference_wrapper<const domain::Artist>> myArtists;
     Indices& myIndices;
 
-    void onIndexChanged(bool&);
+    void onIndexChanged();
 };
 
 }

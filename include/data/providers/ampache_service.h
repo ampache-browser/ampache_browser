@@ -25,7 +25,7 @@
 #include <QPixmap>
 #include <QNetworkAccessManager>
 
-#include "infrastructure/event.h"
+#include "infrastructure/event/event.h"
 
 class QXmlStreamReader;
 
@@ -75,7 +75,7 @@ public:
 
     AmpacheService& operator=(const AmpacheService& other) = delete;
 
-    infrastructure::Event<bool> connected{};
+    infrastructure::Event<void> connected{};
 
     infrastructure::Event<std::vector<std::unique_ptr<AlbumData>>> readyAlbums{};
 

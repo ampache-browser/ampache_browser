@@ -7,10 +7,10 @@
 
 
 
-#include <iostream>
 #include <fstream>
 #include <memory>
 
+#include "infrastructure/event/delegate.h"
 #include "ui/ui.h"
 #include "domain/artist.h"
 #include "application/models/album_model.h"
@@ -26,6 +26,7 @@
 
 using namespace std;
 using namespace placeholders;
+using namespace infrastructure;
 using namespace domain;
 using namespace data;
 using namespace ui;
@@ -47,14 +48,14 @@ myUi(&ui) {
         creds.close();
     }
     myAmpacheService = unique_ptr<AmpacheService>{new AmpacheService{url, user, pass}};
-    myAmpacheService->connected += bind(&AmpacheBrowser::onConnected, this);
+    myAmpacheService->connected += DELEGATE0(&AmpacheBrowser::onConnected);
     myCache = unique_ptr<Cache>{new Cache{}};
 }
 
 
 
 void AmpacheBrowser::onConnected() {
-    myAmpacheService->connected -= bind(&AmpacheBrowser::onConnected, this);
+    myAmpacheService->connected -= DELEGATE0(&AmpacheBrowser::onConnected);
 
     myIndices = unique_ptr<Indices>{new Indices{}};
 
@@ -64,17 +65,17 @@ void AmpacheBrowser::onConnected() {
     myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpacheService, *myCache,
       *myArtistRepository, *myAlbumRepository, *myIndices}};
 
-    myArtistRepository->fullyLoaded += bind(&AmpacheBrowser::onArtistsFullyLoaded, this);
+    myArtistRepository->fullyLoaded += DELEGATE0(&AmpacheBrowser::onArtistsFullyLoaded);
     myArtistModel = unique_ptr<ArtistModel>{new ArtistModel(*myArtistRepository)};
     myUi->setArtistModel(*myArtistModel);
-    myUi->artistsSelected += bind(&AmpacheBrowser::onArtistsSelected, this, _1);
+    myUi->artistsSelected += DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
 }
 
 
 
 void AmpacheBrowser::onArtistsFullyLoaded() {
-    myArtistRepository->fullyLoaded -= bind(&AmpacheBrowser::onArtistsFullyLoaded, this);
-    myAlbumRepository->fullyLoaded += bind(&AmpacheBrowser::onAlbumsFullyLoaded, this);
+    myArtistRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onArtistsFullyLoaded);
+    myAlbumRepository->fullyLoaded += DELEGATE0(&AmpacheBrowser::onAlbumsFullyLoaded);
     myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel(*myAlbumRepository)};
     myUi->setAlbumModel(*myAlbumModel);
 }
@@ -82,8 +83,8 @@ void AmpacheBrowser::onArtistsFullyLoaded() {
 
 
 void AmpacheBrowser::onAlbumsFullyLoaded() {
-    myAlbumRepository->fullyLoaded -= bind(&AmpacheBrowser::onAlbumsFullyLoaded, this);
-    myTrackRepository->fullyLoaded += bind(&AmpacheBrowser::onTracksFullyLoaded, this);
+    myAlbumRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onAlbumsFullyLoaded);
+    myTrackRepository->fullyLoaded += DELEGATE0(&AmpacheBrowser::onTracksFullyLoaded);
     myTrackModel = unique_ptr<TrackModel>{new TrackModel(*myTrackRepository)};
     myUi->setTrackModel(*myTrackModel);
 }
@@ -91,10 +92,10 @@ void AmpacheBrowser::onAlbumsFullyLoaded() {
 
 
 void AmpacheBrowser::onTracksFullyLoaded() {
-    myTrackRepository->fullyLoaded -= bind(&AmpacheBrowser::onTracksFullyLoaded, this);
+    myTrackRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onTracksFullyLoaded);
 
-    myUi->albumsSelected += bind(&AmpacheBrowser::onAlbumsSelected, this, _1);
-    myUi->searchTriggered += bind(&AmpacheBrowser::onSearchTriggered, this, _1);
+    myUi->albumsSelected += DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
+    myUi->searchTriggered += DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
 }
 
 

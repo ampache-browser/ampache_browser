@@ -16,7 +16,7 @@
 #include <vector>
 #include <memory>
 
-#include "infrastructure/event.h"
+#include "infrastructure/event/event.h"
 #include "../../src/data/data_objects/artist_data.h"
 #include "domain/artist.h"
 
@@ -40,9 +40,9 @@ public:
 
     infrastructure::Event<std::pair<int, int>> loaded{};
 
-    infrastructure::Event<bool> fullyLoaded{};
+    infrastructure::Event<void> fullyLoaded{};
 
-    infrastructure::Event<bool> filterChanged{};
+    infrastructure::Event<void> filterChanged{};
 
     bool load(int offset, int limit);
 

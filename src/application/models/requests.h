@@ -15,7 +15,7 @@
 #include <limits>
 #include <vector>
 #include <memory>
-#include "infrastructure/event.h"
+#include "infrastructure/event/event.h"
 #include "request_group.h"
 #include "request_groups.h"
 

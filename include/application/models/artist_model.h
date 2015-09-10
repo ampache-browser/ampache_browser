@@ -44,7 +44,7 @@ private:
 
     void onReadyToExecute(RequestGroup& requestGroup);
     void onReadyArtists(std::pair<int, int>& offsetAndLimit);
-    void onFilterChanged(bool);
+    void onFilterChanged();
 };
 
 }

@@ -11,6 +11,7 @@
 #include <QtCore/QModelIndex>
 #include <QAbstractTableModel>
 
+#include "infrastructure/event/delegate.h"
 #include "domain/artist.h"
 #include "data/artist_repository.h"
 #include "requests.h"
@@ -18,6 +19,7 @@
 
 using namespace std;
 using namespace placeholders;
+using namespace infrastructure;
 using namespace data;
 using namespace domain;
 
@@ -27,9 +29,9 @@ namespace application {
 
 ArtistModel::ArtistModel(ArtistRepository& artistRepository, QObject* parent): QAbstractTableModel(parent),
 myArtistRepository(artistRepository) {
-    myRequests->readyToExecute += bind(&ArtistModel::onReadyToExecute, this, _1);
-    myArtistRepository.loaded += bind(&ArtistModel::onReadyArtists, this, _1);
-    myArtistRepository.filterChanged += bind(&ArtistModel::onFilterChanged, this, _1);
+    myRequests->readyToExecute += DELEGATE1(&ArtistModel::onReadyToExecute, RequestGroup);
+    myArtistRepository.loaded += DELEGATE1(&ArtistModel::onReadyArtists, pair<int, int>);
+    myArtistRepository.filterChanged += DELEGATE0(&ArtistModel::onFilterChanged);
 
     // start populating with data
     for (int row = 0; row < rowCount(); row++) {
@@ -91,7 +93,7 @@ void ArtistModel::onReadyArtists(pair<int, int>&) {
 
 
 
-void ArtistModel::onFilterChanged(bool) {
+void ArtistModel::onFilterChanged() {
     beginResetModel();
     endResetModel();
 }

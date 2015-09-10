@@ -9,7 +9,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/../include ${CMAKE_CURRENT_BINARY_DIR}/..)
 
-set(ampache_browser_SRCS src/infrastructure/os_paths.cpp
+set(ampache_browser_SRCS src/infrastructure/os_paths.cpp src/infrastructure/event/delegate_void.cpp
+    src/infrastructure/event/event_void.cpp
     src/data/data_objects/track_data.cpp src/data/data_objects/artist_data.cpp src/data/data_objects/album_data.cpp
     src/data/providers/ampache_service.cpp src/data/providers/cache.cpp src/data/filters/album_artist_filter.cpp
     src/data/track_repository.cpp src/data/artist_repository.cpp src/data/album_repository.cpp src/data/indices.cpp

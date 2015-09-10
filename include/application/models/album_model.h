@@ -50,7 +50,7 @@ private:
     void onLoaded(std::pair<int, int>& offsetAndLimit);
     void onReadyToExecuteArts(RequestGroup& requestGroup);
     void onArtsLoaded(std::pair<int, int>& offsetAndLimit);
-    void onFilterChanged(bool);
+    void onFilterChanged();
 };
 
 }

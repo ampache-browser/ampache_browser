@@ -9,7 +9,7 @@
 
 #include <vector>
 #include <memory>
-#include "infrastructure/event.h"
+#include "infrastructure/event/delegate.h"
 #include "domain/artist.h"
 #include "../data_objects/album_data.h"
 #include "data/indices.h"
@@ -28,13 +28,13 @@ AlbumArtistFilter::AlbumArtistFilter(vector<unique_ptr<AlbumData>>& sourceData,
     vector<reference_wrapper<const Artist>> artists, Indices& indices): Filter<AlbumData>(sourceData),
 myArtists(artists),
 myIndices(indices) {
-    myIndices.changed += bind(&AlbumArtistFilter::onIndexChanged, this, _1);
+    myIndices.changed += DELEGATE0(&AlbumArtistFilter::onIndexChanged);
 }
 
 
 
 AlbumArtistFilter::~AlbumArtistFilter() {
-    myIndices.changed -= bind(&AlbumArtistFilter::onIndexChanged, this, _1);
+    myIndices.changed -= DELEGATE0(&AlbumArtistFilter::onIndexChanged);
 }
 
 
@@ -57,7 +57,7 @@ void AlbumArtistFilter::apply() {
 
 
 
-void AlbumArtistFilter::onIndexChanged(bool&) {
+void AlbumArtistFilter::onIndexChanged() {
     apply();
 }
 

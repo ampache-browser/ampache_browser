@@ -16,7 +16,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <memory>
-#include "infrastructure/event.h"
+#include "infrastructure/event/event.h"
 #include "domain/artist.h"
 #include "../../src/data/data_objects/album_data.h"
 
@@ -38,7 +38,7 @@ using ArtistAlbumIndex = std::unordered_map<
 class Indices {
 
 public:
-    infrastructure::Event<bool> changed{};
+    infrastructure::Event<void> changed{};
 
     ArtistAlbumIndex& getArtistAlbum();
 

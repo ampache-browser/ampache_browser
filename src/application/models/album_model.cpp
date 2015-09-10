@@ -7,7 +7,6 @@
 
 
 
-#include <iostream>
 #include <vector>
 #include <memory>
 
@@ -16,6 +15,7 @@
 #include <QtCore/QAbstractListModel>
 #include <QtGui/QIcon>
 
+#include "infrastructure/event/delegate.h"
 #include "domain/album.h"
 #include "data/album_repository.h"
 #include "requests.h"
@@ -23,6 +23,7 @@
 
 using namespace std;
 using namespace placeholders;
+using namespace infrastructure;
 using namespace data;
 using namespace domain;
 
@@ -32,11 +33,11 @@ namespace application {
 
 AlbumModel::AlbumModel(AlbumRepository& albumRepository, QObject* parent): QAbstractTableModel(parent),
 myAlbumRepository(albumRepository) {
-    myAlbumRequests->readyToExecute += bind(&AlbumModel::onReadyToExecuteAlbums, this, _1);
-    myAlbumRepository.loaded += bind(&AlbumModel::onLoaded, this, _1);
-    myArtRequests->readyToExecute += bind(&AlbumModel::onReadyToExecuteArts, this, _1);
-    myAlbumRepository.artsLoaded += bind(&AlbumModel::onArtsLoaded, this, _1);
-    myAlbumRepository.filterChanged += bind(&AlbumModel::onFilterChanged, this, _1);
+    myAlbumRequests->readyToExecute += DELEGATE1(&AlbumModel::onReadyToExecuteAlbums, RequestGroup);
+    myAlbumRepository.loaded += DELEGATE1(&AlbumModel::onLoaded, pair<int, int>);
+    myArtRequests->readyToExecute += DELEGATE1(&AlbumModel::onReadyToExecuteArts, RequestGroup);
+    myAlbumRepository.artsLoaded += DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
+    myAlbumRepository.filterChanged += DELEGATE0(&AlbumModel::onFilterChanged);
 
     // start populating with data
     for (int row = 0; row < rowCount(); row++) {
@@ -138,7 +139,7 @@ void AlbumModel::onArtsLoaded(pair<int, int>&) {
 
 
 
-void AlbumModel::onFilterChanged(bool) {
+void AlbumModel::onFilterChanged() {
     myArtRequests->cancel();
     beginResetModel();
     endResetModel();

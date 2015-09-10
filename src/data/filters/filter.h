@@ -14,7 +14,7 @@
 
 #include <vector>
 #include <memory>
-#include "infrastructure/event.h"
+#include "infrastructure/event/event.h"
 
 
 
@@ -28,7 +28,7 @@ public:
 
     virtual ~Filter();
 
-    infrastructure::Event<bool> changed{};
+    infrastructure::Event<void> changed{};
 
     std::vector<std::reference_wrapper<T>>& getFilteredData();
 

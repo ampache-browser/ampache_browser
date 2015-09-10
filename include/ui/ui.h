@@ -16,7 +16,7 @@
 #include <vector>
 #include <QObject>
 #include "src/ui/ampache_browser_main_window.h"
-#include "infrastructure/event.h"
+#include "infrastructure/event/event.h"
 
 class QAbstractItemModel;
 class QItemSelection;
