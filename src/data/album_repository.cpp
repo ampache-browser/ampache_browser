@@ -21,7 +21,8 @@
 #include "data/providers/cache.h"
 #include "data_objects/album_data.h"
 #include "data/indices.h"
-#include "filters/album_artist_filter.h"
+#include "data/filters/album_artist_filter.h"
+#include "data/filters/album_name_filter.h"
 #include "data/artist_repository.h"
 #include "data/album_repository.h"
 
@@ -35,12 +36,10 @@ using namespace domain;
 
 namespace data {
 
-AlbumRepository::AlbumRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository,
-    Indices& indices):
+AlbumRepository::AlbumRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository):
 myAmpacheService(ampacheService),
 myCache(cache),
-myArtistRepository(artistRepository),
-myIndices(indices) {
+myArtistRepository(artistRepository) {
     // SMELL: Should we subscribe to myAmpacheService.connected? (Subscribing to it would allow reservation
     // of the vector size and also initialization of (max.) number of albums.)
     myAmpacheService.readyAlbums += DELEGATE1(&AlbumRepository::onReadyAlbums, vector<unique_ptr<AlbumData>>);
@@ -157,40 +156,13 @@ int AlbumRepository::maxCount() {
 
 
 
-/**
- * @warning May be called no sooner than after the repository is fully loaded.
- */
-void AlbumRepository::setArtistFilter(vector<reference_wrapper<const Artist>> artists) {
+void AlbumRepository::setFilter(unique_ptr<Filter<AlbumData>> filter) {
     unsetFilter();
     myAlbumDataReferences.swap(myStoredAlbumDataReferences);
-    myFilter = unique_ptr<Filter<AlbumData>>{new AlbumArtistFilter{myAlbumsData, artists, myIndices}};
+    myFilter = move(filter);
+    myFilter->setSourceData(myAlbumsData);
     myFilter->changed += DELEGATE0(&AlbumRepository::onFilterChanged);
     myFilter->apply();
-}
-
-
-
-/**
- * @warning May be called no sooner than after the repository is fully loaded.
- */
-void AlbumRepository::setNameFilter(const string& namePattern) {
-    unsetFilter();
-    myNameFilter = namePattern;
-    vector<reference_wrapper<AlbumData>> filteredAlbumData;
-    for (auto& albumData: myAlbumsData) {
-        auto name = albumData->getAlbum().getName();
-        if (search(name.begin(), name.end(), namePattern.begin(), namePattern.end(),
-            [](char c1, char c2) {return toupper(c1) == toupper(c2); }) != name.end()) {
-
-            filteredAlbumData.push_back(*albumData);
-        }
-    }
-    myAlbumDataReferences.swap(myStoredAlbumDataReferences);
-    myAlbumDataReferences.swap(filteredAlbumData);
-
-    myCachedMaxCount = -1;
-
-    filterChanged();
 }
 
 
@@ -201,7 +173,6 @@ void AlbumRepository::unsetFilter() {
     }
     myFilter->changed -= DELEGATE0(&AlbumRepository::onFilterChanged);
     myFilter = nullptr;
-    myNameFilter = "";
     myAlbumDataReferences.clear();
     myAlbumDataReferences.swap(myStoredAlbumDataReferences);
 
@@ -214,7 +185,7 @@ void AlbumRepository::unsetFilter() {
 
 
 bool AlbumRepository::isFiltered() const {
-    return myFilter != nullptr || !myNameFilter.empty();
+    return myFilter != nullptr;
 }
 
 

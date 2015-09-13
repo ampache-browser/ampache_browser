@@ -18,6 +18,8 @@
 #include "application/models/track_model.h"
 #include "data/providers/ampache_service.h"
 #include "data/providers/cache.h"
+#include "data/filters/album_artist_filter.h"
+#include "data/filters/album_name_filter.h"
 #include "data/album_repository.h"
 #include "data/artist_repository.h"
 #include "data/track_repository.h"
@@ -61,7 +63,7 @@ void AmpacheBrowser::onConnected() {
 
     myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpacheService, *myCache}};
     myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpacheService, *myCache,
-      *myArtistRepository, *myIndices}};
+      *myArtistRepository}};
     myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpacheService, *myCache,
       *myArtistRepository, *myAlbumRepository, *myIndices}};
 
@@ -110,7 +112,7 @@ void AmpacheBrowser::onArtistsSelected(vector<string> ids) {
             auto& artist = myArtistRepository->getById(id);
             artists.push_back(artist);
         }
-        myAlbumRepository->setArtistFilter(artists);
+        myAlbumRepository->setFilter(unique_ptr<Filter<AlbumData>>{new AlbumArtistFilter{artists, *myIndices}});
         myTrackRepository->setArtistFilter(artists);
     }
 }
@@ -139,7 +141,7 @@ void AmpacheBrowser::onSearchTriggered(string searchText) {
         myTrackRepository->unsetFilter();
     } else {
         myArtistRepository->setNameFilter(searchText);
-        myAlbumRepository->setNameFilter(searchText);
+        myAlbumRepository->setFilter(unique_ptr<Filter<AlbumData>>{new AlbumNameFilter{searchText}});
         myTrackRepository->setNameFilter(searchText);
     }
 }

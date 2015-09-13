@@ -34,8 +34,7 @@ class Indices;
 class AlbumArtistFilter: public Filter<AlbumData> {
 
 public:
-    AlbumArtistFilter(std::vector<std::unique_ptr<AlbumData>>& sourceData,
-        std::vector<std::reference_wrapper<const domain::Artist>> artists, Indices& indices);
+    AlbumArtistFilter(std::vector<std::reference_wrapper<const domain::Artist>> artists, Indices& indices);
 
     ~AlbumArtistFilter() override;
 

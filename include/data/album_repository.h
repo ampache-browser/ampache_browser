@@ -22,7 +22,7 @@
 #include "../../src/data/data_objects/album_data.h"
 #include "domain/album.h"
 #include "domain/artist.h"
-#include "../../src/data/filters/filter.h"
+#include "filters/filter.h"
 
 
 
@@ -38,8 +38,7 @@ class Indices;
 class AlbumRepository {
 
 public:
-    explicit AlbumRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository,
-        Indices& indices);
+    explicit AlbumRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository);
 
     AlbumRepository(const AlbumRepository& other) = delete;
 
@@ -67,9 +66,7 @@ public:
 
     int maxCount();
 
-    void setArtistFilter(std::vector<std::reference_wrapper<const domain::Artist>> artists);
-
-    void setNameFilter(const std::string& namePattern);
+    void setFilter(std::unique_ptr<Filter<AlbumData>> filter);
 
     void unsetFilter();
 
@@ -82,13 +79,10 @@ private:
     AmpacheService& myAmpacheService;
     Cache& myCache;
     ArtistRepository& myArtistRepository;
-    Indices& myIndices;
     int myLoadProgress = 0;
     int myLoadOffset = -1;
     int myArtsLoadOffset = -1;
     std::unique_ptr<Filter<AlbumData>> myFilter = nullptr;
-    bool myIsFilterSet = false;
-    std::string myNameFilter = "";
     int myCachedMaxCount = -1;
     bool myCachedLoad = false;
 

@@ -24,18 +24,20 @@ template <class T>
 class Filter {
 
 public:
-    Filter(std::vector<std::unique_ptr<T>>& sourceData);
+    explicit Filter();
 
     virtual ~Filter();
 
     infrastructure::Event<void> changed{};
+
+    void setSourceData(std::vector<std::unique_ptr<T>>& sourceData);
 
     std::vector<std::reference_wrapper<T>>& getFilteredData();
 
     virtual void apply();
 
 protected:
-    std::vector<std::unique_ptr<T>>& mySourceData;
+    std::vector<std::unique_ptr<T>>* mySourceData;
     std::vector<std::reference_wrapper<T>> myFilteredData;
 };
 
@@ -43,7 +45,7 @@ protected:
 
 
 
-#include "filter.cpp"
+#include "src/data/filters/filter.cpp"
 
 
 

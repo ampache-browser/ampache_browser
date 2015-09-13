@@ -15,14 +15,20 @@
 namespace data {
 
 template <class T>
-Filter<T>::Filter(std::vector<std::unique_ptr<T>>& sourceData):
-mySourceData(sourceData) {
+Filter<T>::Filter() {
 }
 
 
 
-template<class T>
+template <class T>
 Filter<T>::~Filter() {
+}
+
+
+
+template <class T>
+void Filter<T>::setSourceData(std::vector<std::unique_ptr<T>>& sourceData) {
+    mySourceData = &sourceData;
 }
 
 

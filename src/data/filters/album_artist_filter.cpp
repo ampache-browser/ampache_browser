@@ -13,7 +13,7 @@
 #include "domain/artist.h"
 #include "../data_objects/album_data.h"
 #include "data/indices.h"
-#include "album_artist_filter.h"
+#include "data/filters/album_artist_filter.h"
 
 using namespace std;
 using namespace placeholders;
@@ -24,8 +24,8 @@ using namespace domain;
 
 namespace data {
 
-AlbumArtistFilter::AlbumArtistFilter(vector<unique_ptr<AlbumData>>& sourceData,
-    vector<reference_wrapper<const Artist>> artists, Indices& indices): Filter<AlbumData>(sourceData),
+AlbumArtistFilter::AlbumArtistFilter(vector<reference_wrapper<const Artist>> artists,
+    Indices& indices): Filter<AlbumData>(),
 myArtists(artists),
 myIndices(indices) {
     myIndices.changed += DELEGATE0(&AlbumArtistFilter::onIndexChanged);
