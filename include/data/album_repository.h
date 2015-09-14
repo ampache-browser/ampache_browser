@@ -23,6 +23,7 @@
 #include "domain/album.h"
 #include "domain/artist.h"
 #include "filters/filter.h"
+#include "filters/album_unfiltered_filter.h"
 
 
 
@@ -39,6 +40,8 @@ class AlbumRepository {
 
 public:
     explicit AlbumRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository);
+
+    ~AlbumRepository();
 
     AlbumRepository(const AlbumRepository& other) = delete;
 
@@ -74,15 +77,16 @@ public:
 
 private:
     std::vector<std::unique_ptr<AlbumData>> myAlbumsData;
-    std::vector<std::reference_wrapper<AlbumData>> myAlbumDataReferences;
-    std::vector<std::reference_wrapper<AlbumData>> myStoredAlbumDataReferences;
     AmpacheService& myAmpacheService;
     Cache& myCache;
     ArtistRepository& myArtistRepository;
     int myLoadProgress = 0;
     int myLoadOffset = -1;
     int myArtsLoadOffset = -1;
-    std::unique_ptr<Filter<AlbumData>> myFilter = nullptr;
+    std::shared_ptr<Filter<AlbumData>> myUnfilteredFilter = std::shared_ptr<Filter<AlbumData>>{
+        new AlbumUnfilteredFilter{}};
+    std::shared_ptr<Filter<AlbumData>> myFilter = nullptr;
+    bool myIsFilterSet = false;
     int myCachedMaxCount = -1;
     bool myCachedLoad = false;
 

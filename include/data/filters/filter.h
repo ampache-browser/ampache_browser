@@ -30,14 +30,14 @@ public:
 
     infrastructure::Event<void> changed{};
 
-    void setSourceData(std::vector<std::unique_ptr<T>>& sourceData);
+    void setSourceData(const std::vector<std::unique_ptr<T>>& sourceData);
 
-    std::vector<std::reference_wrapper<T>>& getFilteredData();
+    const std::vector<std::reference_wrapper<T>>& getFilteredData() const;
 
     virtual void apply();
 
 protected:
-    std::vector<std::unique_ptr<T>>* mySourceData;
+    const std::vector<std::unique_ptr<T>>* mySourceData;
     std::vector<std::reference_wrapper<T>> myFilteredData;
 };
 

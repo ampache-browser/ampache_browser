@@ -27,14 +27,14 @@ Filter<T>::~Filter() {
 
 
 template <class T>
-void Filter<T>::setSourceData(std::vector<std::unique_ptr<T>>& sourceData) {
+void Filter<T>::setSourceData(const std::vector<std::unique_ptr<T>>& sourceData) {
     mySourceData = &sourceData;
 }
 
 
 
 template <class T>
-std::vector<std::reference_wrapper<T>>& Filter<T>::getFilteredData() {
+const std::vector<std::reference_wrapper<T>>& Filter<T>::getFilteredData() const {
     return myFilteredData;
 }
 

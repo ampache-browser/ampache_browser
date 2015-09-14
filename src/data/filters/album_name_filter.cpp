@@ -7,8 +7,6 @@
 
 
 
-#include <vector>
-#include <memory>
 #include "../data_objects/album_data.h"
 #include "data/filters/album_name_filter.h"
 

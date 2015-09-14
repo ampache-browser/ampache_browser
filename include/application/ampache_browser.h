@@ -37,18 +37,18 @@ public:
     AmpacheBrowser& operator=(const AmpacheBrowser& other) = delete;
 
 private:
-    ui::Ui* const myUi = nullptr;
-
     std::unique_ptr<data::AmpacheService> myAmpacheService = nullptr;
     std::unique_ptr<data::Cache> myCache = nullptr;
-    std::unique_ptr<data::AlbumRepository> myAlbumRepository = nullptr;
-    std::unique_ptr<data::ArtistRepository> myArtistRepository = nullptr;
-    std::unique_ptr<data::TrackRepository> myTrackRepository = nullptr;
     std::unique_ptr<data::Indices> myIndices = nullptr;
+    std::unique_ptr<data::ArtistRepository> myArtistRepository = nullptr;
+    std::unique_ptr<data::AlbumRepository> myAlbumRepository = nullptr;
+    std::unique_ptr<data::TrackRepository> myTrackRepository = nullptr;
 
     std::unique_ptr<AlbumModel> myAlbumModel = nullptr;
     std::unique_ptr<ArtistModel> myArtistModel = nullptr;
     std::unique_ptr<TrackModel> myTrackModel = nullptr;
+
+    ui::Ui* const myUi = nullptr;
 
     void onConnected();
     void onArtistsFullyLoaded();
