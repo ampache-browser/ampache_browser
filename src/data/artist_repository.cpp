@@ -13,6 +13,7 @@
 #include "data/providers/ampache_service.h"
 #include "data_objects/artist_data.h"
 #include "data/providers/cache.h"
+#include "data/filters/filter.h"
 #include "data/artist_repository.h"
 
 using namespace std;
@@ -27,7 +28,21 @@ namespace data {
 ArtistRepository::ArtistRepository(AmpacheService& ampacheService, Cache& cache):
 myAmpacheService(ampacheService),
 myCache(cache) {
+    myUnfilteredFilter->setSourceData(myArtistsData);
+    myUnfilteredFilter->changed += DELEGATE0(&ArtistRepository::onFilterChanged);
+    myFilter = myUnfilteredFilter;
+
     myAmpacheService.readyArtists += DELEGATE1(&ArtistRepository::onReadyArtists, vector<unique_ptr<ArtistData>>);
+}
+
+
+
+ArtistRepository::~ArtistRepository() {
+    myAmpacheService.readyArtists -= DELEGATE1(&ArtistRepository::onReadyArtists, vector<unique_ptr<ArtistData>>);
+    myUnfilteredFilter->changed -= DELEGATE0(&ArtistRepository::onFilterChanged);
+    if (isFiltered()) {
+        myFilter->changed -= DELEGATE0(&ArtistRepository::onFilterChanged);
+    }
 }
 
 
@@ -51,7 +66,7 @@ bool ArtistRepository::load(int offset, int limit) {
 
 
 Artist& ArtistRepository::get(int filteredOffset) const {
-    ArtistData& artistData = myArtistDataReferences[filteredOffset];
+    ArtistData& artistData = myFilter->getFilteredData()[filteredOffset];
     return artistData.getArtist();
 }
 
@@ -74,8 +89,9 @@ ArtistData& ArtistRepository::getArtistDataById(const string& id) const {
 
 bool ArtistRepository::isLoaded(int filteredOffset, int limit) const {
     uint end = filteredOffset + limit;
-    return (myArtistDataReferences.size() >= end) && all_of(myArtistDataReferences.begin() + filteredOffset,
-        myArtistDataReferences.begin() + filteredOffset + limit, [](const ArtistData& ad) {return &ad != nullptr;});
+    auto filteredArtistsData = myFilter->getFilteredData();
+    return (filteredArtistsData.size() >= end) && all_of(filteredArtistsData.begin() + filteredOffset,
+        filteredArtistsData.begin() + filteredOffset + limit, [](const ArtistData& ad) {return &ad != nullptr;});
 }
 
 
@@ -89,40 +105,38 @@ int ArtistRepository::maxCount() {
 
 
 
-/**
- * @warning May be called no sooner than after the repository is fully loaded.
- */
-void ArtistRepository::setNameFilter(const string& namePattern) {
-    unsetFilter();
+void ArtistRepository::setFilter(unique_ptr<Filter<ArtistData>> filter) {
     myIsFilterSet = true;
-    vector<reference_wrapper<ArtistData>> filteredArtistData;
-    for (auto& artistData: myArtistsData) {
-        auto name = artistData->getArtist().getName();
-        if (search(name.begin(), name.end(), namePattern.begin(), namePattern.end(),
-            [](char c1, char c2) {return toupper(c1) == toupper(c2); }) != name.end()) {
 
-            filteredArtistData.push_back(*artistData);
-        }
-    }
-    myArtistDataReferences.swap(myStoredArtistDataReferences);
-    myArtistDataReferences.swap(filteredArtistData);
+    myFilter->changed -= DELEGATE0(&ArtistRepository::onFilterChanged);
 
-    myCachedMaxCount = -1;
-    filterChanged();
+    filter->setSourceData(myArtistsData);
+    filter->changed += DELEGATE0(&ArtistRepository::onFilterChanged);
+    myFilter = move(filter);
+    myFilter->apply();
 }
 
 
 
 void ArtistRepository::unsetFilter() {
-    if (!myIsFilterSet) {
+    if (!isFiltered()) {
         return;
     }
-    myArtistDataReferences.clear();
-    myArtistDataReferences.swap(myStoredArtistDataReferences);
     myIsFilterSet = false;
+
+    myFilter->changed -= DELEGATE0(&ArtistRepository::onFilterChanged);
+
+    myUnfilteredFilter->changed += DELEGATE0(&ArtistRepository::onFilterChanged);
+    myFilter = myUnfilteredFilter;
     myCachedMaxCount = -1;
 
     filterChanged();
+}
+
+
+
+bool ArtistRepository::isFiltered() const {
+    return myIsFilterSet;
 }
 
 
@@ -132,22 +146,17 @@ void ArtistRepository::onReadyArtists(vector<unique_ptr<ArtistData>>& artistsDat
     auto end = offset + artistsData.size();
     if (end > myArtistsData.size()) {
         myArtistsData.resize(end);
-
-        // resize references container
-        for (auto idx = myArtistDataReferences.size(); idx < end; idx++) {
-            myArtistDataReferences.push_back(*myArtistsData[idx]);
-        }
     }
 
     for (auto& artistData: artistsData) {
-        myArtistDataReferences[offset] = *artistData;
         myArtistsData[offset] = move(artistData);
         offset++;
     }
 
     auto offsetAndLimit = pair<int, int>{myLoadOffset, artistsData.size()};
+    myUnfilteredFilter->processUpdatedSourceData(myLoadOffset, artistsData.size());
+    myFilter->apply();
     myLoadOffset = -1;
-    myCachedMaxCount = -1;
     loaded(offsetAndLimit);
 
     myLoadProgress += artistsData.size();
@@ -159,16 +168,23 @@ void ArtistRepository::onReadyArtists(vector<unique_ptr<ArtistData>>& artistsDat
 
 
 
+void ArtistRepository::onFilterChanged() {
+    myCachedMaxCount = -1;
+
+    // to the outside world there is no filter to change if not filtered
+    if (isFiltered()) {
+        filterChanged();
+    }
+}
+
+
+
 void ArtistRepository::loadFromCache() {
     myArtistsData = myCache.loadArtistsData();
 
-    for (auto& artistData: myArtistsData) {
-        myArtistDataReferences.push_back(*artistData);
-    }
-
+    myUnfilteredFilter->processUpdatedSourceData(0, myArtistsData.size());
+    myFilter->apply();
     myLoadOffset = -1;
-    myCachedMaxCount = -1;
-
     auto offsetAndLimit = pair<int, int>{0, myArtistsData.size()};
     loaded(offsetAndLimit);
 
@@ -180,7 +196,7 @@ void ArtistRepository::loadFromCache() {
 
 int ArtistRepository::computeMaxCount() const {
     if (myIsFilterSet && myLoadProgress != 0) {
-        return myArtistDataReferences.size();
+        return myFilter->getFilteredData().size();
     }
     return myAmpacheService.numberOfArtists();
 }

@@ -1,4 +1,4 @@
-// album_artist_filter.cpp
+// artist_filter_for_albums.cpp
 //
 // Project: Ampache Browser
 // License: GNU GPLv3
@@ -13,7 +13,7 @@
 #include "domain/artist.h"
 #include "../data_objects/album_data.h"
 #include "data/indices.h"
-#include "data/filters/album_artist_filter.h"
+#include "data/filters/artist_filter_for_albums.h"
 
 using namespace std;
 using namespace placeholders;
@@ -24,22 +24,22 @@ using namespace domain;
 
 namespace data {
 
-AlbumArtistFilter::AlbumArtistFilter(vector<reference_wrapper<const Artist>> artists,
+ArtistFilterForAlbums::ArtistFilterForAlbums(vector<reference_wrapper<const Artist>> artists,
     Indices& indices): Filter<AlbumData>(),
 myArtists(artists),
 myIndices(indices) {
-    myIndices.changed += DELEGATE0(&AlbumArtistFilter::onIndexChanged);
+    myIndices.changed += DELEGATE0(&ArtistFilterForAlbums::onIndexChanged);
 }
 
 
 
-AlbumArtistFilter::~AlbumArtistFilter() {
-    myIndices.changed -= DELEGATE0(&AlbumArtistFilter::onIndexChanged);
+ArtistFilterForAlbums::~ArtistFilterForAlbums() {
+    myIndices.changed -= DELEGATE0(&ArtistFilterForAlbums::onIndexChanged);
 }
 
 
 
-void AlbumArtistFilter::apply() {
+void ArtistFilterForAlbums::apply() {
     myFilteredData.clear();
     unordered_set<reference_wrapper<AlbumData>, hash<AlbumData>> filteredUniqueAlbumData;
 
@@ -57,7 +57,7 @@ void AlbumArtistFilter::apply() {
 
 
 
-void AlbumArtistFilter::onIndexChanged() {
+void ArtistFilterForAlbums::onIndexChanged() {
     apply();
 }
 

@@ -48,7 +48,7 @@ QVariant TrackModel::data(const QModelIndex& index, int role) const {
 
     int row = index.row();
     if (!myTrackRepository.isLoaded(row)) {
-        if (role == Qt::DisplayRole) {
+        if (role == Qt::DisplayRole && !myTrackRepository.isFiltered()) {
             myRequests->add(row);
         }
         return "...";

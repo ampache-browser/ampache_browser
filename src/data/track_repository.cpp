@@ -12,10 +12,11 @@
 #include "data/providers/cache.h"
 #include "data_objects/track_data.h"
 #include "data_objects/album_data.h"
+#include "data/filters/filter.h"
+#include "data/indices.h"
 #include "data/artist_repository.h"
 #include "data/album_repository.h"
 #include "data/track_repository.h"
-#include "data/indices.h"
 
 using namespace std;
 using namespace placeholders;
@@ -33,7 +34,21 @@ myCache(cache),
 myArtistRepository(artistRepository),
 myAlbumRepository(albumRepository),
 myIndices(indices) {
+    myUnfilteredFilter->setSourceData(myTracksData);
+    myUnfilteredFilter->changed += DELEGATE0(&TrackRepository::onFilterChanged);
+    myFilter = myUnfilteredFilter;
+
     myAmpacheService.readyTracks += DELEGATE1(&TrackRepository::onReadyTracks, vector<unique_ptr<TrackData>>);
+}
+
+
+
+TrackRepository::~TrackRepository() {
+    myAmpacheService.readyTracks -= DELEGATE1(&TrackRepository::onReadyTracks, vector<unique_ptr<TrackData>>);
+    myUnfilteredFilter->changed -= DELEGATE0(&TrackRepository::onFilterChanged);
+    if (isFiltered()) {
+        myFilter->changed -= DELEGATE0(&TrackRepository::onFilterChanged);
+    }
 }
 
 
@@ -60,7 +75,7 @@ bool TrackRepository::load(int offset, int limit) {
 
 
 Track& TrackRepository::get(int filteredOffset) const {
-    TrackData& trackData = myTrackDataReferences[filteredOffset];
+    TrackData& trackData = myFilter->getFilteredData()[filteredOffset];
     return trackData.getTrack();
 }
 
@@ -68,9 +83,9 @@ Track& TrackRepository::get(int filteredOffset) const {
 
 bool TrackRepository::isLoaded(int filteredOffset, int limit) const {
     uint end = filteredOffset + limit;
-
-    return (myTrackDataReferences.size() >= end) && all_of(myTrackDataReferences.begin() + filteredOffset,
-        myTrackDataReferences.begin() + filteredOffset + limit, [](const TrackData& td) {return &td != nullptr;});
+    auto filteredTracksData = myFilter->getFilteredData();
+    return (filteredTracksData.size() >= end) && all_of(filteredTracksData.begin() + filteredOffset,
+        filteredTracksData.begin() + filteredOffset + limit, [](const TrackData& td) {return &td != nullptr;});
 }
 
 
@@ -84,77 +99,38 @@ int TrackRepository::maxCount() {
 
 
 
-/**
- * @warning May be called no sooner than after the repository is fully loaded.
- */
-void TrackRepository::setArtistFilter(vector<reference_wrapper<const Artist>> artists) {
-    unsetFilter();
+void TrackRepository::setFilter(unique_ptr<Filter<TrackData>> filter) {
     myIsFilterSet = true;
-    myTrackDataReferences.swap(myStoredTrackDataReferences);
-    for (auto artist: artists) {
-        auto artistIndex = myArtistTrackIndex[artist];
-        myTrackDataReferences.insert(myTrackDataReferences.end(), artistIndex.begin(), artistIndex.end());
-    }
-    myCachedMaxCount = -1;
 
-    filterChanged();
-}
+    myFilter->changed -= DELEGATE0(&TrackRepository::onFilterChanged);
 
-
-
-/**
- * @warning May be called no sooner than after the repository is fully loaded.
- */
-void TrackRepository::setAlbumFilter(vector<reference_wrapper<const Album>> albums) {
-    unsetFilter();
-    myIsFilterSet = true;
-    myTrackDataReferences.swap(myStoredTrackDataReferences);
-    for (auto album: albums) {
-        auto albumIndex = myAlbumTrackIndex[album];
-        myTrackDataReferences.insert(myTrackDataReferences.end(), albumIndex.begin(), albumIndex.end());
-    }
-    myCachedMaxCount = -1;
-
-    filterChanged();
-}
-
-
-
-/**
- * @warning May be called no sooner than after the repository is fully loaded.
- */
-void TrackRepository::setNameFilter(const string& namePattern) {
-    unsetFilter();
-    myIsFilterSet = true;
-    vector<reference_wrapper<TrackData>> filteredTrackData;
-    for (auto& trackData: myTracksData) {
-        auto name = trackData->getTrack().getName();
-        if (search(name.begin(), name.end(), namePattern.begin(), namePattern.end(),
-            [](char c1, char c2) {return toupper(c1) == toupper(c2); }) != name.end()) {
-
-            filteredTrackData.push_back(*trackData);
-        }
-    }
-    myTrackDataReferences.swap(myStoredTrackDataReferences);
-    myTrackDataReferences.swap(filteredTrackData);
-
-    myCachedMaxCount = -1;
-
-    filterChanged();
+    filter->setSourceData(myTracksData);
+    filter->changed += DELEGATE0(&TrackRepository::onFilterChanged);
+    myFilter = move(filter);
+    myFilter->apply();
 }
 
 
 
 void TrackRepository::unsetFilter() {
-    if (!myIsFilterSet) {
+    if (!isFiltered()) {
         return;
     }
-    myTrackDataReferences.clear();
-    myTrackDataReferences.swap(myStoredTrackDataReferences);
     myIsFilterSet = false;
+
+    myFilter->changed -= DELEGATE0(&TrackRepository::onFilterChanged);
+
+    myUnfilteredFilter->changed += DELEGATE0(&TrackRepository::onFilterChanged);
+    myFilter = myUnfilteredFilter;
     myCachedMaxCount = -1;
 
     filterChanged();
+}
+
+
+
+bool TrackRepository::isFiltered() const {
+    return myIsFilterSet;
 }
 
 
@@ -164,11 +140,6 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
     auto end = offset + tracksData.size();
     if (end > myTracksData.size()) {
         myTracksData.resize(end);
-
-        // resize references container
-        for (auto idx = myTrackDataReferences.size(); idx < end; idx++) {
-            myTrackDataReferences.push_back(*myTracksData[idx]);
-        }
     }
 
     for (auto& trackData: tracksData) {
@@ -180,21 +151,31 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
 
         updateIndicies(*trackData);
 
-        myTrackDataReferences[offset] = *trackData;
         myTracksData[offset] = move(trackData);
         offset++;
     }
 
     auto offsetAndLimit = pair<int, int>{myLoadOffset, tracksData.size()};
+    myUnfilteredFilter->processUpdatedSourceData(myLoadOffset, tracksData.size());
+    myFilter->apply();
     myLoadOffset = -1;
-    myCachedMaxCount = -1;
-
     loaded(offsetAndLimit);
 
     myLoadProgress += tracksData.size();
     if (myLoadProgress >= myAmpacheService.numberOfTracks()) {
         myCache.saveTracksData(myTracksData);
         fullyLoaded();
+    }
+}
+
+
+
+void TrackRepository::onFilterChanged() {
+    myCachedMaxCount = -1;
+
+    // to the outside world there is no filter to change if not filtered
+    if (isFiltered()) {
+        filterChanged();
     }
 }
 
@@ -211,13 +192,11 @@ void TrackRepository::loadFromCache() {
         track.setAlbum(album);
 
         updateIndicies(*trackData);
-
-        myTrackDataReferences.push_back(*trackData);
     }
 
+    myUnfilteredFilter->processUpdatedSourceData(0, myTracksData.size());
+    myFilter->apply();
     myLoadOffset = -1;
-    myCachedMaxCount = -1;
-
     auto offsetAndLimit = pair<int, int>{0, myTracksData.size()};
     loaded(offsetAndLimit);
 
@@ -231,26 +210,16 @@ void TrackRepository::updateIndicies(TrackData& trackData) {
     auto& artist = myArtistRepository.getById(trackData.getArtistId());
     auto& albumData = myAlbumRepository.getAlbumDataById(trackData.getAlbumId());
     myIndices.updateArtistAlbum(artist, albumData);
-    // TODO: Crashes when filter is unset while artists (or albums?) are still loading.  myArtistRepository.getById
-    // returns invalid reference and somehow td in the lambda below is also invalid.
-    if (!any_of(myArtistTrackIndex[artist].begin(), myArtistTrackIndex[artist].end(),
-        [&trackData](TrackData& td) {return (&td != nullptr) && (td == trackData);})) {
-
-        myArtistTrackIndex[artist].push_back(trackData);
-    }
+    myIndices.updateArtistTrack(artist, trackData);
     auto& album = albumData.getAlbum();
-    if (!any_of(myAlbumTrackIndex[album].begin(), myAlbumTrackIndex[album].end(),
-        [&trackData](TrackData& td) {return (&td != nullptr) && (td == trackData);})) {
-
-        myAlbumTrackIndex[album].push_back(trackData);
-    }
+    myIndices.updateAlbumTrack(album, trackData);
 }
 
 
 
 int TrackRepository::computeMaxCount() const {
     if (myIsFilterSet && myLoadProgress != 0) {
-        return myTrackDataReferences.size();
+        return myFilter->getFilteredData().size();
     }
     return myAmpacheService.numberOfTracks();
 }

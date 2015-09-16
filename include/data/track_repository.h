@@ -21,6 +21,8 @@
 #include "infrastructure/event/event.h"
 #include "../../src/data/data_objects/track_data.h"
 #include "../../src/data/data_objects/album_data.h"
+#include "filters/filter.h"
+#include "filters/unfiltered_filter.h"
 #include "domain/track.h"
 #include "domain/album.h"
 #include "domain/artist.h"
@@ -43,6 +45,8 @@ public:
     explicit TrackRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository,
         AlbumRepository& albumRepository, Indices& indices);
 
+    ~TrackRepository();
+
     TrackRepository(const TrackRepository& other) = delete;
 
     TrackRepository& operator=(const TrackRepository& other) = delete;
@@ -61,26 +65,14 @@ public:
 
     int maxCount();
 
-    void setArtistFilter(std::vector<std::reference_wrapper<const domain::Artist>> artists);
-
-    void setAlbumFilter(std::vector<std::reference_wrapper<const domain::Album>> albums);
-
-    void setNameFilter(const std::string& namePattern);
+    void setFilter(std::unique_ptr<Filter<TrackData>> filter);
 
     void unsetFilter();
 
+    bool isFiltered() const;
+
 private:
     std::vector<std::unique_ptr<TrackData>> myTracksData;
-    std::vector<std::reference_wrapper<TrackData>> myTrackDataReferences;
-    std::vector<std::reference_wrapper<TrackData>> myStoredTrackDataReferences;
-    std::unordered_map<
-        std::reference_wrapper<const domain::Artist>,
-        std::vector<std::reference_wrapper<TrackData>>,
-        std::hash<domain::Artist>> myArtistTrackIndex;
-    std::unordered_map<
-        std::reference_wrapper<const domain::Album>,
-        std::vector<std::reference_wrapper<TrackData>>,
-        std::hash<domain::Album>> myAlbumTrackIndex;
     AmpacheService& myAmpacheService;
     Cache& myCache;
     ArtistRepository& myArtistRepository;
@@ -88,10 +80,14 @@ private:
     Indices& myIndices;
     int myLoadProgress = 0;
     int myLoadOffset = -1;
+    std::shared_ptr<UnfilteredFilter<TrackData>> myUnfilteredFilter = std::shared_ptr<UnfilteredFilter<TrackData>>{
+        new UnfilteredFilter<TrackData>{}};
+    std::shared_ptr<Filter<TrackData>> myFilter = nullptr;
     bool myIsFilterSet = false;
     int myCachedMaxCount = -1;
 
     void onReadyTracks(std::vector<std::unique_ptr<TrackData>>& trackData);
+    void onFilterChanged();
 
     void updateIndicies(TrackData& trackData);
     void loadFromCache();

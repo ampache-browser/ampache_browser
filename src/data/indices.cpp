@@ -28,4 +28,30 @@ void Indices::updateArtistAlbum(Artist& artist, AlbumData& albumData) {
     changed();
 }
 
+
+
+ArtistTrackIndex& Indices::getArtistTrack() {
+    return myArtistTrack;
+}
+
+
+
+void Indices::updateArtistTrack(Artist& artist, TrackData& trackData) {
+    myArtistTrack[artist].insert(trackData);
+    changed();
+}
+
+
+
+AlbumTrackIndex& Indices::getAlbumTrack() {
+    return myAlbumTrack;
+}
+
+
+
+void Indices::updateAlbumTrack(Album& album, TrackData& trackData) {
+    myAlbumTrack[album].insert(trackData);
+    changed();
+}
+
 }

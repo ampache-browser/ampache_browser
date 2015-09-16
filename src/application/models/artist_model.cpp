@@ -51,7 +51,7 @@ QVariant ArtistModel::data(const QModelIndex& index, int role) const {
 
     int row = index.row();
     if (!myArtistRepository.isLoaded(row)) {
-        if (role == Qt::DisplayRole) {
+        if (role == Qt::DisplayRole && !myArtistRepository.isFiltered()) {
             myRequests->add(row);
         }
         return "...";

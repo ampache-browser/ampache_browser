@@ -21,9 +21,7 @@
 #include "data/providers/cache.h"
 #include "data_objects/album_data.h"
 #include "data/indices.h"
-#include "data/filters/album_unfiltered_filter.h"
-#include "data/filters/album_artist_filter.h"
-#include "data/filters/album_name_filter.h"
+#include "data/filters/filter.h"
 #include "data/artist_repository.h"
 #include "data/album_repository.h"
 
@@ -196,7 +194,7 @@ void AlbumRepository::unsetFilter() {
 
     myUnfilteredFilter->changed += DELEGATE0(&AlbumRepository::onFilterChanged);
     myFilter = myUnfilteredFilter;
-    myFilter->apply();
+    myCachedMaxCount = -1;
 
     filterChanged();
 }
@@ -227,6 +225,7 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
     }
 
     auto offsetAndLimit = pair<int, int>{myLoadOffset, albumsData.size()};
+    myUnfilteredFilter->processUpdatedSourceData(myLoadOffset, albumsData.size());
     myFilter->apply();
     myLoadOffset = -1;
     loaded(offsetAndLimit);
@@ -293,6 +292,7 @@ void AlbumRepository::loadFromCache() {
         }
     }
 
+    myUnfilteredFilter->processUpdatedSourceData(0, myAlbumsData.size());
     myFilter->apply();
     myLoadOffset = -1;
     auto offsetAndLimit = pair<int, int>{0, myAlbumsData.size()};

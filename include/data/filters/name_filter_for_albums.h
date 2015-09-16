@@ -1,4 +1,4 @@
-// album_name_filter.h
+// name_filter_for_albums.h
 //
 // Project: Ampache Browser
 // License: GNU GPLv3
@@ -7,8 +7,8 @@
 
 
 
-#ifndef ALBUMNAMEFILTER_H
-#define ALBUMNAMEFILTER_H
+#ifndef NAMEFILTERFORALBUMS_H
+#define NAMEFILTERFORALBUMS_H
 
 
 
@@ -24,10 +24,10 @@ class AlbumData;
 
 
 
-class AlbumNameFilter: public Filter<AlbumData> {
+class NameFilterForAlbums: public Filter<AlbumData> {
 
 public:
-    AlbumNameFilter(const std::string& namePattern);
+    explicit NameFilterForAlbums(const std::string& namePattern);
 
     void apply() override;
 
@@ -39,4 +39,4 @@ private:
 
 
 
-#endif // ALBUMNAMEFILTER_H
+#endif // NAMEFILTERFORALBUMS_H

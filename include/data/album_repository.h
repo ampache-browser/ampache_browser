@@ -23,7 +23,7 @@
 #include "domain/album.h"
 #include "domain/artist.h"
 #include "filters/filter.h"
-#include "filters/album_unfiltered_filter.h"
+#include "filters/unfiltered_filter.h"
 
 
 
@@ -32,7 +32,6 @@ namespace data {
 class AmpacheService;
 class Cache;
 class ArtistRepository;
-class Indices;
 
 
 
@@ -83,8 +82,8 @@ private:
     int myLoadProgress = 0;
     int myLoadOffset = -1;
     int myArtsLoadOffset = -1;
-    std::shared_ptr<Filter<AlbumData>> myUnfilteredFilter = std::shared_ptr<Filter<AlbumData>>{
-        new AlbumUnfilteredFilter{}};
+    std::shared_ptr<UnfilteredFilter<AlbumData>> myUnfilteredFilter = std::shared_ptr<UnfilteredFilter<AlbumData>>{
+        new UnfilteredFilter<AlbumData>{}};
     std::shared_ptr<Filter<AlbumData>> myFilter = nullptr;
     bool myIsFilterSet = false;
     int myCachedMaxCount = -1;

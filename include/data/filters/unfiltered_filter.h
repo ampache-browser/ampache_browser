@@ -1,4 +1,4 @@
-// album_unfiltered_filter.h
+// unfiltered_filter.h
 //
 // Project: Ampache Browser
 // License: GNU GPLv3
@@ -7,8 +7,8 @@
 
 
 
-#ifndef ALBUMUNFILTEREDFILTER_H
-#define ALBUMUNFILTEREDFILTER_H
+#ifndef UNFILTEREDFILTER_H
+#define UNFILTEREDFILTER_H
 
 
 
@@ -20,17 +20,20 @@
 
 namespace data {
 
-class AlbumData;
-
-
-
-class AlbumUnfilteredFilter: public Filter<AlbumData> {
+template <class T>
+class UnfilteredFilter: public Filter<T> {
 
 public:
     void apply() override;
+
+    void processUpdatedSourceData(int offset, int length);
 };
 
 }
+
+
+
+#include "src/data/filters/unfiltered_filter.cpp"
 
 
 

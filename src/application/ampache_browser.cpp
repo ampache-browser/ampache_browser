@@ -18,8 +18,12 @@
 #include "application/models/track_model.h"
 #include "data/providers/ampache_service.h"
 #include "data/providers/cache.h"
-#include "data/filters/album_artist_filter.h"
-#include "data/filters/album_name_filter.h"
+#include "data/filters/name_filter_for_artists.h"
+#include "data/filters/artist_filter_for_albums.h"
+#include "data/filters/name_filter_for_albums.h"
+#include "data/filters/artist_filter_for_tracks.h"
+#include "data/filters/album_filter_for_tracks.h"
+#include "data/filters/name_filter_for_tracks.h"
 #include "data/album_repository.h"
 #include "data/artist_repository.h"
 #include "data/track_repository.h"
@@ -70,7 +74,9 @@ void AmpacheBrowser::onConnected() {
     myArtistRepository->fullyLoaded += DELEGATE0(&AmpacheBrowser::onArtistsFullyLoaded);
     myArtistModel = unique_ptr<ArtistModel>{new ArtistModel(*myArtistRepository)};
     myUi->setArtistModel(*myArtistModel);
+
     myUi->artistsSelected += DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
+    myUi->albumsSelected += DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
 }
 
 
@@ -95,8 +101,6 @@ void AmpacheBrowser::onAlbumsFullyLoaded() {
 
 void AmpacheBrowser::onTracksFullyLoaded() {
     myTrackRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onTracksFullyLoaded);
-
-    myUi->albumsSelected += DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
     myUi->searchTriggered += DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
 }
 
@@ -112,8 +116,8 @@ void AmpacheBrowser::onArtistsSelected(vector<string> ids) {
             auto& artist = myArtistRepository->getById(id);
             artists.push_back(artist);
         }
-        myAlbumRepository->setFilter(unique_ptr<Filter<AlbumData>>{new AlbumArtistFilter{artists, *myIndices}});
-        myTrackRepository->setArtistFilter(artists);
+        myAlbumRepository->setFilter(unique_ptr<Filter<AlbumData>>{new ArtistFilterForAlbums{artists, *myIndices}});
+        myTrackRepository->setFilter(unique_ptr<Filter<TrackData>>{new ArtistFilterForTracks{artists, *myIndices}});
     }
 }
 
@@ -128,7 +132,7 @@ void AmpacheBrowser::onAlbumsSelected(vector<string> ids) {
             auto& album = myAlbumRepository->getById(id);
             albums.push_back(album);
         }
-        myTrackRepository->setAlbumFilter(albums);
+        myTrackRepository->setFilter(unique_ptr<Filter<TrackData>>{new AlbumFilterForTracks{albums, *myIndices}});
     }
 }
 
@@ -140,9 +144,9 @@ void AmpacheBrowser::onSearchTriggered(string searchText) {
         myAlbumRepository->unsetFilter();
         myTrackRepository->unsetFilter();
     } else {
-        myArtistRepository->setNameFilter(searchText);
-        myAlbumRepository->setFilter(unique_ptr<Filter<AlbumData>>{new AlbumNameFilter{searchText}});
-        myTrackRepository->setNameFilter(searchText);
+        myArtistRepository->setFilter(unique_ptr<Filter<ArtistData>>{new NameFilterForArtists{searchText}});
+        myAlbumRepository->setFilter(unique_ptr<Filter<AlbumData>>{new NameFilterForAlbums{searchText}});
+        myTrackRepository->setFilter(unique_ptr<Filter<TrackData>>{new NameFilterForTracks{searchText}});
     }
 }
 

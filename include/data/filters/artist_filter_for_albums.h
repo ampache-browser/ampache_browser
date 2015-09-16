@@ -1,4 +1,4 @@
-// album_artist_filter.h
+// artist_filter_for_albums.h
 //
 // Project: Ampache Browser
 // License: GNU GPLv3
@@ -7,8 +7,8 @@
 
 
 
-#ifndef ALBUMARTISTFILTER_H
-#define ALBUMARTISTFILTER_H
+#ifndef ARTISTFILTERFORALBUMS_H
+#define ARTISTFILTERFORALBUMS_H
 
 
 
@@ -31,12 +31,12 @@ class Indices;
 
 
 
-class AlbumArtistFilter: public Filter<AlbumData> {
+class ArtistFilterForAlbums: public Filter<AlbumData> {
 
 public:
-    AlbumArtistFilter(std::vector<std::reference_wrapper<const domain::Artist>> artists, Indices& indices);
+    explicit ArtistFilterForAlbums(std::vector<std::reference_wrapper<const domain::Artist>> artists, Indices& indices);
 
-    ~AlbumArtistFilter() override;
+    ~ArtistFilterForAlbums() override;
 
     void apply() override;
 
@@ -51,4 +51,4 @@ private:
 
 
 
-#endif // ALBUMARTISTFILTER_H
+#endif // ARTISTFILTERFORALBUMS_H

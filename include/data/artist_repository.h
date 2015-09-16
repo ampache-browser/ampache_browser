@@ -18,6 +18,8 @@
 
 #include "infrastructure/event/event.h"
 #include "../../src/data/data_objects/artist_data.h"
+#include "filters/filter.h"
+#include "filters/unfiltered_filter.h"
 #include "domain/artist.h"
 
 
@@ -33,6 +35,8 @@ class ArtistRepository {
 
 public:
     explicit ArtistRepository(AmpacheService& ampacheService, Cache& cache);
+
+    ~ArtistRepository();
 
     ArtistRepository(const ArtistRepository& other) = delete;
 
@@ -56,22 +60,26 @@ public:
     
     int maxCount();
 
-    void setNameFilter(const std::string& namePattern);
+    void setFilter(std::unique_ptr<Filter<ArtistData>> filter);
 
     void unsetFilter();
 
+    bool isFiltered() const;
+
 private:
     std::vector<std::unique_ptr<ArtistData>> myArtistsData;
-    std::vector<std::reference_wrapper<ArtistData>> myArtistDataReferences;
-    std::vector<std::reference_wrapper<ArtistData>> myStoredArtistDataReferences;
     AmpacheService& myAmpacheService;
     Cache& myCache;
     int myLoadProgress = 0;
     int myLoadOffset = -1;
+    std::shared_ptr<UnfilteredFilter<ArtistData>> myUnfilteredFilter = std::shared_ptr<UnfilteredFilter<ArtistData>>{
+        new UnfilteredFilter<ArtistData>{}};
+    std::shared_ptr<Filter<ArtistData>> myFilter = nullptr;
     bool myIsFilterSet = false;
     int myCachedMaxCount = -1;
 
     void onReadyArtists(std::vector<std::unique_ptr<ArtistData>>& artistData);
+    void onFilterChanged();
 
     void loadFromCache();
     int computeMaxCount() const;

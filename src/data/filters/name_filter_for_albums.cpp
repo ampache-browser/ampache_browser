@@ -1,4 +1,4 @@
-// album_name_filter.cpp
+// name_filter_for_albums.cpp
 //
 // Project: Ampache Browser
 // License: GNU GPLv3
@@ -8,7 +8,7 @@
 
 
 #include "../data_objects/album_data.h"
-#include "data/filters/album_name_filter.h"
+#include "data/filters/name_filter_for_albums.h"
 
 using namespace std;
 
@@ -16,13 +16,13 @@ using namespace std;
 
 namespace data {
 
-AlbumNameFilter::AlbumNameFilter(const string& namePattern):
+NameFilterForAlbums::NameFilterForAlbums(const string& namePattern):
 myNamePattern(namePattern) {
 }
 
 
 
-void AlbumNameFilter::apply() {
+void NameFilterForAlbums::apply() {
     myFilteredData.clear();
 
     for (auto& albumData: *mySourceData) {
