@@ -26,6 +26,9 @@ void NameFilterForArtists::apply() {
     myFilteredData.clear();
 
     for (auto& artistData: *mySourceData) {
+        if (artistData == nullptr) {
+            continue;
+        }
         auto name = artistData->getArtist().getName();
         if (search(name.begin(), name.end(), myNamePattern.begin(), myNamePattern.end(),
             [](char c1, char c2) {return toupper(c1) == toupper(c2); }) != name.end()) {

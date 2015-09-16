@@ -26,6 +26,9 @@ void NameFilterForAlbums::apply() {
     myFilteredData.clear();
 
     for (auto& albumData: *mySourceData) {
+        if (albumData == nullptr) {
+            continue;
+        }
         auto name = albumData->getAlbum().getName();
         if (search(name.begin(), name.end(), myNamePattern.begin(), myNamePattern.end(),
             [](char c1, char c2) {return toupper(c1) == toupper(c2); }) != name.end()) {

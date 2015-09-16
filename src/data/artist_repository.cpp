@@ -73,16 +73,12 @@ Artist& ArtistRepository::get(int filteredOffset) const {
 
 
 Artist& ArtistRepository::getById(const string& id) const {
-    return getArtistDataById(id).getArtist();
-}
-
-
-
-ArtistData& ArtistRepository::getArtistDataById(const string& id) const {
+    // SMELL: ad can be nullptr.
     auto artistsDataIter = find_if(myArtistsData.begin(), myArtistsData.end(),
         [&id](const unique_ptr<ArtistData>& ad) {return ad->getId() == id;});
     // TODO: Check whether the artist was really found.
-    return **artistsDataIter;
+    return (*artistsDataIter)->getArtist();
+
 }
 
 

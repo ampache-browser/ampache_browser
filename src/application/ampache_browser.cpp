@@ -77,6 +77,7 @@ void AmpacheBrowser::onConnected() {
 
     myUi->artistsSelected += DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
     myUi->albumsSelected += DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
+    myUi->searchTriggered += DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
 }
 
 
@@ -101,7 +102,6 @@ void AmpacheBrowser::onAlbumsFullyLoaded() {
 
 void AmpacheBrowser::onTracksFullyLoaded() {
     myTrackRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onTracksFullyLoaded);
-    myUi->searchTriggered += DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
 }
 
 

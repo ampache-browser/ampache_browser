@@ -105,6 +105,7 @@ Album& AlbumRepository::getById(const string& id) const {
 
 
 AlbumData& AlbumRepository::getAlbumDataById(const string& id) const {
+    // SMELL: ad can be nullptr.
     auto albumsDataIter = find_if(myAlbumsData.begin(), myAlbumsData.end(),
         [&id](const unique_ptr<AlbumData>& ad) {return ad->getId() == id;});
     return **albumsDataIter;

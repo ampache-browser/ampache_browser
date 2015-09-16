@@ -54,8 +54,6 @@ public:
 
     domain::Artist& getById(const std::string& id) const;
 
-    ArtistData& getArtistDataById(const std::string& id) const;
-
     bool isLoaded(int filteredOffset, int limit = 1) const;
     
     int maxCount();
