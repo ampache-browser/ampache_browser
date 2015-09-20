@@ -45,6 +45,31 @@ private:
     const std::unique_ptr<domain::Artist> myArtist;
 };
 
+bool operator==(const ArtistData& lhs, const ArtistData& rhs);
+
+bool operator!=(const ArtistData& lhs, const ArtistData& rhs);
+
+bool operator<(const ArtistData& lhs, const ArtistData& rhs);
+
+bool operator>(const ArtistData& lhs, const ArtistData& rhs);
+
+bool operator<=(const ArtistData& lhs, const ArtistData& rhs);
+
+bool operator>=(const ArtistData& lhs, const ArtistData& rhs);
+
+}
+
+
+
+namespace std {
+
+template<>
+class hash<data::ArtistData> {
+
+public:
+    size_t operator()(const data::ArtistData& artistData) const;
+};
+
 }
 
 

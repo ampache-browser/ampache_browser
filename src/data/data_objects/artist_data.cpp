@@ -50,4 +50,50 @@ Artist& ArtistData::getArtist() const {
     return *myArtist;
 }
 
+
+
+bool operator==(const ArtistData& lhs, const ArtistData& rhs) {
+    return lhs.getId() == rhs.getId();
+}
+
+
+
+bool operator!=(const ArtistData& lhs, const ArtistData& rhs) {
+    return !operator==(lhs, rhs);
+}
+
+
+
+bool operator<(const ArtistData& lhs, const ArtistData& rhs) {
+    return (lhs.getId() != rhs.getId()) && (lhs.getArtist() < rhs.getArtist());
+}
+
+
+
+bool operator>(const ArtistData& lhs, const ArtistData& rhs) {
+    return operator<(rhs, lhs);
+}
+
+
+
+bool operator<=(const ArtistData& lhs, const ArtistData& rhs) {
+    return !operator>(lhs, rhs);
+}
+
+
+
+bool operator>=(const ArtistData& lhs, const ArtistData& rhs) {
+    return !operator<(lhs, rhs);
+}
+
+}
+
+
+
+namespace std {
+
+size_t hash<data::ArtistData>::operator()(const data::ArtistData& artistData) const {
+    return hash<string>()(artistData.getId());
+}
+
 }

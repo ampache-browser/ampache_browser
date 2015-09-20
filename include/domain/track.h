@@ -57,7 +57,33 @@ private:
     const Album* myAlbum = nullptr;
 };
 
+bool operator==(const Track& lhs, const Track& rhs);
+
+bool operator!=(const Track& lhs, const Track& rhs);
+
+bool operator<(const Track& lhs, const Track& rhs);
+
+bool operator>(const Track& lhs, const Track& rhs);
+
+bool operator<=(const Track& lhs, const Track& rhs);
+
+bool operator>=(const Track& lhs, const Track& rhs);
+
 }
+
+
+
+namespace std {
+
+template<>
+class hash<domain::Track> {
+
+public:
+    size_t operator()(const domain::Track& track) const;
+};
+
+}
+
 
 
 #endif // TRACK_H

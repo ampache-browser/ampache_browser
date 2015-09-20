@@ -79,7 +79,7 @@ bool operator!=(const AlbumData& lhs, const AlbumData& rhs) {
 
 
 bool operator<(const AlbumData& lhs, const AlbumData& rhs) {
-    return (lhs.getId() != rhs.getId()) && (lhs.getId() < rhs.getId());
+    return (lhs.getId() != rhs.getId()) && (lhs.getAlbum() < rhs.getAlbum());
 }
 
 

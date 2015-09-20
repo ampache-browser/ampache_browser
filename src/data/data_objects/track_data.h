@@ -23,6 +23,14 @@ namespace data {
 class TrackData {
 
 public:
+
+    class NameCompare {
+    public:
+        bool operator()(TrackData& lhs, TrackData& rhs) const;
+    };
+
+
+
     explicit TrackData(const std::string& id, const std::string& artistId, const std::string& albumId,
         std::unique_ptr<domain::Track> track);
 

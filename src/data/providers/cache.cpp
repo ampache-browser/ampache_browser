@@ -105,9 +105,12 @@ vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() {
         auto name = readString(albumsDataStream);
         int releaseYear = 0;
         albumsDataStream.read(reinterpret_cast<char*>(&releaseYear), sizeof releaseYear);
+        int mediaNumber = 0;
+        albumsDataStream.read(reinterpret_cast<char*>(&mediaNumber), sizeof mediaNumber);
 
         albumsData.emplace_back(
-            new AlbumData{id, "",  artistId, numberOfTracks, unique_ptr<Album>{new Album{id, name, releaseYear}}});
+            new AlbumData{id, "",  artistId, numberOfTracks, unique_ptr<Album>{
+                new Album{id, name, releaseYear, mediaNumber}}});
     }
 
     return albumsData;

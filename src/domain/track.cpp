@@ -72,4 +72,75 @@ void Track::setAlbum(const Album& album) {
     myAlbum = &album;
 }
 
+
+
+bool operator==(const Track& lhs, const Track& rhs) {
+    return lhs.getId() == rhs.getId();
+}
+
+
+
+bool operator!=(const Track& lhs, const Track& rhs) {
+    return !operator==(lhs, rhs);
+}
+
+
+
+bool operator<(const Track& lhs, const Track& rhs) {
+    if (lhs.getId() == rhs.getId()) {
+        return false;
+    }
+
+    if (lhs.getAlbum() < rhs.getAlbum()) {
+        return true;
+    }
+    if (lhs.getAlbum() > rhs.getAlbum()) {
+        return false;
+    }
+
+    if (lhs.getNumber() < rhs.getNumber()) {
+        return true;
+    }
+    if (lhs.getNumber() > rhs.getNumber()) {
+        return false;
+    }
+
+    if (lhs.getName() < rhs.getName()) {
+        return true;
+    }
+    if (lhs.getName() > rhs.getName()) {
+        return false;
+    }
+
+    return lhs.getId() < rhs.getId();
+}
+
+
+
+bool operator>(const Track& lhs, const Track& rhs) {
+    return operator<(rhs, lhs);
+}
+
+
+
+bool operator<=(const Track& lhs, const Track& rhs) {
+    return !operator>(lhs, rhs);
+}
+
+
+
+bool operator>=(const Track& lhs, const Track& rhs) {
+    return !operator<(lhs, rhs);
+}
+
+}
+
+
+
+namespace std {
+
+size_t hash<domain::Track>::operator()(const domain::Track& track) const {
+    return hash<string>()(track.getId());
+}
+
 }

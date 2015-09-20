@@ -8,6 +8,7 @@
 
 
 #include <vector>
+#include <set>
 #include <memory>
 #include "infrastructure/event/delegate.h"
 #include "domain/artist.h"
@@ -41,15 +42,13 @@ AlbumFilterForTracks::~AlbumFilterForTracks() {
 
 void AlbumFilterForTracks::apply() {
     myFilteredData.clear();
-    unordered_set<reference_wrapper<TrackData>, hash<TrackData>> filteredUniqueTrackData;
-
+    set<reference_wrapper<TrackData>> filteredUniqueTrackData;
     for (auto album: myAlbums) {
         auto albumIndex = myIndices.getAlbumTrack()[album];
         filteredUniqueTrackData.insert(albumIndex.begin(), albumIndex.end());
     }
-    for (auto trackData: filteredUniqueTrackData) {
-        myFilteredData.push_back(trackData);
-    }
+    myFilteredData = vector<reference_wrapper<TrackData>>{
+        filteredUniqueTrackData.begin(), filteredUniqueTrackData.end()};
 
     Filter<TrackData>::apply();
 }

@@ -7,7 +7,6 @@
 
 
 
-
 #ifndef ALBUMDATA_H
 #define ALBUMDATA_H
 

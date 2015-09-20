@@ -22,10 +22,11 @@ namespace domain {
 
 
 
-Album::Album(const string& id, const string& name, int releaseYear):
+Album::Album(const string& id, const string& name, int releaseYear, int mediaNumber):
 myId{id},
 myName{name},
-myReleaseYear{releaseYear} {
+myReleaseYear{releaseYear},
+myMediaNumber{mediaNumber} {
 }
 
 
@@ -44,6 +45,12 @@ const string Album::getName() const {
 
 int Album::getReleaseYear() const {
     return myReleaseYear;
+}
+
+
+
+int Album::getMediaNumber() const {
+    return myMediaNumber;
 }
 
 
@@ -91,7 +98,25 @@ bool operator!=(const Album& lhs, const Album& rhs) {
 
 
 bool operator<(const Album& lhs, const Album& rhs) {
-    return (lhs.getId() != rhs.getId()) && (lhs.getName() < rhs.getName());
+    if (lhs.getId() == rhs.getId()) {
+        return false;
+    }
+
+    if (lhs.getName() < rhs.getName()) {
+        return true;
+    }
+    if (lhs.getName() > rhs.getName()) {
+        return false;
+    }
+
+    if (lhs.getMediaNumber() < rhs.getMediaNumber()) {
+        return true;
+    }
+    if (lhs.getMediaNumber() > rhs.getMediaNumber()) {
+        return false;
+    }
+
+    return lhs.getId() < rhs.getId();
 }
 
 

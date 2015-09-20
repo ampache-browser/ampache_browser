@@ -29,7 +29,7 @@ class Track;
 class Album {
 
 public:
-    Album(const std::string& id, const std::string& name, int releaseYear);
+    Album(const std::string& id, const std::string& name, int releaseYear, int mediaNumber);
 
     Album(const Album& other) = delete;
 
@@ -40,6 +40,8 @@ public:
     const std::string getName() const;
 
     int getReleaseYear() const;
+
+    int getMediaNumber() const;
 
     const Artist& getArtist() const;
 
@@ -55,6 +57,7 @@ private:
     const std::string myId;
     const std::string myName;
     const int myReleaseYear;
+    const int myMediaNumber;
     const Artist* myArtist = nullptr;
     std::unique_ptr<QPixmap> myArt = nullptr;
 };

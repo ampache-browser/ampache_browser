@@ -8,6 +8,7 @@
 
 
 #include <vector>
+#include <set>
 #include <memory>
 #include "infrastructure/event/delegate.h"
 #include "domain/artist.h"
@@ -41,16 +42,15 @@ ArtistFilterForAlbums::~ArtistFilterForAlbums() {
 
 void ArtistFilterForAlbums::apply() {
     myFilteredData.clear();
-    unordered_set<reference_wrapper<AlbumData>, hash<AlbumData>> filteredUniqueAlbumData;
+    set<reference_wrapper<AlbumData>> filteredUniqueAlbumData;
 
     // TODO: Include also albums that have matching album artist.
     for (auto artist: myArtists) {
         auto artistIndex = myIndices.getArtistAlbum()[artist];
         filteredUniqueAlbumData.insert(artistIndex.begin(), artistIndex.end());
     }
-    for (auto albumData: filteredUniqueAlbumData) {
-        myFilteredData.push_back(albumData);
-    }
+    myFilteredData =
+        vector<reference_wrapper<AlbumData>>{filteredUniqueAlbumData.begin(), filteredUniqueAlbumData.end()};
 
     Filter<AlbumData>::apply();
 }

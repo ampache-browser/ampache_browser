@@ -19,6 +19,12 @@ using namespace domain;
 
 namespace data {
 
+bool TrackData::NameCompare::operator()(TrackData& lhs, TrackData& rhs) const {
+    return lhs.getTrack().getName() < rhs.getTrack().getName();
+}
+
+
+
 TrackData::TrackData(const string& id, const string& artistId, const string& albumId, unique_ptr<Track> track):
 myId{id},
 myArtistId{artistId},
@@ -65,7 +71,7 @@ bool operator!=(const TrackData& lhs, const TrackData& rhs) {
 
 
 bool operator<(const TrackData& lhs, const TrackData& rhs) {
-    return (lhs.getId() != rhs.getId()) && (lhs.getId() < rhs.getId());
+    return (lhs.getId() != rhs.getId()) && (lhs.getTrack() < rhs.getTrack());
 }
 
 
