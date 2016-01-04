@@ -4,6 +4,7 @@ find_package(Qt5Core)
 find_package(Qt5Widgets)
 find_package(Qt5Network)
 find_package(Qt5Xml)
+find_package(Qt5Concurrent)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -27,12 +28,12 @@ set(ampache_browser_SRCS src/infrastructure/os_paths.cpp src/infrastructure/even
 # headers with QT meta objects
 set(ampache_browser_HEADERS_WITH_MO include/ui/ui.h include/application/models/album_model.h
     include/application/models/artist_model.h include/application/models/track_model.h
-    src/ui/ampache_browser_main_window.h include/data/providers/ampache_service.h)
+    src/ui/ampache_browser_main_window.h include/data/providers/ampache_service.h include/data/providers/cache.h)
 qt5_wrap_cpp(ampache_browser_HEADERS_MOC ${ampache_browser_HEADERS_WITH_MO})
 
 add_executable(ampache_browser ${ampache_browser_SRCS} ${ampache_browser_HEADERS_MOC})
 
-target_link_libraries(ampache_browser Qt5::Core Qt5::Widgets Qt5::Network Qt5::Xml)
+target_link_libraries(ampache_browser Qt5::Core Qt5::Widgets Qt5::Network Qt5::Xml Qt5Concurrent)
 
 install(TARGETS ampache_browser RUNTIME DESTINATION bin)
 

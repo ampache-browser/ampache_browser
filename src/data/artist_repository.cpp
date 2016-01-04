@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -76,7 +76,7 @@ Artist& ArtistRepository::getById(const string& id) const {
     // SMELL: ad can be nullptr.
     auto artistsDataIter = find_if(myArtistsData.begin(), myArtistsData.end(),
         [&id](const unique_ptr<ArtistData>& ad) {return ad->getId() == id;});
-    // TODO: Check whether the artist was really found.
+    // TODO: Check whether the artist was really found.  if (artistDataIter == myArtistData.end) { // not found }
     return (*artistsDataIter)->getArtist();
 
 }

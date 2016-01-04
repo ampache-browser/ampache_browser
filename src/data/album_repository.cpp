@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -47,11 +47,13 @@ myArtistRepository(artistRepository) {
     // of the vector size and also initialization of (max.) number of albums.)
     myAmpacheService.readyAlbums += DELEGATE1(&AlbumRepository::onReadyAlbums, vector<unique_ptr<AlbumData>>);
     myAmpacheService.readyAlbumArts += DELEGATE1(&AlbumRepository::onReadyArts, map<string, QPixmap>);
+    myCache.readyAlbumArts += DELEGATE1(&AlbumRepository::onReadyArts, map<string, QPixmap>);
 }
 
 
 
 AlbumRepository::~AlbumRepository() {
+    myCache.readyAlbumArts -= DELEGATE1(&AlbumRepository::onReadyArts, map<string, QPixmap>);
     myAmpacheService.readyAlbumArts -= DELEGATE1(&AlbumRepository::onReadyArts, map<string, QPixmap>);
     myAmpacheService.readyAlbums -= DELEGATE1(&AlbumRepository::onReadyAlbums, vector<unique_ptr<AlbumData>>);
     myUnfilteredFilter->changed -= DELEGATE0(&AlbumRepository::onFilterChanged);
@@ -106,6 +108,7 @@ Album& AlbumRepository::getById(const string& id) const {
 
 AlbumData& AlbumRepository::getAlbumDataById(const string& id) const {
     // SMELL: ad can be nullptr.
+    // SMELL: in case album data is not found, return null?
     auto albumsDataIter = find_if(myAlbumsData.begin(), myAlbumsData.end(),
         [&id](const unique_ptr<AlbumData>& ad) {return ad->getId() == id;});
     return **albumsDataIter;
@@ -121,6 +124,7 @@ bool AlbumRepository::loadArts(int filteredOffset, int limit) {
         return false;
     }
 
+    myArtsLoadOffset = filteredOffset;
     if (myCachedLoad) {
         vector<string> artIds;
         for (auto idx = filteredOffset; idx < filteredOffset + limit; idx++) {
@@ -128,19 +132,9 @@ bool AlbumRepository::loadArts(int filteredOffset, int limit) {
             auto id = albumData.getId();
             artIds.push_back(id);
         }
-        auto arts = myCache.loadAlbumArts(artIds);
-        // TODO: Optimize so that it loops only over the same albums as the loop above (the loop above will store
-        // also album data).
-        for (auto idAndArt: arts) {
-            auto& albumData = getAlbumDataById(idAndArt.first);
-            albumData.getAlbum().setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
-        }
 
-        auto offsetAndLimit = pair<int, int>{filteredOffset, limit};
-        myArtsLoadOffset = -1;
-        artsLoaded(offsetAndLimit);
+        myCache.requestAlbumArts(artIds);
     } else {
-        myArtsLoadOffset = filteredOffset;
         vector<string> urls;
         for (auto idx = filteredOffset; idx < filteredOffset + limit; idx++) {
             AlbumData& albumData = myFilter->getFilteredData()[idx];
@@ -251,9 +245,21 @@ void AlbumRepository::onReadyArts(std::map<std::string, QPixmap>& arts) {
     auto filteredAlbumsData = myFilter->getFilteredData();
     map<string, QPixmap> idAndArts;
     for (auto urlAndArt: arts) {
-        auto albumDataIter = find_if(filteredAlbumsData.begin() + myArtsLoadOffset,
-            filteredAlbumsData.begin() + myArtsLoadOffset + arts.size(),
-            [&urlAndArt](AlbumData& ad) {return ad.getArtUrl() == urlAndArt.first;});
+        auto albumDataIter = filteredAlbumsData.begin();
+        if (myCachedLoad) {
+            albumDataIter = find_if(filteredAlbumsData.begin() + myArtsLoadOffset,
+                filteredAlbumsData.begin() + myArtsLoadOffset + arts.size(),
+                [&urlAndArt](AlbumData& ad) {return ad.getId() == urlAndArt.first;});
+
+        } else {
+            albumDataIter = find_if(filteredAlbumsData.begin() + myArtsLoadOffset,
+                filteredAlbumsData.begin() + myArtsLoadOffset + arts.size(),
+                [&urlAndArt](AlbumData& ad) {return ad.getArtUrl() == urlAndArt.first;});
+        }
+        if (albumDataIter == filteredAlbumsData.begin() + myArtsLoadOffset + arts.size()) {
+            continue;
+        }
+
         AlbumData& albumData = *albumDataIter;
         auto& album = albumData.getAlbum();
 
@@ -262,7 +268,9 @@ void AlbumRepository::onReadyArts(std::map<std::string, QPixmap>& arts) {
         idAndArts.emplace(album.getId(), urlAndArt.second);
     }
 
-    myCache.updateAlbumArts(idAndArts);
+    if (!myCachedLoad) {
+        myCache.updateAlbumArts(idAndArts);
+    }
 
     auto offsetAndLimit = pair<int, int>{myArtsLoadOffset, arts.size()};
     myArtsLoadOffset = -1;

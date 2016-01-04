@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -18,7 +18,7 @@ void UnfilteredFilter<T>::apply() {
 template <class T>
 void UnfilteredFilter<T>::processUpdatedSourceData(int offset, int length) {
     // resize
-    for (auto idx = this->myFilteredData.size(); idx < offset + length; idx++) {
+    for (int idx = this->myFilteredData.size(); idx < offset + length; idx++) {
         this->myFilteredData.push_back(*(*this->mySourceData)[idx]);
     }
 

@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -16,9 +16,11 @@
 #include <map>
 #include <memory>
 #include <chrono>
-#include "infrastructure/os_paths.h"
+#include <QObject>
+#include <QPixmap>
 
-class QPixmap;
+#include "infrastructure/event/event.h"
+#include "infrastructure/os_paths.h"
 
 
 
@@ -30,20 +32,23 @@ class TrackData;
 
 
 
-class Cache {
+class Cache: public QObject {
+    Q_OBJECT
 
 public:
     explicit Cache();
 
+    infrastructure::Event<std::map<std::string, QPixmap>> readyAlbumArts{};
+
     std::chrono::system_clock::time_point getLastUpdate() const;
 
-    std::vector<std::unique_ptr<ArtistData>> loadArtistsData();
+    std::vector<std::unique_ptr<ArtistData>> loadArtistsData() const;
 
-    std::vector<std::unique_ptr<AlbumData>> loadAlbumsData();
+    std::vector<std::unique_ptr<AlbumData>> loadAlbumsData() const;
 
-    std::vector<std::unique_ptr<TrackData>> loadTracksData();
+    std::vector<std::unique_ptr<TrackData>> loadTracksData() const;
 
-    std::map<std::string, QPixmap> loadAlbumArts(const std::vector<std::string>& ids) const;
+    void requestAlbumArts(std::vector<std::string> ids);
 
     void saveArtistsData(std::vector<std::unique_ptr<ArtistData>>& artistsData);
 
@@ -51,7 +56,10 @@ public:
 
     void saveTracksData(std::vector<std::unique_ptr<TrackData>>& tracksData);
 
-    void updateAlbumArts(const std::map<std::string, QPixmap>& arts);
+    void updateAlbumArts(const std::map< std::string, QPixmap >& arts) const;
+
+private slots:
+    void onArtsLoadFinished();
 
 private:
     int const VERSION = 0;
@@ -69,7 +77,9 @@ private:
     bool myArtistsSaved = false;
     bool myAlbumsSaved = false;
     bool myTracksSaved = false;
+    std::vector<std::string> myRequestedAlbumArtIds;
 
+    std::pair<std::string, QPixmap> loadAlbumArt(const std::string& id) const;
     void saveMeta(std::chrono::system_clock::time_point lastUpdate);
     std::string readString(std::ifstream& stream) const;
     void writeString(std::ofstream& stream, const std::string& str) const;

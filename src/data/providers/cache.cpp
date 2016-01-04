@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -12,6 +12,12 @@
 #include <memory>
 #include <fstream>
 #include <chrono>
+#include <QString>
+#include <QPixmap>
+#include <QFutureWatcher>
+#include <QFutureIterator>
+#include <QtConcurrent/QtConcurrent>
+
 #include "domain/artist.h"
 #include "domain/album.h"
 #include "domain/track.h"
@@ -66,7 +72,7 @@ system_clock::time_point Cache::getLastUpdate() const {
 
 
 
-vector<unique_ptr<ArtistData>> Cache::loadArtistsData() {
+vector<unique_ptr<ArtistData>> Cache::loadArtistsData() const {
     vector<unique_ptr<ArtistData>> artistsData{};
 
     ifstream artistsDataStream{ARTISTS_DATA_PATH};
@@ -90,7 +96,7 @@ vector<unique_ptr<ArtistData>> Cache::loadArtistsData() {
 
 
 
-vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() {
+vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() const {
     vector<unique_ptr<AlbumData>> albumsData{};
 
     ifstream albumsDataStream{ALBUMS_DATA_PATH};
@@ -118,7 +124,7 @@ vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() {
 
 
 
-vector<unique_ptr<TrackData>> Cache::loadTracksData() {
+vector<unique_ptr<TrackData>> Cache::loadTracksData() const {
     vector<unique_ptr<TrackData>> tracksData{};
 
     ifstream tracksDataStream{TRACKS_DATA_PATH};
@@ -142,15 +148,12 @@ vector<unique_ptr<TrackData>> Cache::loadTracksData() {
 
 
 
-map<string, QPixmap> Cache::loadAlbumArts(const vector<string>& ids) const {
-    map<string, QPixmap> arts;
-    for (string id: ids) {
-        auto fileName = QString::fromStdString(ALBUM_ARTS_DIR + id + ART_SUFFIX);
-        QPixmap art;
-        art.load(fileName, "PNG");
-        arts.emplace(id, art);
-    }
-    return arts;
+void Cache::requestAlbumArts(vector<string> ids) {
+    myRequestedAlbumArtIds = ids;
+    auto artsLoadFutureWatcher = new QFutureWatcher<pair<string, QPixmap>>();
+    connect(artsLoadFutureWatcher, SIGNAL(finished()), this, SLOT(onArtsLoadFinished()));
+    artsLoadFutureWatcher->setFuture(QtConcurrent::mapped(myRequestedAlbumArtIds,
+        bind(&Cache::loadAlbumArt, this, placeholders::_1)));
 }
 
 
@@ -190,12 +193,14 @@ void Cache::saveAlbumsData(vector<unique_ptr<AlbumData>>& albumsData) {
         auto& album = albumData->getAlbum();
         string name = album.getName();
         int releaseYear = album.getReleaseYear();
+        int mediaNumber = album.getMediaNumber();
 
         writeString(albumsDataStream, id);
         writeString(albumsDataStream, artistId);
         albumsDataStream.write(reinterpret_cast<char*>(&numberOfTracks), sizeof numberOfTracks);
         writeString(albumsDataStream, name);
         albumsDataStream.write(reinterpret_cast<char*>(&releaseYear), sizeof releaseYear);
+        albumsDataStream.write(reinterpret_cast<char*>(&mediaNumber), sizeof mediaNumber);
     }
     myAlbumsSaved = true;
     updateLastUpdateInfo();
@@ -228,11 +233,36 @@ void Cache::saveTracksData(vector<unique_ptr<TrackData>>& tracksData) {
 
 
 
-void Cache::updateAlbumArts(const map<string, QPixmap>& arts) {
+void Cache::updateAlbumArts(const map<string, QPixmap>& arts) const {
     for (auto idAndArt: arts) {
-        auto fileName = QString::fromStdString(ALBUM_ARTS_DIR + idAndArt.first + ART_SUFFIX);
-        idAndArt.second.save(fileName, "PNG");
+        idAndArt.second.save(QString::fromStdString(ALBUM_ARTS_DIR + idAndArt.first + ART_SUFFIX), "PNG");
     }
+}
+
+
+
+void Cache::onArtsLoadFinished() {
+    auto artsLoadFutureWatcher = reinterpret_cast<QFutureWatcher<pair<string, QPixmap>>*>(sender());
+    QFutureIterator<pair<string, QPixmap>> results{artsLoadFutureWatcher->future()};
+
+    map<string, QPixmap> arts;
+    while (results.hasNext()) {
+        auto result = results.next();
+        arts[result.first] = result.second;
+    }
+
+    myRequestedAlbumArtIds.clear();
+    readyAlbumArts(arts);
+
+    artsLoadFutureWatcher->deleteLater();
+}
+
+
+
+pair<string, QPixmap> Cache::loadAlbumArt(const string& id) const {
+    QPixmap art;
+    art.load(QString::fromStdString(ALBUM_ARTS_DIR + id + ART_SUFFIX), "PNG");
+    return make_pair(id, art);
 }
 
 
