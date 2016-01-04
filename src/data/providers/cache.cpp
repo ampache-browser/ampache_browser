@@ -8,6 +8,8 @@
 
 
 #include <sys/stat.h>
+#include <stdio.h>
+#include <dirent.h>
 #include <vector>
 #include <memory>
 #include <fstream>
@@ -56,7 +58,7 @@ Cache::Cache() {
         if (!S_ISDIR(albumArtsStat.st_mode)) {
             mkdir(ALBUM_ARTS_DIR.c_str(), 0777);
         }
-        saveMeta(myLastUpdate);
+        invalidate();
     } else {
         int version = 0;
         metaStream.read(reinterpret_cast<char*>(&version), sizeof version);
@@ -255,6 +257,23 @@ void Cache::onArtsLoadFinished() {
     readyAlbumArts(arts);
 
     artsLoadFutureWatcher->deleteLater();
+}
+
+
+
+void Cache::invalidate() {
+    auto albumArtsDir = opendir(ALBUM_ARTS_DIR.c_str());
+    dirent* file;
+    while ((file = readdir(albumArtsDir)) != nullptr) {
+        string fileName{file->d_name};
+        if (fileName != "." && fileName != "..")
+        {
+            remove((ALBUM_ARTS_DIR + fileName).c_str());
+        }
+    }
+    closedir(albumArtsDir);
+
+    saveMeta(system_clock::time_point::min());
 }
 
 

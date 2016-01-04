@@ -79,6 +79,7 @@ private:
     bool myTracksSaved = false;
     std::vector<std::string> myRequestedAlbumArtIds;
 
+    void invalidate();
     std::pair<std::string, QPixmap> loadAlbumArt(const std::string& id) const;
     void saveMeta(std::chrono::system_clock::time_point lastUpdate);
     std::string readString(std::ifstream& stream) const;
