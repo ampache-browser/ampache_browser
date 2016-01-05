@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -24,6 +24,7 @@
 #include <QImage>
 #include <QPixmap>
 #include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 #include "infrastructure/event/event.h"
 
@@ -85,21 +86,23 @@ public:
 
     infrastructure::Event<std::vector<std::unique_ptr<TrackData>>> readyTracks{};
 
+    bool getIsConnected() const;
+
     std::chrono::system_clock::time_point getLastUpdate() const;
 
     int numberOfAlbums() const;
 
-    void requestAlbums(int offset, int limit);
-
-    void requestAlbumArts(std::vector<std::string> urls);
-
     int numberOfArtists() const;
-
-    void requestArtists(int offset, int limit);
 
     int numberOfTracks() const;
 
+    void requestAlbums(int offset, int limit);
+
+    void requestArtists(int offset, int limit);
+
     void requestTracks(int offset, int limit);
+
+    void requestAlbumArts(std::vector<std::string> urls);
 
 private slots:
     void onFinished();
@@ -120,6 +123,7 @@ private:
     const std::string myPassword;
 
     const std::unique_ptr<QNetworkAccessManager> myNetworkAccessManager;
+    bool myIsConnected = false;
     std::string myAuthToken = "";
     std::chrono::system_clock::time_point myLastUpdate = std::chrono::system_clock::time_point::min();
     int myNumberOfAlbums = 0;
@@ -131,7 +135,7 @@ private:
 
     void connectToServer();
     void callMethod(std::string name, std::map<std::string, std::string> arguments) const;
-    void processHandshake(QXmlStreamReader& xmlStreamReader);
+    void processHandshake(QXmlStreamReader& xmlStreamReader, QNetworkReply::NetworkError error);
     void processAlbums(QXmlStreamReader& xmlStreamReader);
     std::vector<std::unique_ptr<AlbumData>> createAlbums(QXmlStreamReader& xmlStreamReader) const;
     void processArtists(QXmlStreamReader& xmlStreamReader);

@@ -42,6 +42,12 @@ public:
 
     std::chrono::system_clock::time_point getLastUpdate() const;
 
+    int numberOfAlbums() const;
+
+    int numberOfArtists() const;
+
+    int numberOfTracks() const;
+
     std::vector<std::unique_ptr<ArtistData>> loadArtistsData() const;
 
     std::vector<std::unique_ptr<AlbumData>> loadAlbumsData() const;
@@ -74,14 +80,18 @@ private:
 
     std::chrono::system_clock::time_point myLastUpdate = std::chrono::system_clock::time_point::min();
     std::chrono::system_clock::time_point myUpdateBegin = std::chrono::system_clock::time_point::min();
+    int myNumberOfAlbums = 0;
+    int myNumberOfArtists = 0;
+    int myNumberOfTracks = 0;
     bool myArtistsSaved = false;
     bool myAlbumsSaved = false;
     bool myTracksSaved = false;
     std::vector<std::string> myRequestedAlbumArtIds;
 
+    void loadMeta(std::ifstream& metaStream);
+    void saveMeta(std::chrono::system_clock::time_point lastUpdate);
     void invalidate();
     std::pair<std::string, QPixmap> loadAlbumArt(const std::string& id) const;
-    void saveMeta(std::chrono::system_clock::time_point lastUpdate);
     std::string readString(std::ifstream& stream) const;
     void writeString(std::ofstream& stream, const std::string& str) const;
     void updateLastUpdateInfo();

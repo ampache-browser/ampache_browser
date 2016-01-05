@@ -60,9 +60,7 @@ Cache::Cache() {
         }
         invalidate();
     } else {
-        int version = 0;
-        metaStream.read(reinterpret_cast<char*>(&version), sizeof version);
-        metaStream.read(reinterpret_cast<char*>(&myLastUpdate), sizeof myLastUpdate);
+        loadMeta(metaStream);
     }
 }
 
@@ -70,6 +68,24 @@ Cache::Cache() {
 
 system_clock::time_point Cache::getLastUpdate() const {
     return myLastUpdate;
+}
+
+
+
+int Cache::numberOfArtists() const {
+    return myNumberOfArtists;
+}
+
+
+
+int Cache::numberOfAlbums() const {
+    return myNumberOfAlbums;
+}
+
+
+
+int Cache::numberOfTracks() const {
+    return myNumberOfTracks;
 }
 
 
@@ -177,6 +193,7 @@ void Cache::saveArtistsData(vector<unique_ptr<ArtistData>>& artistsData) {
         artistsDataStream.write(reinterpret_cast<char*>(&numberOfTracks), sizeof numberOfTracks);
         writeString(artistsDataStream, name);
     }
+    myNumberOfArtists = count;
     myArtistsSaved = true;
     updateLastUpdateInfo();
 }
@@ -204,6 +221,7 @@ void Cache::saveAlbumsData(vector<unique_ptr<AlbumData>>& albumsData) {
         albumsDataStream.write(reinterpret_cast<char*>(&releaseYear), sizeof releaseYear);
         albumsDataStream.write(reinterpret_cast<char*>(&mediaNumber), sizeof mediaNumber);
     }
+    myNumberOfAlbums = count;
     myAlbumsSaved = true;
     updateLastUpdateInfo();
 }
@@ -229,6 +247,7 @@ void Cache::saveTracksData(vector<unique_ptr<TrackData>>& tracksData) {
         writeString(tracksDataStream, name);
         tracksDataStream.write(reinterpret_cast<char*>(&number), sizeof number);
     }
+    myNumberOfTracks = count;
     myTracksSaved = true;
     updateLastUpdateInfo();
 }
@@ -261,6 +280,30 @@ void Cache::onArtsLoadFinished() {
 
 
 
+void Cache::loadMeta(ifstream& metaStream) {
+    int version = 0;
+    metaStream.read(reinterpret_cast<char*>(&version), sizeof version);
+    metaStream.read(reinterpret_cast<char*>(&myLastUpdate), sizeof myLastUpdate);
+    metaStream.read(reinterpret_cast<char*>(&myNumberOfArtists), sizeof myNumberOfArtists);
+    metaStream.read(reinterpret_cast<char*>(&myNumberOfAlbums), sizeof myNumberOfAlbums);
+    metaStream.read(reinterpret_cast<char*>(&myNumberOfTracks), sizeof myNumberOfTracks);
+}
+
+
+
+void Cache::saveMeta(system_clock::time_point lastUpdate) {
+    ofstream metaStream{META_PATH, ofstream::binary | ofstream::trunc};
+    int version = VERSION;
+    metaStream.write(reinterpret_cast<char*>(&version), sizeof version);
+    myLastUpdate = lastUpdate;
+    metaStream.write(reinterpret_cast<char*>(&myLastUpdate), sizeof myLastUpdate);
+    metaStream.write(reinterpret_cast<char*>(&myNumberOfArtists), sizeof myNumberOfArtists);
+    metaStream.write(reinterpret_cast<char*>(&myNumberOfAlbums), sizeof myNumberOfAlbums);
+    metaStream.write(reinterpret_cast<char*>(&myNumberOfTracks), sizeof myNumberOfTracks);
+}
+
+
+
 void Cache::invalidate() {
     auto albumArtsDir = opendir(ALBUM_ARTS_DIR.c_str());
     dirent* file;
@@ -282,16 +325,6 @@ pair<string, QPixmap> Cache::loadAlbumArt(const string& id) const {
     QPixmap art;
     art.load(QString::fromStdString(ALBUM_ARTS_DIR + id + ART_SUFFIX), "PNG");
     return make_pair(id, art);
-}
-
-
-
-void Cache::saveMeta(system_clock::time_point lastUpdate) {
-    ofstream metaStream{META_PATH, ofstream::binary | ofstream::trunc};
-    int version = VERSION;
-    metaStream.write(reinterpret_cast<char*>(&version), sizeof version);
-    myLastUpdate = lastUpdate;
-    metaStream.write(reinterpret_cast<char*>(&myLastUpdate), sizeof myLastUpdate);
 }
 
 

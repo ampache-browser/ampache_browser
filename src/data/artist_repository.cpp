@@ -52,7 +52,7 @@ bool ArtistRepository::load(int offset, int limit) {
         return false;
     }
 
-    if (myCache.getLastUpdate() > myAmpacheService.getLastUpdate()) {
+    if (!myAmpacheService.getIsConnected() || (myCache.getLastUpdate() > myAmpacheService.getLastUpdate())) {
         if (myLoadProgress == 0) {
             loadFromCache();
         }
@@ -194,7 +194,7 @@ int ArtistRepository::computeMaxCount() const {
     if (myIsFilterSet && myLoadProgress != 0) {
         return myFilter->getFilteredData().size();
     }
-    return myAmpacheService.numberOfArtists();
+    return myAmpacheService.getIsConnected() ? myAmpacheService.numberOfArtists() : myCache.numberOfArtists();
 }
 
 }

@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -55,6 +55,12 @@ myNetworkAccessManager{new QNetworkAccessManager{this}} {
 
 
 
+bool AmpacheService::getIsConnected() const {
+    return myIsConnected;
+}
+
+
+
 system_clock::time_point AmpacheService::getLastUpdate() const {
     return myLastUpdate;
 }
@@ -67,8 +73,32 @@ int AmpacheService::numberOfAlbums() const {
 
 
 
+int AmpacheService::numberOfArtists() const {
+    return myNumberOfArtists;
+}
+
+
+
+int AmpacheService::numberOfTracks() const {
+    return myNumberOfTracks;
+}
+
+
+
 void AmpacheService::requestAlbums(int offset, int limit) {
     callMethod(Method.Albums, {{"offset", to_string(offset)}, {"limit", to_string(limit)}});
+}
+
+
+
+void AmpacheService::requestArtists(int offset, int limit) {
+    callMethod(Method.Artists, {{"offset",  to_string(offset)}, {"limit", to_string(limit)}});
+}
+
+
+
+void AmpacheService::requestTracks(int offset, int limit) {
+    callMethod(Method.Tracks, {{"offset", to_string(offset)}, {"limit", to_string(limit)}});
 }
 
 
@@ -80,30 +110,6 @@ void AmpacheService::requestAlbumArts(vector<string> urls) {
             artUrl))));
         connect(networkReply, SIGNAL(finished()), this, SLOT(onAlbumArtFinished()));
     }
-}
-
-
-
-int AmpacheService::numberOfArtists() const {
-    return myNumberOfArtists;
-}
-
-
-
-void AmpacheService::requestArtists(int offset, int limit) {
-    callMethod(Method.Artists, {{"offset",  to_string(offset)}, {"limit", to_string(limit)}});
-}
-
-
-
-int AmpacheService::numberOfTracks() const {
-    return myNumberOfTracks;
-}
-
-
-
-void AmpacheService::requestTracks(int offset, int limit) {
-    callMethod(Method.Tracks, {{"offset", to_string(offset)}, {"limit", to_string(limit)}});
 }
 
 
@@ -141,11 +147,12 @@ void AmpacheService::callMethod(string name, map<string, string> arguments) cons
 
 void AmpacheService::onFinished() {
     auto networkReply = qobject_cast<QNetworkReply*>(sender());
+
     QXmlStreamReader xmlStreamReader{networkReply};
 
     string methodName = parseMethodName(networkReply->request().url().toString().toStdString());
     if (methodName == Method.Handshake) {
-        processHandshake(xmlStreamReader);
+        processHandshake(xmlStreamReader, networkReply->error());
     } else if (methodName == Method.Ping) {
 //         processPing(xmlStreamReader);
     } else if (methodName == Method.Albums) {
@@ -155,13 +162,20 @@ void AmpacheService::onFinished() {
     } else if (methodName == Method.Tracks) {
         processTracks(xmlStreamReader);
     }
-
     networkReply->deleteLater();
 }
 
 
 
-void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader) {
+void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader, QNetworkReply::NetworkError error) {
+    if (error != QNetworkReply::NoError) {
+        myIsConnected = false;
+        connected();
+        return;
+    }
+
+    myIsConnected = true;
+
     QDateTime update;
     QDateTime add;
     while (!xmlStreamReader.atEnd()) {

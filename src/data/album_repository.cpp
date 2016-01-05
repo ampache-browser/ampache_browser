@@ -73,7 +73,7 @@ bool AlbumRepository::load(int offset, int limit) {
         return false;
     }
 
-    if (myCache.getLastUpdate() > myAmpacheService.getLastUpdate()) {
+    if (!myAmpacheService.getIsConnected() || (myCache.getLastUpdate() > myAmpacheService.getLastUpdate())) {
         myCachedLoad = true;
 
         // SMELL: The condition below is to ignore subsequent requests from model which are not needed since the
@@ -125,7 +125,7 @@ bool AlbumRepository::loadArts(int filteredOffset, int limit) {
     }
 
     myArtsLoadOffset = filteredOffset;
-    if (myCachedLoad) {
+    if (myCachedLoad || !myAmpacheService.getIsConnected()) {
         vector<string> artIds;
         for (auto idx = filteredOffset; idx < filteredOffset + limit; idx++) {
             AlbumData& albumData = myFilter->getFilteredData()[idx];
@@ -317,7 +317,7 @@ int AlbumRepository::computeMaxCount() const {
     if (isFiltered() && myLoadProgress != 0) {
         return myFilter->getFilteredData().size();
     }
-    return myAmpacheService.numberOfAlbums();
+    return myAmpacheService.getIsConnected() ? myAmpacheService.numberOfAlbums() : myCache.numberOfAlbums();
 }
 
 }

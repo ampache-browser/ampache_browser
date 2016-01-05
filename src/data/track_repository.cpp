@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -61,7 +61,7 @@ bool TrackRepository::load(int offset, int limit) {
         return false;
     }
 
-    if (myCache.getLastUpdate() > myAmpacheService.getLastUpdate()) {
+    if (!myAmpacheService.getIsConnected() || (myCache.getLastUpdate() > myAmpacheService.getLastUpdate())) {
         if (myLoadProgress == 0) {
             loadFromCache();
         }
@@ -221,7 +221,7 @@ int TrackRepository::computeMaxCount() const {
     if (myIsFilterSet && myLoadProgress != 0) {
         return myFilter->getFilteredData().size();
     }
-    return myAmpacheService.numberOfTracks();
+    return myAmpacheService.getIsConnected() ? myAmpacheService.numberOfTracks() : myCache.numberOfTracks();
 }
 
 }
