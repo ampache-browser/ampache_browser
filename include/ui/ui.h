@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -45,6 +45,8 @@ public:
 
     infrastructure::Event<std::string> searchTriggered{};
 
+    QWidget* getMainWidget() const;
+
     void setArtistModel(QAbstractItemModel& model);
 
     void setAlbumModel(QAbstractItemModel& model);
@@ -61,7 +63,7 @@ private slots:
     void onSearchReturnPressed();
 
 private:
-    const std::unique_ptr<AmpacheBrowserMainWindow> myMainWindow;
+    AmpacheBrowserMainWindow* myMainWindow;
 };
 
 }

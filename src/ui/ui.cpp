@@ -36,6 +36,12 @@ myMainWindow{new AmpacheBrowserMainWindow{}} {
 
 
 
+QWidget* Ui::getMainWidget() const {
+    return myMainWindow;
+}
+
+
+
 void Ui::setArtistModel(QAbstractItemModel& model) {
     myMainWindow->artistsListView->setModel(&model);
     connect(myMainWindow->artistsListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),

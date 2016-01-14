@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -11,16 +11,10 @@
 #include <QStyle>
 #include <QAction>
 #include <QLineEdit>
-#include <QSpacerItem>
 #include <QListView>
 #include <QTreeView>
-#include <QLayout>
 #include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QSplitter>
-#include <QStatusBar>
 #include <QDockWidget>
-#include <QCompleter>
 #include "ampache_browser_main_window.h"
 
 
@@ -28,11 +22,7 @@
 namespace ui {
 
 AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow(parent) {
-    // TODO: icon
-    setWindowTitle(tr("Ampache Browser"));
-    setMinimumSize(200, 200);
-    setGeometry(5, 90, 850, 620);
-    setDockOptions(AnimatedDocks);
+    setWindowFlags(Qt::FramelessWindowHint);
 
     // tool bar
     playAction = new QAction(style()->standardIcon(QStyle::SP_MediaPlay), tr("Play"), this);
@@ -58,8 +48,8 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     mainToolBar->addAction(aboutAction);
 
     // central widget
-    auto centralWidget = new QWidget();
-    auto centralLayout = new QHBoxLayout();
+    auto centralWidget = new QWidget{};
+    auto centralLayout = new QHBoxLayout{};
     albumsListView = new QListView{};
     albumsListView->setViewMode(QListView::ViewMode::IconMode);
     albumsListView->setResizeMode(QListView::ResizeMode::Adjust);
@@ -74,26 +64,23 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     setCentralWidget(centralWidget);
 
     // docks
-    auto artistsDockWidget = new QDockWidget(tr("Artists"),  this);
-    auto tracksDockWidget = new QDockWidget(tr("Tracks"),  this);
-    artistsListView = new QListView();
+    auto artistsDockWidget = new QDockWidget(tr("Artists"));
+    auto tracksDockWidget = new QDockWidget(tr("Tracks"));
+    artistsListView = new QListView{};
     artistsListView->setResizeMode(QListView::ResizeMode::Adjust);
     artistsListView->setUniformItemSizes(true);
     artistsListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     artistsListView->setSelectionBehavior(QAbstractItemView::SelectRows);
-    tracksTreeView = new QTreeView();
+    tracksTreeView = new QTreeView{};
 
     artistsDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
-    artistsDockWidget->setAllowedAreas(Qt::RightDockWidgetArea);
+    artistsDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
     artistsDockWidget->setWidget(artistsListView);
     tracksDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
-    tracksDockWidget->setAllowedAreas(Qt::RightDockWidgetArea);
+    tracksDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
     tracksDockWidget->setWidget(tracksTreeView);
     addDockWidget(Qt::RightDockWidgetArea, artistsDockWidget);
     addDockWidget(Qt::RightDockWidgetArea, tracksDockWidget);
-
-    // status bar
-    statusBar()->showMessage(tr("Ready"));
 }
 
 

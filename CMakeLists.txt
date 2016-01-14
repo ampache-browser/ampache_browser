@@ -23,7 +23,8 @@ set(ampache_browser_SRCS src/infrastructure/os_paths.cpp src/infrastructure/even
     src/application/models/request_group.cpp src/application/models/album_model.cpp
     src/ui/ui.cpp src/application/ampache_browser.cpp
     src/domain/album.cpp src/domain/track.cpp src/domain/artist.cpp
-    src/ui/ampache_browser_main_window.cpp src/main.cpp)
+    src/ui/ampache_browser_main_window.cpp
+    src/ampache_browser_plugin.cpp)
 
 # headers with QT meta objects
 set(ampache_browser_HEADERS_WITH_MO include/ui/ui.h include/application/models/album_model.h
@@ -31,11 +32,13 @@ set(ampache_browser_HEADERS_WITH_MO include/ui/ui.h include/application/models/a
     src/ui/ampache_browser_main_window.h include/data/providers/ampache_service.h include/data/providers/cache.h)
 qt5_wrap_cpp(ampache_browser_HEADERS_MOC ${ampache_browser_HEADERS_WITH_MO})
 
-add_executable(ampache_browser ${ampache_browser_SRCS} ${ampache_browser_HEADERS_MOC})
+#add_executable(ampache_browser ${ampache_browser_SRCS} ${ampache_browser_HEADERS_MOC})
+add_library(ampache_browser MODULE ${ampache_browser_SRCS} ${ampache_browser_HEADERS_MOC})
 
-target_link_libraries(ampache_browser Qt5::Core Qt5::Widgets Qt5::Network Qt5::Xml Qt5Concurrent)
+target_link_libraries(ampache_browser audcore Qt5::Core Qt5::Widgets Qt5::Network Qt5::Xml Qt5Concurrent)
 
-install(TARGETS ampache_browser RUNTIME DESTINATION bin)
+#install(TARGETS ampache_browser RUNTIME DESTINATION bin)
+install(TARGETS ampache_browser LIBRARY DESTINATION lib)
 
 add_subdirectory(src)
 
