@@ -293,7 +293,7 @@ void Cache::loadMeta(ifstream& metaStream) {
 
 void Cache::saveMeta(system_clock::time_point lastUpdate) {
     ofstream metaStream{META_PATH, ofstream::binary | ofstream::trunc};
-    int version = VERSION;
+    int version = CACHE_VERSION;
     metaStream.write(reinterpret_cast<char*>(&version), sizeof version);
     myLastUpdate = lastUpdate;
     metaStream.write(reinterpret_cast<char*>(&myLastUpdate), sizeof myLastUpdate);

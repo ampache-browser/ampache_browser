@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -33,7 +33,7 @@ public:
 
 
 
-#include "src/data/filters/unfiltered_filter.cpp"
+#include "src/data/filters/unfiltered_filter.cc"
 
 
 

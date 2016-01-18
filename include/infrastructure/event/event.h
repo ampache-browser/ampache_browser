@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -101,7 +101,7 @@ private:
 
 
 
-#include "src/infrastructure/event/event.cpp"
+#include "src/infrastructure/event/event.cc"
 
 
 

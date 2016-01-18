@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -45,7 +45,7 @@ protected:
 
 
 
-#include "src/data/filters/filter.cpp"
+#include "src/data/filters/filter.cc"
 
 
 

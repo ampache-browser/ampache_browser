@@ -7,10 +7,6 @@
 
 
 
-// remove when built together with other plugins
-#define PACKAGE "audacious-plugins"
-#define EXPORT __attribute__((visibility("default")))
-
 #define AUD_PLUGIN_QT_ONLY
 #include <libaudcore/audstrings.h>
 #include <libaudcore/drct.h>

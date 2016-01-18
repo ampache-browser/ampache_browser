@@ -68,7 +68,7 @@ private slots:
     void onArtsLoadFinished();
 
 private:
-    int const VERSION = 0;
+    int const CACHE_VERSION = 0;
     const std::string CACHE_BASE_DIR = infrastructure::OsPaths::getCacheHome();
     const std::string CACHE_DIR = CACHE_BASE_DIR + "ampache_browser/";
     const std::string META_PATH = CACHE_DIR + "meta";

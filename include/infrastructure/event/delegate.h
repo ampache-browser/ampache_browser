@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -73,7 +73,7 @@ bool operator==(const Delegate<T>& lhs, const Delegate<T>& rhs);
 
 
 
-#include "src/infrastructure/event/delegate.cpp"
+#include "src/infrastructure/event/delegate.cc"
 
 
 
