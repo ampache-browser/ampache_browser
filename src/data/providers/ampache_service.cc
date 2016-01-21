@@ -45,10 +45,10 @@ using namespace domain;
 
 namespace data {
 
-AmpacheService::AmpacheService(string url, string user, string password):
+AmpacheService::AmpacheService(string url, string user, string passwordHash):
 myUrl{url},
 myUser{user},
-myPassword{password},
+myPasswordHash{passwordHash},
 myNetworkAccessManager{new QNetworkAccessManager{this}} {
     connectToServer();
 }
@@ -117,8 +117,8 @@ void AmpacheService::requestAlbumArts(vector<string> urls) {
 void AmpacheService::connectToServer() {
     auto currentTime = to_string(chrono::duration_cast<chrono::seconds>(chrono::system_clock::now().
         time_since_epoch()).count());
-    auto key = QCryptographicHash::hash(QByteArray::fromStdString(myPassword), QCryptographicHash::Sha256).toHex();
-    auto passphrase = QCryptographicHash::hash(QByteArray::fromStdString(currentTime) + key,
+    auto passphrase = QCryptographicHash::hash(
+        QByteArray::fromStdString(currentTime) + QByteArray::fromStdString(myPasswordHash),
         QCryptographicHash::Sha256).toHex().toStdString();
 
     ostringstream urlStream;

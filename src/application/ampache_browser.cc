@@ -3,12 +3,14 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
 #include <fstream>
 #include <memory>
+
+#include <libaudcore/runtime.h>
 
 #include "infrastructure/event/delegate.h"
 #include "ui/ui.h"
@@ -43,17 +45,11 @@ namespace application {
 
 AmpacheBrowser::AmpacheBrowser(Ui& ui):
 myUi(&ui) {
-    string url;
-    string user;
-    string pass;
-    ifstream creds{"../../elab/creds"};
-    if (creds.is_open()) {
-        getline(creds, url);
-        getline(creds, user);
-        getline(creds, pass);
-        creds.close();
-    }
-    myAmpacheService = unique_ptr<AmpacheService>{new AmpacheService{url, user, pass}};
+    auto url = aud_get_str("ampache_browser", "url").to_raw();
+    auto username = aud_get_str("ampache_browser", "username").to_raw();
+    auto passwordHash = aud_get_str("ampache_browser", "password_hash").to_raw();
+
+    myAmpacheService = unique_ptr<AmpacheService>{new AmpacheService{url, username, passwordHash}};
     myAmpacheService->connected += DELEGATE0(&AmpacheBrowser::onConnected);
     myCache = unique_ptr<Cache>{new Cache{}};
 }

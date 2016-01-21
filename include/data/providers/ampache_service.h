@@ -70,7 +70,7 @@ class AmpacheService: public QObject {
     Q_OBJECT
 
 public:
-    explicit AmpacheService(std::string url, std::string user, std::string password);
+    explicit AmpacheService(std::string url, std::string user, std::string passwordHash);
 
     AmpacheService(const AmpacheService& other) = delete;
 
@@ -120,7 +120,7 @@ private:
 
     const std::string myUrl;
     const std::string myUser;
-    const std::string myPassword;
+    const std::string myPasswordHash;
 
     const std::unique_ptr<QNetworkAccessManager> myNetworkAccessManager;
     bool myIsConnected = false;
