@@ -22,7 +22,7 @@
 namespace ui {
 
 AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow(parent) {
-    setWindowFlags(Qt::FramelessWindowHint);
+    setWindowFlags(Qt::Widget);
 
     // tool bar
     playAction = new QAction(style()->standardIcon(QStyle::SP_MediaPlay), tr("Play"), this);
@@ -89,6 +89,7 @@ AmpacheBrowserMainWindow::~AmpacheBrowserMainWindow() {
     delete(tracksTreeView);
     delete(artistsListView);
     delete(albumsListView);
+    delete(searchLineEdit);
     delete(playAction);
 }
 

@@ -81,6 +81,14 @@ Track& TrackRepository::get(int filteredOffset) const {
 
 
 
+Track& TrackRepository::getById(const string& id) const {
+    auto tracksDataIter = find_if(myTracksData.begin(), myTracksData.end(),
+        [&id](const unique_ptr<TrackData>& td) {return td->getId() == id;});
+    return (*tracksDataIter)->getTrack();
+}
+
+
+
 bool TrackRepository::isLoaded(int filteredOffset, int limit) const {
     uint end = filteredOffset + limit;
     auto filteredTracksData = myFilter->getFilteredData();

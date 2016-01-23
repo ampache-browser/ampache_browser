@@ -35,7 +35,7 @@ public:
 
     Ui& operator=(const Ui& other) = delete;
 
-//     Event<SelectedItems> playTriggered;
+    infrastructure::Event<std::vector<std::string>> playTriggered{};
 
     infrastructure::Event<bool> albumWindowRedraw{};
 
@@ -56,7 +56,8 @@ public:
     void setSearchCompletionModel(QAbstractItemModel& model);
 
 private slots:
-    void onPlayActionTriggered();
+    void onPlayActionTriggered() const;
+    void onActivated(const QModelIndex& index) const;
     void onArtistsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void onAlbumsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void onSearchTextChanged(const QString& text);
@@ -64,6 +65,8 @@ private slots:
 
 private:
     AmpacheBrowserMainWindow* myMainWindow;
+
+    void raisePlayTriggeredForSelectedTracks() const;
 };
 
 }

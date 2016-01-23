@@ -156,9 +156,10 @@ vector<unique_ptr<TrackData>> Cache::loadTracksData() const {
         auto name = readString(tracksDataStream);
         int number = 0;
         tracksDataStream.read(reinterpret_cast<char*>(&number), sizeof number);
+        auto url = readString(tracksDataStream);
 
         tracksData.emplace_back(
-            new TrackData{id, artistId, albumId, unique_ptr<Track>{new Track{id, name, number, ""}}});
+            new TrackData{id, artistId, albumId, unique_ptr<Track>{new Track{id, name, number, url}}});
     }
 
     return tracksData;
@@ -240,12 +241,14 @@ void Cache::saveTracksData(vector<unique_ptr<TrackData>>& tracksData) {
         auto& track = trackData->getTrack();
         string name = track.getName();
         int number = track.getNumber();
+        string url = track.getUrl();
 
         writeString(tracksDataStream, id);
         writeString(tracksDataStream, artistId);
         writeString(tracksDataStream, albumId);
         writeString(tracksDataStream, name);
         tracksDataStream.write(reinterpret_cast<char*>(&number), sizeof number);
+        writeString(tracksDataStream, url);
     }
     myNumberOfTracks = count;
     myTracksSaved = true;

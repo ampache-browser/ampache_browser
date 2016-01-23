@@ -62,6 +62,8 @@ QVariant TrackModel::data(const QModelIndex& index, int role) const {
             return QString::fromStdString(track.getArtist().getName());
         case 2:
             return QString::fromStdString(track.getAlbum().getName());
+        case 3:
+            return QString::fromStdString(track.getId());
         default:
             return QVariant{};
     }
@@ -96,7 +98,7 @@ int TrackModel::rowCount(const QModelIndex&) const {
 
 
 int TrackModel::columnCount(const QModelIndex&) const {
-    return 3;
+    return 4;
 }
 
 

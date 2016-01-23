@@ -78,7 +78,6 @@ Artist& ArtistRepository::getById(const string& id) const {
         [&id](const unique_ptr<ArtistData>& ad) {return ad->getId() == id;});
     // TODO: Check whether the artist was really found.  if (artistDataIter == myArtistData.end) { // not found }
     return (*artistsDataIter)->getArtist();
-
 }
 
 

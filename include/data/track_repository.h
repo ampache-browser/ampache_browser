@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -60,6 +60,8 @@ public:
     bool load(int offset, int limit);
 
     domain::Track& get(int filteredOffset) const;
+
+    domain::Track& getById(const std::string& id) const;
 
     bool isLoaded(int filteredOffset, int limit = 1) const;
 

@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -28,6 +28,10 @@ namespace ui {
 Ui::Ui():
 myMainWindow{new AmpacheBrowserMainWindow{}} {
     connect(myMainWindow->playAction, SIGNAL(triggered()), this, SLOT(onPlayActionTriggered()));
+    connect(myMainWindow->artistsListView, SIGNAL(activated(QModelIndex)), this, SLOT(onActivated(QModelIndex)));
+    connect(myMainWindow->albumsListView, SIGNAL(activated(QModelIndex)), this, SLOT(onActivated(QModelIndex)));
+    connect(myMainWindow->tracksTreeView, SIGNAL(activated(QModelIndex)), this, SLOT(onActivated(QModelIndex)));
+
     connect(myMainWindow->searchLineEdit, SIGNAL(textChanged(QString)), this, SLOT(onSearchTextChanged(QString)));
     connect(myMainWindow->searchLineEdit, SIGNAL(returnPressed()), this, SLOT(onSearchReturnPressed()));
 
@@ -70,9 +74,14 @@ void Ui::setSearchCompletionModel(QAbstractItemModel& model) {
 
 
 
-void Ui::onPlayActionTriggered() {
-    bool b = false;
-    albumWindowRedraw(b);
+void Ui::onPlayActionTriggered() const {
+    raisePlayTriggeredForSelectedTracks();
+}
+
+
+
+void Ui::onActivated(const QModelIndex&) const {
+    raisePlayTriggeredForSelectedTracks();
 }
 
 
@@ -109,6 +118,17 @@ void Ui::onSearchTextChanged(const QString& searchText) {
 void Ui::onSearchReturnPressed() {
     auto searchText = myMainWindow->searchLineEdit->text().toStdString();
     searchTriggered(searchText);
+}
+
+
+
+void Ui::raisePlayTriggeredForSelectedTracks() const {
+    auto selectedRows = myMainWindow->tracksTreeView->selectionModel()->selectedRows(3);
+    vector<string> trackIds;
+    for (auto hiddenColumnIndex: selectedRows) {
+        trackIds.push_back(hiddenColumnIndex.data().toString().toStdString());
+    }
+    playTriggered(trackIds);
 }
 
 }

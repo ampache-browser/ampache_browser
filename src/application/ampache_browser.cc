@@ -11,6 +11,9 @@
 #include <memory>
 
 #include <libaudcore/runtime.h>
+#include <libaudcore/index.h>
+#include <libaudcore/tuple.h>
+#include <libaudcore/playlist.h>
 
 #include "infrastructure/event/delegate.h"
 #include "ui/ui.h"
@@ -74,6 +77,7 @@ void AmpacheBrowser::onConnected() {
     myUi->artistsSelected += DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
     myUi->albumsSelected += DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
     myUi->searchTriggered += DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
+    myUi->playTriggered += DELEGATE1(&AmpacheBrowser::onPlayTriggered, vector<string>);
 }
 
 
@@ -98,6 +102,25 @@ void AmpacheBrowser::onAlbumsFullyLoaded() {
 
 void AmpacheBrowser::onTracksFullyLoaded() {
     myTrackRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onTracksFullyLoaded);
+}
+
+
+
+void AmpacheBrowser::onPlayTriggered(vector<string> ids) {
+    // if nothing selected, take all
+    if (ids.size() == 0) {
+        for (int row = 0; row < myTrackModel->rowCount(); ++row) {
+            ids.push_back(myTrackModel->data(myTrackModel->index(row, 3)).toString().toStdString());
+        }
+    }
+
+    Index<PlaylistAddItem> playlistAddItems;
+    for (auto id: ids) {
+        Tuple tuple;
+        playlistAddItems.append(String{myTrackRepository->getById(id).getUrl().c_str()}, move(tuple), nullptr);
+    }
+    auto activePlaylist = aud_playlist_get_active();
+    aud_playlist_entry_insert_batch(activePlaylist, -1, move(playlistAddItems), true);
 }
 
 

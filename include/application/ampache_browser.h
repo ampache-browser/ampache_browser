@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -54,8 +54,9 @@ private:
     void onArtistsFullyLoaded();
     void onAlbumsFullyLoaded();
     void onTracksFullyLoaded();
-    void onArtistsSelected(std::vector<std::string> id);
-    void onAlbumsSelected(std::vector<std::string> id);
+    void onPlayTriggered(std::vector<std::string> id);
+    void onArtistsSelected(std::vector<std::string> ids);
+    void onAlbumsSelected(std::vector<std::string> ids);
     void onSearchTriggered(std::string searchText);
 };
 
