@@ -49,6 +49,9 @@ MOC_SRCS = include/ui/moc_ui.cc \
 
 SRCS += ${MOC_SRCS}
 
+moc_%.cc:%.h
+	moc $(DEFINES) $(INCPATH) $< -o $@
+
 include ../../buildsys.mk
 include ../../extra.mk
 

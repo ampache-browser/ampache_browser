@@ -48,13 +48,18 @@ namespace application {
 
 AmpacheBrowser::AmpacheBrowser(Ui& ui):
 myUi(&ui) {
-    auto url = aud_get_str("ampache_browser", "url").to_raw();
-    auto username = aud_get_str("ampache_browser", "username").to_raw();
-    auto passwordHash = aud_get_str("ampache_browser", "password_hash").to_raw();
+    auto url = string{aud_get_str("ampache_browser", "url")};
+    auto username = string{aud_get_str("ampache_browser", "username")};
+    auto passwordHash = string{aud_get_str("ampache_browser", "password_hash")};
 
     myAmpacheService = unique_ptr<AmpacheService>{new AmpacheService{url, username, passwordHash}};
     myAmpacheService->connected += DELEGATE0(&AmpacheBrowser::onConnected);
     myCache = unique_ptr<Cache>{new Cache{}};
+}
+
+
+
+AmpacheBrowser::~AmpacheBrowser() {
 }
 
 

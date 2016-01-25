@@ -28,22 +28,19 @@ class AmpacheBrowserPlugin: public GeneralPlugin {
 public:
     static const char about[];
 
-    static constexpr PluginInfo info = {
-        N_("Ampache Browser"),
-        PACKAGE,
-        about,
-        nullptr
-    };
+    static const PluginInfo pluginInfo;
 
-    constexpr AmpacheBrowserPlugin(): GeneralPlugin(info, true) {
+    AmpacheBrowserPlugin(): GeneralPlugin(pluginInfo, true) {
     }
 
-    void* get_qt_widget();
+    void cleanup() override;
+
+    void* get_qt_widget() override;
+
+private:
+    Ui* myUi = nullptr;
+    AmpacheBrowser* myAmpacheBrowser = nullptr;
 };
-
-
-
-EXPORT AmpacheBrowserPlugin aud_plugin_instance;
 
 
 
@@ -55,11 +52,29 @@ const char AmpacheBrowserPlugin::about[] =
 
 
 
+const PluginInfo AmpacheBrowserPlugin::pluginInfo = {
+    N_("Ampache Browser"),
+    PACKAGE,
+    about,
+    nullptr
+};
+
+
+
+void AmpacheBrowserPlugin::cleanup() {
+    delete(myAmpacheBrowser);
+    delete(myUi);
+}
+
+
+
 void* AmpacheBrowserPlugin::get_qt_widget()
 {
-    auto ui = new Ui{};
-    // SMELL: The AmpacheBrowser instance is not owned and not released.
-    new AmpacheBrowser{*ui};
-
-    return ui->getMainWidget();
+    myUi = new Ui{};
+    myAmpacheBrowser = new AmpacheBrowser{*myUi};
+    return myUi->getMainWidget();
 }
+
+
+
+EXPORT AmpacheBrowserPlugin aud_plugin_instance;

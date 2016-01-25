@@ -30,7 +30,9 @@ namespace application {
 class AmpacheBrowser {
 
 public:
-    AmpacheBrowser(ui::Ui& ui);
+    explicit AmpacheBrowser(ui::Ui& ui);
+
+    ~AmpacheBrowser();
 
     AmpacheBrowser(const AmpacheBrowser& other) = delete;
 

@@ -13,18 +13,18 @@
 #include <memory>
 #include <utility>
 
-#include <QtCore/QObject>
-#include <QtCore/QString>
-#include <QtCore/QUrl>
-#include <QtCore/QVariant>
-#include <QtCore/QCoreApplication>
-#include <QtCore/QThreadPool>
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkRequest>
-#include <QtNetwork/QNetworkReply>
-#include <QtGui/QImageReader>
-#include <QtGui/QImage>
-#include <QtGui/QPixmap>
+#include <QObject>
+#include <QString>
+#include <QUrl>
+#include <QVariant>
+#include <QCoreApplication>
+#include <QThreadPool>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QImageReader>
+#include <QImage>
+#include <QPixmap>
 #include <QXmlStreamReader>
 #include <QCryptographicHash>
 
@@ -176,8 +176,8 @@ void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader, QNetwor
 
     myIsConnected = true;
 
-    QDateTime update;
-    QDateTime add;
+    QDateTime update{};
+    QDateTime add{};
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
         auto name = xmlStreamReader.name();
@@ -229,13 +229,13 @@ vector<unique_ptr<AlbumData>> AmpacheService::createAlbums(QXmlStreamReader& xml
         }
     }
 
-    string id;
-    string albumName;
-    int year;
-    int disk;
-    int tracks;
-    string artUrl;
-    string artistId;
+    string id = "";
+    string albumName = "";
+    int year = 0;
+    int disk = 0;
+    int tracks = 0;
+    string artUrl = "";
+    string artistId = "";
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
         xmlElement = xmlStreamReader.name().toString();
@@ -350,10 +350,10 @@ vector<unique_ptr<ArtistData>> AmpacheService::createArtists(QXmlStreamReader& x
         }
     }
 
-    string id;
-    string artistName;
-    int albums;
-    int songs;
+    string id = "";
+    string artistName = "";
+    int albums = 0;
+    int songs = 0;
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
         xmlElement = xmlStreamReader.name().toString();
@@ -423,12 +423,12 @@ vector<unique_ptr<TrackData>> AmpacheService::createTracks(QXmlStreamReader& xml
         }
     }
 
-    string id;
-    string title;
-    int number;
-    string url;
-    string artistId;
-    string albumId;
+    string id = "";
+    string title = "";
+    int number = 0;
+    string url = "";
+    string artistId = "";
+    string albumId = "";
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
         xmlElement = xmlStreamReader.name().toString();
