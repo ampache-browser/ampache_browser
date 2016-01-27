@@ -26,6 +26,8 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
+#include <libaudcore/index.h>
+
 #include "infrastructure/event/event.h"
 
 class QXmlStreamReader;
@@ -70,6 +72,8 @@ class AmpacheService: public QObject {
     Q_OBJECT
 
 public:
+    typedef std::function<void (const char* url, const Index<char>& buffer)> OnGetContentsFunc;
+
     explicit AmpacheService(std::string url, std::string user, std::string passwordHash);
 
     AmpacheService(const AmpacheService& other) = delete;
@@ -105,8 +109,6 @@ public:
     void requestAlbumArts(std::vector<std::string> urls);
 
 private slots:
-    void onFinished();
-    void onAlbumArtFinished();
     void onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable);
 
 private:
@@ -133,9 +135,15 @@ private:
     std::set<std::string> myPendingAlbumArts;
     std::map<std::string, QPixmap> myFinishedAlbumArts;
 
+    OnGetContentsFunc myOnGetContentsFunc;
+    OnGetContentsFunc myOnAlbumArtFinishedFunc;
+
+    void onGetContent(const char* url, const Index<char>& contentBuffer);
+    void onAlbumArtFinished(const char* artUrl, const Index<char>& contentBuffer);
+
     void connectToServer();
-    void callMethod(std::string name, std::map<std::string, std::string> arguments) const;
-    void processHandshake(QXmlStreamReader& xmlStreamReader, QNetworkReply::NetworkError error);
+    void callMethod(std::string name, std::map<std::string, std::string> arguments);
+    void processHandshake(QXmlStreamReader& xmlStreamReader, bool error);
     void processAlbums(QXmlStreamReader& xmlStreamReader);
     std::vector<std::unique_ptr<AlbumData>> createAlbums(QXmlStreamReader& xmlStreamReader) const;
     void processArtists(QXmlStreamReader& xmlStreamReader);
