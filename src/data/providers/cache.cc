@@ -1,4 +1,4 @@
-// cache.cpp
+// cache.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

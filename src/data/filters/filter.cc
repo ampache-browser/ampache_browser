@@ -1,4 +1,4 @@
-// filter.cpp
+// filter.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

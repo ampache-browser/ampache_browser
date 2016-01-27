@@ -1,4 +1,4 @@
-// event_void.cpp
+// event_void.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

@@ -1,4 +1,4 @@
-// ui.cpp
+// ui.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

@@ -1,4 +1,4 @@
-// artist_name_filter.cpp
+// artist_name_filter.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

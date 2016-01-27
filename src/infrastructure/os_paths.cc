@@ -1,4 +1,4 @@
-// os_paths.cpp
+// os_paths.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

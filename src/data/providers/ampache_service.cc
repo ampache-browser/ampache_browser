@@ -1,4 +1,4 @@
-// ampache_service.cpp
+// ampache_service.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

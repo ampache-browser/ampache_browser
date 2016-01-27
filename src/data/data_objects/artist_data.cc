@@ -1,4 +1,4 @@
-// artist_data.cpp
+// artist_data.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

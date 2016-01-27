@@ -1,4 +1,4 @@
-// event.cpp
+// event.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

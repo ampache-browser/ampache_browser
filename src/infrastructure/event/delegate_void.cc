@@ -1,4 +1,4 @@
-// delegate_void.cpp
+// delegate_void.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

@@ -1,4 +1,4 @@
-// delegate.cpp
+// delegate.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

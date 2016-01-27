@@ -1,4 +1,4 @@
-// name_filter_for_albums.cpp
+// name_filter_for_albums.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

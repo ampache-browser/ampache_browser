@@ -1,4 +1,4 @@
-// artist_model.cpp
+// artist_model.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

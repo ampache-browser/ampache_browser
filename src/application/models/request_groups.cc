@@ -1,4 +1,4 @@
-// request_groups.cpp
+// request_groups.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

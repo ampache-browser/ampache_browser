@@ -1,4 +1,4 @@
-// artist_filter_for_tracks.cpp
+// artist_filter_for_tracks.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3
