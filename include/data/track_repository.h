@@ -42,8 +42,8 @@ class Indices;
 class TrackRepository {
 
 public:
-    explicit TrackRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository,
-        AlbumRepository& albumRepository, Indices& indices);
+    explicit TrackRepository(AmpacheService& ampacheService, Cache& cache, const ArtistRepository& artistRepository,
+        const AlbumRepository& albumRepository, Indices& indices);
 
     ~TrackRepository();
 
@@ -77,8 +77,8 @@ private:
     std::vector<std::unique_ptr<TrackData>> myTracksData;
     AmpacheService& myAmpacheService;
     Cache& myCache;
-    ArtistRepository& myArtistRepository;
-    AlbumRepository& myAlbumRepository;
+    const ArtistRepository& myArtistRepository;
+    const AlbumRepository& myAlbumRepository;
     Indices& myIndices;
     int myLoadProgress = 0;
     int myLoadOffset = -1;

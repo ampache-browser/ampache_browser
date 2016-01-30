@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -19,7 +19,7 @@ using namespace domain;
 
 namespace data {
 
-bool TrackData::NameCompare::operator()(TrackData& lhs, TrackData& rhs) const {
+bool TrackData::NameCompare::operator()(const TrackData& lhs, const TrackData& rhs) const {
     return lhs.getTrack().getName() < rhs.getTrack().getName();
 }
 

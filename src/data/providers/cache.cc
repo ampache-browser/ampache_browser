@@ -167,7 +167,7 @@ vector<unique_ptr<TrackData>> Cache::loadTracksData() const {
 
 
 
-void Cache::requestAlbumArts(vector<string> ids) {
+void Cache::requestAlbumArts(const vector<string>& ids) {
     myRequestedAlbumArtIds = ids;
     auto artsLoadFutureWatcher = new QFutureWatcher<pair<string, QPixmap>>();
     connect(artsLoadFutureWatcher, SIGNAL(finished()), this, SLOT(onArtsLoadFinished()));

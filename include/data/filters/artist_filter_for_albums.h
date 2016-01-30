@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -34,14 +34,15 @@ class Indices;
 class ArtistFilterForAlbums: public Filter<AlbumData> {
 
 public:
-    explicit ArtistFilterForAlbums(std::vector<std::reference_wrapper<const domain::Artist>> artists, Indices& indices);
+    explicit ArtistFilterForAlbums(const std::vector<std::reference_wrapper<const domain::Artist>>& artists,
+        Indices& indices);
 
     ~ArtistFilterForAlbums() override;
 
     void apply() override;
 
 private:
-    std::vector<std::reference_wrapper<const domain::Artist>> myArtists;
+    const std::vector<std::reference_wrapper<const domain::Artist>> myArtists;
     Indices& myIndices;
 
     void onIndexChanged();

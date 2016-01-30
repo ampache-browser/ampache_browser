@@ -54,7 +54,7 @@ public:
 
     std::vector<std::unique_ptr<TrackData>> loadTracksData() const;
 
-    void requestAlbumArts(std::vector<std::string> ids);
+    void requestAlbumArts(const std::vector<std::string>& ids);
 
     void saveArtistsData(std::vector<std::unique_ptr<ArtistData>>& artistsData);
 

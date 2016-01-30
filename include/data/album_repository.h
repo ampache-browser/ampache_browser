@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -38,7 +38,7 @@ class ArtistRepository;
 class AlbumRepository {
 
 public:
-    explicit AlbumRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository);
+    explicit AlbumRepository(AmpacheService& ampacheService, Cache& cache, const ArtistRepository& artistRepository);
 
     ~AlbumRepository();
 
@@ -76,9 +76,11 @@ public:
 
 private:
     std::vector<std::unique_ptr<AlbumData>> myAlbumsData;
+
     AmpacheService& myAmpacheService;
     Cache& myCache;
-    ArtistRepository& myArtistRepository;
+    const ArtistRepository& myArtistRepository;
+    
     int myLoadProgress = 0;
     int myLoadOffset = -1;
     int myArtsLoadOffset = -1;
@@ -89,8 +91,8 @@ private:
     int myCachedMaxCount = -1;
     bool myCachedLoad = false;
 
-    void onReadyAlbums(std::vector<std::unique_ptr<AlbumData>>& albumsData);
-    void onReadyArts(std::map<std::string, QPixmap>& arts);
+    void onReadyAlbums(std::vector<std::unique_ptr<data::AlbumData>>& albumsData);
+    void onReadyArts(const std::map<std::string, QPixmap>& arts);
     void onFilterChanged();
 
     void loadFromCache();

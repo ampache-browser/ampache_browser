@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -107,13 +107,13 @@ int AlbumModel::columnCount(const QModelIndex&) const {
 
 
 
-void AlbumModel::onReadyToExecuteAlbums(RequestGroup& requestGroup) {
+void AlbumModel::onReadyToExecuteAlbums(RequestGroup requestGroup) {
     myAlbumRepository.load(requestGroup.getLower(), requestGroup.getSize());
 }
 
 
 
-void AlbumModel::onLoaded(pair<int, int>&) {
+void AlbumModel::onLoaded(pair<int, int>) {
     auto finishedRequestGroup = myAlbumRequests->setFinished();
     if (myAlbumRepository.isFiltered()) {
         beginResetModel();
@@ -126,13 +126,13 @@ void AlbumModel::onLoaded(pair<int, int>&) {
 
 
 
-void AlbumModel::onReadyToExecuteArts(RequestGroup& requestGroup) {
+void AlbumModel::onReadyToExecuteArts(RequestGroup requestGroup) {
     myAlbumRepository.loadArts(requestGroup.getLower(), requestGroup.getSize());
 }
 
 
 
-void AlbumModel::onArtsLoaded(pair<int, int>&) {
+void AlbumModel::onArtsLoaded(pair<int, int>) {
     auto finishedRequestGroup = myArtRequests->setFinished();
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
 }

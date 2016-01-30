@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -21,7 +21,7 @@ namespace domain {
 class Artist {
 
 public:
-    Artist(const std::string id, const std::string name);
+    Artist(const std::string& id, const std::string& name);
 
     Artist(const Artist& other) = delete;
 

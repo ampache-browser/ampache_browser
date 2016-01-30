@@ -111,7 +111,7 @@ void AmpacheBrowser::onTracksFullyLoaded() {
 
 
 
-void AmpacheBrowser::onPlayTriggered(vector<string> ids) {
+void AmpacheBrowser::onPlayTriggered(vector<string>& ids) {
     // if nothing selected, take all
     if (ids.size() == 0) {
         for (int row = 0; row < myTrackModel->rowCount(); ++row) {
@@ -130,7 +130,7 @@ void AmpacheBrowser::onPlayTriggered(vector<string> ids) {
 
 
 
-void AmpacheBrowser::onArtistsSelected(vector<string> ids) {
+void AmpacheBrowser::onArtistsSelected(vector<string>& ids) {
     if (ids.empty()) {
         myAlbumRepository->unsetFilter();
         myTrackRepository->unsetFilter();
@@ -147,7 +147,7 @@ void AmpacheBrowser::onArtistsSelected(vector<string> ids) {
 
 
 
-void AmpacheBrowser::onAlbumsSelected(vector<string> ids) {
+void AmpacheBrowser::onAlbumsSelected(vector<string>& ids) {
     if (ids.empty()) {
         myTrackRepository->unsetFilter();
     } else {
@@ -162,7 +162,7 @@ void AmpacheBrowser::onAlbumsSelected(vector<string> ids) {
 
 
 
-void AmpacheBrowser::onSearchTriggered(string searchText) {
+void AmpacheBrowser::onSearchTriggered(const string& searchText) {
     if (searchText.empty()) {
         myArtistRepository->unsetFilter();
         myAlbumRepository->unsetFilter();

@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -25,7 +25,7 @@ using namespace domain;
 
 namespace data {
 
-AlbumFilterForTracks::AlbumFilterForTracks(vector<reference_wrapper<const Album>> albums,
+AlbumFilterForTracks::AlbumFilterForTracks(const vector<reference_wrapper<const Album>>& albums,
     Indices& indices): Filter<TrackData>(),
 myAlbums(albums),
 myIndices(indices) {
@@ -43,8 +43,8 @@ AlbumFilterForTracks::~AlbumFilterForTracks() {
 void AlbumFilterForTracks::apply() {
     myFilteredData.clear();
     set<reference_wrapper<TrackData>> filteredUniqueTrackData;
-    for (auto album: myAlbums) {
-        auto albumIndex = myIndices.getAlbumTrack()[album];
+    for (auto& album: myAlbums) {
+        auto albumIndex = myIndices.getAlbumTrack(album.get());
         filteredUniqueTrackData.insert(albumIndex.begin(), albumIndex.end());
     }
     myFilteredData = vector<reference_wrapper<TrackData>>{

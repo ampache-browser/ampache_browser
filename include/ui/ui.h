@@ -53,8 +53,6 @@ public:
 
     void setTrackModel(QAbstractItemModel& model);
 
-    void setSearchCompletionModel(QAbstractItemModel& model);
-
 private slots:
     void onPlayActionTriggered() const;
     void onActivated(const QModelIndex& index) const;

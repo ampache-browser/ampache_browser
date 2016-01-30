@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -26,7 +26,7 @@ public:
 
     class NameCompare {
     public:
-        bool operator()(TrackData& lhs, TrackData& rhs) const;
+        bool operator()(const TrackData& lhs, const TrackData& rhs) const;
     };
 
 

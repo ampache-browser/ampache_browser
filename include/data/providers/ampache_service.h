@@ -74,7 +74,7 @@ class AmpacheService: public QObject {
 public:
     typedef std::function<void (const char* url, const Index<char>& buffer)> OnGetContentsFunc;
 
-    explicit AmpacheService(std::string url, std::string user, std::string passwordHash);
+    explicit AmpacheService(const std::string& url, const std::string& user, const std::string& passwordHash);
 
     AmpacheService(const AmpacheService& other) = delete;
 
@@ -106,7 +106,7 @@ public:
 
     void requestTracks(int offset, int limit);
 
-    void requestAlbumArts(std::vector<std::string> urls);
+    void requestAlbumArts(const std::vector<std::string>& urls);
 
 private slots:
     void onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable);
@@ -124,7 +124,6 @@ private:
     const std::string myUser;
     const std::string myPasswordHash;
 
-    const std::unique_ptr<QNetworkAccessManager> myNetworkAccessManager;
     bool myIsConnected = false;
     std::string myAuthToken = "";
     std::chrono::system_clock::time_point myLastUpdate = std::chrono::system_clock::time_point::min();
@@ -142,7 +141,7 @@ private:
     void onAlbumArtFinished(const char* artUrl, const Index<char>& contentBuffer);
 
     void connectToServer();
-    void callMethod(std::string name, std::map<std::string, std::string> arguments);
+    void callMethod(const std::string& name, const std::map<std::string, std::string>& arguments);
     void processHandshake(QXmlStreamReader& xmlStreamReader, bool error);
     void processAlbums(QXmlStreamReader& xmlStreamReader);
     std::vector<std::unique_ptr<AlbumData>> createAlbums(QXmlStreamReader& xmlStreamReader) const;

@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -66,8 +66,10 @@ public:
 
 private:
     std::vector<std::unique_ptr<ArtistData>> myArtistsData;
+
     AmpacheService& myAmpacheService;
     Cache& myCache;
+
     int myLoadProgress = 0;
     int myLoadOffset = -1;
     std::shared_ptr<UnfilteredFilter<ArtistData>> myUnfilteredFilter = std::shared_ptr<UnfilteredFilter<ArtistData>>{

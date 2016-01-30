@@ -68,12 +68,6 @@ void Ui::setTrackModel(QAbstractItemModel& model) {
 
 
 
-void Ui::setSearchCompletionModel(QAbstractItemModel& model) {
-    myMainWindow->searchLineEdit->completer()->setModel(&model);
-}
-
-
-
 void Ui::onPlayActionTriggered() const {
     raisePlayTriggeredForSelectedTracks();
 }

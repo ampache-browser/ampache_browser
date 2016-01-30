@@ -37,7 +37,7 @@ public:
     virtual void apply();
 
 protected:
-    const std::vector<std::unique_ptr<T>>* mySourceData;
+    const std::vector<std::unique_ptr<T>>* mySourceData{};
     std::vector<std::reference_wrapper<T>> myFilteredData;
 };
 

@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -25,7 +25,7 @@ using namespace domain;
 
 namespace data {
 
-ArtistFilterForAlbums::ArtistFilterForAlbums(vector<reference_wrapper<const Artist>> artists,
+ArtistFilterForAlbums::ArtistFilterForAlbums(const vector<reference_wrapper<const Artist>>& artists,
     Indices& indices): Filter<AlbumData>(),
 myArtists(artists),
 myIndices(indices) {
@@ -45,8 +45,8 @@ void ArtistFilterForAlbums::apply() {
     set<reference_wrapper<AlbumData>> filteredUniqueAlbumData;
 
     // TODO: Include also albums that have matching album artist.
-    for (auto artist: myArtists) {
-        auto artistIndex = myIndices.getArtistAlbum()[artist];
+    for (auto& artist: myArtists) {
+        auto artistIndex = myIndices.getArtistAlbum(artist.get());
         filteredUniqueAlbumData.insert(artistIndex.begin(), artistIndex.end());
     }
     myFilteredData =

@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 -2016 Róbert Čerňanský
 
 
 
@@ -46,10 +46,10 @@ private:
     const std::unique_ptr<Requests> myAlbumRequests{new Requests};
     const std::unique_ptr<Requests> myArtRequests{new Requests{3}};
 
-    void onReadyToExecuteAlbums(RequestGroup& requestGroup);
-    void onLoaded(std::pair<int, int>& offsetAndLimit);
-    void onReadyToExecuteArts(RequestGroup& requestGroup);
-    void onArtsLoaded(std::pair<int, int>& offsetAndLimit);
+    void onReadyToExecuteAlbums(RequestGroup requestGroup);
+    void onLoaded(std::pair<int, int> offsetAndLimit);
+    void onReadyToExecuteArts(RequestGroup requestGroup);
+    void onArtsLoaded(std::pair<int, int> offsetAndLimit);
     void onFilterChanged();
 };
 

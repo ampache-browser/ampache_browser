@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -26,19 +26,20 @@
 
 namespace data {
 
+using AlbumDataUnorderedSet = std::unordered_set<std::reference_wrapper<AlbumData>, std::hash<AlbumData>>;
+
+using TrackDataUnorderedSet = std::unordered_set<std::reference_wrapper<TrackData>, std::hash<TrackData>>;
+
 using ArtistAlbumIndex = std::unordered_map<
-    std::reference_wrapper<const domain::Artist>,
-    std::unordered_set<std::reference_wrapper<AlbumData>, std::hash<AlbumData>>,
+    std::reference_wrapper<const domain::Artist>, AlbumDataUnorderedSet,
     std::hash<domain::Artist>>;
 
 using ArtistTrackIndex = std::unordered_map<
-    std::reference_wrapper<const domain::Artist>,
-    std::unordered_set<std::reference_wrapper<TrackData>, std::hash<TrackData>>,
+    std::reference_wrapper<const domain::Artist>, TrackDataUnorderedSet,
     std::hash<domain::Artist>>;
 
 using AlbumTrackIndex = std::unordered_map<
-    std::reference_wrapper<const domain::Album>,
-    std::unordered_set<std::reference_wrapper<TrackData>, std::hash<TrackData>>,
+    std::reference_wrapper<const domain::Album>, TrackDataUnorderedSet,
     std::hash<domain::Album>>;
 
 
@@ -49,17 +50,17 @@ public:
     // SMELL: Could be suboptimal to have only one event for all index types.
     infrastructure::Event<void> changed{};
 
-    ArtistAlbumIndex& getArtistAlbum();
+    AlbumDataUnorderedSet& getArtistAlbum(const domain::Artist& artist);
 
-    void updateArtistAlbum(domain::Artist& artist, AlbumData& albumData);
+    void updateArtistAlbum(const domain::Artist& artist, AlbumData& albumData);
 
-    ArtistTrackIndex& getArtistTrack();
+    TrackDataUnorderedSet& getArtistTrack(const domain::Artist& artist);
 
-    void updateArtistTrack(domain::Artist& artist, TrackData& trackData);
+    void updateArtistTrack(const domain::Artist& artist, TrackData& trackData);
 
-    AlbumTrackIndex& getAlbumTrack();
+    TrackDataUnorderedSet& getAlbumTrack(const domain::Album& album);
 
-    void updateAlbumTrack(domain::Album& album, TrackData& trackData);
+    void updateAlbumTrack(const domain::Album& album, TrackData& trackData);
 
 private:
     ArtistAlbumIndex myArtistAlbum;

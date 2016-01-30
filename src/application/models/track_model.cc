@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -103,13 +103,13 @@ int TrackModel::columnCount(const QModelIndex&) const {
 
 
 
-void TrackModel::onReadyToExecute(RequestGroup& requestGroup) {
+void TrackModel::onReadyToExecute(RequestGroup requestGroup) {
     myTrackRepository.load(requestGroup.getLower(), requestGroup.getSize());
 }
 
 
 
-void TrackModel::onReadyTracks(pair<int, int>&) {
+void TrackModel::onReadyTracks(pair<int, int>) {
     auto finishedRequestGroup = myRequests->setFinished();
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
 }

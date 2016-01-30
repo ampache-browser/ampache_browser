@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -115,7 +115,7 @@ void RequestGroups::chop() {
 
 
 
-void RequestGroups::appendOnTop(vector<RequestGroup>& groups, const RequestGroup groupToPlace) {
+void RequestGroups::appendOnTop(vector<RequestGroup>& groups, RequestGroup groupToPlace) {
     if (groups.size() == 0) {
         groups.push_back(groupToPlace);
         return;

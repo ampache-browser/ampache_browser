@@ -55,7 +55,7 @@ void onGetContentsCStyleWrapper(const char* url, const Index<char>& buffer, void
 
 
 
-AmpacheService::AmpacheService(string url, string user, string passwordHash):
+AmpacheService::AmpacheService(const string& url, const string& user, const string& passwordHash):
 myUrl{url},
 myUser{user},
 myPasswordHash{passwordHash},
@@ -114,7 +114,7 @@ void AmpacheService::requestTracks(int offset, int limit) {
 
 
 
-void AmpacheService::requestAlbumArts(vector<string> urls) {
+void AmpacheService::requestAlbumArts(const vector<string>& urls) {
     for (auto artUrl: urls) {
         myPendingAlbumArts.insert(artUrl);
         vfs_async_file_get_contents(artUrl.c_str(), onGetContentsCStyleWrapper, &myOnAlbumArtFinishedFunc);
@@ -139,7 +139,7 @@ void AmpacheService::connectToServer() {
 
 
 
-void AmpacheService::callMethod(string name, map<string, string> arguments) {
+void AmpacheService::callMethod(const string& name, const map<string, string>& arguments) {
     ostringstream urlStream;
     urlStream << assembleUrlBase() << name << "&auth=" << myAuthToken;
     for (auto nameValuePair: arguments) {

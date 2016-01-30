@@ -27,8 +27,8 @@ using namespace domain;
 
 namespace data {
 
-TrackRepository::TrackRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository,
-    AlbumRepository& albumRepository, Indices& indices):
+TrackRepository::TrackRepository(AmpacheService& ampacheService, Cache& cache, const ArtistRepository& artistRepository,
+    const AlbumRepository& albumRepository, Indices& indices):
 myAmpacheService(ampacheService),
 myCache(cache),
 myArtistRepository(artistRepository),

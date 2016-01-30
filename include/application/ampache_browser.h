@@ -56,10 +56,10 @@ private:
     void onArtistsFullyLoaded();
     void onAlbumsFullyLoaded();
     void onTracksFullyLoaded();
-    void onPlayTriggered(std::vector<std::string> id);
-    void onArtistsSelected(std::vector<std::string> ids);
-    void onAlbumsSelected(std::vector<std::string> ids);
-    void onSearchTriggered(std::string searchText);
+    void onPlayTriggered(std::vector<std::string>& ids);
+    void onArtistsSelected(std::vector<std::string>& ids);
+    void onAlbumsSelected(std::vector<std::string>& ids);
+    void onSearchTriggered(const std::string& searchText);
 };
 
 }

@@ -26,7 +26,7 @@ class Album;
 class Track {
 
 public:
-    Track(const std::string id, const std::string title, int number, const std::string url);
+    Track(const std::string& id, const std::string& title, int number, const std::string& url);
 
     Track(const Track& other) = delete;
 

@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -17,39 +17,39 @@ using namespace domain;
 
 namespace data {
 
-ArtistAlbumIndex& Indices::getArtistAlbum() {
-    return myArtistAlbum;
+AlbumDataUnorderedSet& Indices::getArtistAlbum(const Artist& artist) {
+    return myArtistAlbum.at(artist);
 }
 
 
 
-void Indices::updateArtistAlbum(Artist& artist, AlbumData& albumData) {
+void Indices::updateArtistAlbum(const Artist& artist, AlbumData& albumData) {
     myArtistAlbum[artist].insert(albumData);
     changed();
 }
 
 
 
-ArtistTrackIndex& Indices::getArtistTrack() {
-    return myArtistTrack;
+TrackDataUnorderedSet& Indices::getArtistTrack(const Artist& artist) {
+    return myArtistTrack.at(artist);
 }
 
 
 
-void Indices::updateArtistTrack(Artist& artist, TrackData& trackData) {
+void Indices::updateArtistTrack(const Artist& artist, TrackData& trackData) {
     myArtistTrack[artist].insert(trackData);
     changed();
 }
 
 
 
-AlbumTrackIndex& Indices::getAlbumTrack() {
-    return myAlbumTrack;
+TrackDataUnorderedSet& Indices::getAlbumTrack(const Album& album) {
+    return myAlbumTrack.at(album);
 }
 
 
 
-void Indices::updateAlbumTrack(Album& album, TrackData& trackData) {
+void Indices::updateAlbumTrack(const Album& album, TrackData& trackData) {
     myAlbumTrack[album].insert(trackData);
     changed();
 }

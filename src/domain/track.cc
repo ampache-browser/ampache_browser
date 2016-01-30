@@ -18,7 +18,7 @@ using namespace std;
 
 namespace domain {
 
-Track::Track(const std::string id, const std::string name, int number, const std::string url):
+Track::Track(const std::string& id, const std::string& name, int number, const std::string& url):
 myId{id},
 myName{name},
 myNumber{number},

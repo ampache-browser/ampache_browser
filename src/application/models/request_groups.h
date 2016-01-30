@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -48,7 +48,7 @@ private:
 
     void chop();
 
-    void appendOnTop(std::vector<RequestGroup>& groups, const RequestGroup groupToPlace);
+    void appendOnTop(std::vector<RequestGroup>& groups, RequestGroup groupToPlace);
 
     int findOwningGroupIdx(int offset) const;
 

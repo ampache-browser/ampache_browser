@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -44,8 +44,8 @@ private:
     data::TrackRepository& myTrackRepository;
     const std::unique_ptr<Requests> myRequests{new Requests{60}};
 
-    void onReadyToExecute(RequestGroup& requestGroup);
-    void onReadyTracks(std::pair<int, int>& offsetAndLimit);
+    void onReadyToExecute(RequestGroup requestGroup);
+    void onReadyTracks(std::pair<int, int> offsetAndLimit);
     void onFilterChanged();
 };
 

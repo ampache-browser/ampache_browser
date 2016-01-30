@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -17,7 +17,7 @@ using namespace std;
 
 namespace domain {
 
-Artist::Artist(const string id, const string name):
+Artist::Artist(const string& id, const string& name):
 myId{id},
 myName{name} {
 }

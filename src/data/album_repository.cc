@@ -35,7 +35,8 @@ using namespace domain;
 
 namespace data {
 
-AlbumRepository::AlbumRepository(AmpacheService& ampacheService, Cache& cache, ArtistRepository& artistRepository):
+AlbumRepository::AlbumRepository(AmpacheService& ampacheService, Cache& cache,
+    const ArtistRepository& artistRepository):
 myAmpacheService(ampacheService),
 myCache(cache),
 myArtistRepository(artistRepository) {
@@ -234,7 +235,7 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
 
 
 
-void AlbumRepository::onReadyArts(std::map<std::string, QPixmap>& arts) {
+void AlbumRepository::onReadyArts(const std::map<std::string, QPixmap>& arts) {
     // there might be some change during loading (e.g. filter was changed) so ignore the result
     if (myArtsLoadOffset == -1) {
         auto offsetAndLimit = pair<int, int>{0, 0};
