@@ -14,10 +14,12 @@
 #include <libaudcore/interface.h>
 #include <libaudcore/plugin.h>
 
+#include "infrastructure/event/delegate.h"
 #include "application/ampache_browser.h"
 
 
 
+using namespace infrastructure;
 using namespace ui;
 using namespace application;
 
@@ -40,6 +42,8 @@ public:
 private:
     Ui* myUi = nullptr;
     AmpacheBrowser* myAmpacheBrowser = nullptr;
+
+    void onTerminated();
 };
 
 
@@ -62,8 +66,8 @@ const PluginInfo AmpacheBrowserPlugin::pluginInfo = {
 
 
 void AmpacheBrowserPlugin::cleanup() {
-    delete(myAmpacheBrowser);
-    delete(myUi);
+    myAmpacheBrowser->terminated += DELEGATE0(&AmpacheBrowserPlugin::onTerminated);
+    myAmpacheBrowser->requestTermination();
 }
 
 
@@ -73,6 +77,14 @@ void* AmpacheBrowserPlugin::get_qt_widget()
     myUi = new Ui{};
     myAmpacheBrowser = new AmpacheBrowser{*myUi};
     return myUi->getMainWidget();
+}
+
+
+
+void AmpacheBrowserPlugin::onTerminated() {
+    myAmpacheBrowser->terminated -= DELEGATE0(&AmpacheBrowserPlugin::onTerminated);
+    delete(myAmpacheBrowser);
+    delete(myUi);
 }
 
 

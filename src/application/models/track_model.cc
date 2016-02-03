@@ -30,13 +30,8 @@ namespace application {
 TrackModel::TrackModel(TrackRepository& trackRepository, QObject* parent): QAbstractTableModel(parent),
 myTrackRepository(trackRepository) {
     myRequests->readyToExecute += DELEGATE1(&TrackModel::onReadyToExecute, RequestGroup);
-    myTrackRepository.loaded += DELEGATE1(&TrackModel::onReadyTracks, pair<int, int>);
+    myTrackRepository.loaded += DELEGATE1(&TrackModel::onLoaded, pair<int, int>);
     myTrackRepository.filterChanged += DELEGATE0(&TrackModel::onFilterChanged);
-
-    // start populating with data
-    for (int row = 0; row < rowCount(); row++) {
-        myRequests->add(row);
-    }
 }
 
 
@@ -103,15 +98,37 @@ int TrackModel::columnCount(const QModelIndex&) const {
 
 
 
+void TrackModel::requestAllData() {
+    for (int row = 0; row < rowCount(); row++) {
+        myRequests->add(row);
+    }
+}
+
+
+
+void TrackModel::abortDataRequests() {
+    myDataRequestsAborted = true;
+    myRequests->cancel();
+    if (!myRequests->isInProgress()) {
+        dataRequestsAborted();
+    }
+}
+
+
+
 void TrackModel::onReadyToExecute(RequestGroup requestGroup) {
     myTrackRepository.load(requestGroup.getLower(), requestGroup.getSize());
 }
 
 
 
-void TrackModel::onReadyTracks(pair<int, int>) {
+void TrackModel::onLoaded(pair<int, int>) {
     auto finishedRequestGroup = myRequests->setFinished();
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+
+    if (myDataRequestsAborted) {
+        dataRequestsAborted();
+    }
 }
 
 

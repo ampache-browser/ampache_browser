@@ -30,22 +30,14 @@ namespace application {
 ArtistModel::ArtistModel(ArtistRepository& artistRepository, QObject* parent): QAbstractTableModel(parent),
 myArtistRepository(artistRepository) {
     myRequests->readyToExecute += DELEGATE1(&ArtistModel::onReadyToExecute, RequestGroup);
-    myArtistRepository.loaded += DELEGATE1(&ArtistModel::onReadyArtists, pair<int, int>);
+    myArtistRepository.loaded += DELEGATE1(&ArtistModel::onLoaded, pair<int, int>);
     myArtistRepository.filterChanged += DELEGATE0(&ArtistModel::onFilterChanged);
-
-    // start populating with data
-    for (int row = 0; row < rowCount(); row++) {
-        myRequests->add(row);
-    }
 }
 
 
 
 QVariant ArtistModel::data(const QModelIndex& index, int role) const {
-    if (!index.isValid()) {
-        return QVariant{};
-    }
-    if (role != Qt::DisplayRole) {
+    if (!index.isValid() || role != Qt::DisplayRole || myDataRequestsAborted) {
         return QVariant{};
     }
 
@@ -80,15 +72,37 @@ int ArtistModel::columnCount(const QModelIndex&) const {
 
 
 
+void ArtistModel::requestAllData() {
+    for (int row = 0; row < rowCount(); row++) {
+        myRequests->add(row);
+    }
+}
+
+
+
+void ArtistModel::abortDataRequests() {
+    myDataRequestsAborted = true;
+    myRequests->cancel();
+    if (!myRequests->isInProgress()) {
+        dataRequestsAborted();
+    }
+}
+
+
+
 void ArtistModel::onReadyToExecute(RequestGroup requestGroup) {
     myArtistRepository.load(requestGroup.getLower(), requestGroup.getSize());
 }
 
 
 
-void ArtistModel::onReadyArtists(pair<int, int>) {
+void ArtistModel::onLoaded(pair<int, int>) {
     auto finishedRequestGroup = myRequests->setFinished();
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+
+    if (myDataRequestsAborted) {
+        dataRequestsAborted();
+    }
 }
 
 

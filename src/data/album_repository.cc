@@ -224,11 +224,17 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
     myUnfilteredFilter->processUpdatedSourceData(myLoadOffset, albumsData.size());
     myFilter->apply();
     myLoadOffset = -1;
-    loaded(offsetAndLimit);
-
     myLoadProgress += albumsData.size();
-    if (myLoadProgress >= myAmpacheService.numberOfAlbums()) {
+
+    bool isFullyLoaded = myLoadProgress >= myAmpacheService.numberOfAlbums();
+    if (isFullyLoaded) {
         myCache.saveAlbumsData(myAlbumsData);
+    }
+
+    // application can be terminated after loaded event therefore there should be no access to instance variables
+    // after it is fired
+    loaded(offsetAndLimit);
+    if (isFullyLoaded) {
         fullyLoaded();
     }
 }
@@ -273,6 +279,8 @@ void AlbumRepository::onReadyArts(const std::map<std::string, QPixmap>& arts) {
         myCache.updateAlbumArts(idAndArts);
     }
 
+    // application can be terminated after artsLoaded event therefore there should be no access to instance variables
+    // after it is fired
     auto offsetAndLimit = pair<int, int>{myArtsLoadOffset, arts.size()};
     myArtsLoadOffset = -1;
     artsLoaded(offsetAndLimit);
@@ -305,10 +313,12 @@ void AlbumRepository::loadFromCache() {
     myUnfilteredFilter->processUpdatedSourceData(0, myAlbumsData.size());
     myFilter->apply();
     myLoadOffset = -1;
+    myLoadProgress += myAlbumsData.size();
+
+    // application can be terminated after loaded event therefore there should be no access to instance variables
+    // after it is fired
     auto offsetAndLimit = pair<int, int>{0, myAlbumsData.size()};
     loaded(offsetAndLimit);
-
-    myLoadProgress += myAlbumsData.size();
     fullyLoaded();
 }
 

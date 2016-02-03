@@ -54,18 +54,8 @@ myUi(&ui) {
 
     myAmpacheService = unique_ptr<AmpacheService>{new AmpacheService{url, username, passwordHash}};
     myAmpacheService->connected += DELEGATE0(&AmpacheBrowser::onConnected);
+
     myCache = unique_ptr<Cache>{new Cache{}};
-}
-
-
-
-AmpacheBrowser::~AmpacheBrowser() {
-}
-
-
-
-void AmpacheBrowser::onConnected() {
-    myAmpacheService->connected -= DELEGATE0(&AmpacheBrowser::onConnected);
 
     myIndices = unique_ptr<Indices>{new Indices{}};
 
@@ -75,9 +65,9 @@ void AmpacheBrowser::onConnected() {
     myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpacheService, *myCache,
       *myArtistRepository, *myAlbumRepository, *myIndices}};
 
-    myArtistRepository->fullyLoaded += DELEGATE0(&AmpacheBrowser::onArtistsFullyLoaded);
     myArtistModel = unique_ptr<ArtistModel>{new ArtistModel(*myArtistRepository)};
-    myUi->setArtistModel(*myArtistModel);
+    myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel(*myAlbumRepository)};
+    myTrackModel = unique_ptr<TrackModel>{new TrackModel(*myTrackRepository)};
 
     myUi->artistsSelected += DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
     myUi->albumsSelected += DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
@@ -87,40 +77,84 @@ void AmpacheBrowser::onConnected() {
 
 
 
+AmpacheBrowser::~AmpacheBrowser() {
+    myUi->playTriggered -= DELEGATE1(&AmpacheBrowser::onPlayTriggered, vector<string>);
+    myUi->searchTriggered -= DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
+    myUi->albumsSelected -= DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
+    myUi->artistsSelected -= DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
+}
+
+
+
+void AmpacheBrowser::requestTermination() {
+    myAmpacheService->connected -= DELEGATE0(&AmpacheBrowser::onConnected);
+    myArtistRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onArtistsFullyLoaded);
+    myAlbumRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onAlbumsFullyLoaded);
+    myTrackRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onTracksFullyLoaded);
+
+    myArtistModel->dataRequestsAborted += DELEGATE0(&AmpacheBrowser::onArtistDataRequestsAborted);
+    myAlbumModel->dataRequestsAborted += DELEGATE0(&AmpacheBrowser::onAlbumDataRequestsAborted);
+    myTrackModel->dataRequestsAborted += DELEGATE0(&AmpacheBrowser::onTrackDataRequestsAborted);
+    myArtistModel->abortDataRequests();
+    myAlbumModel->abortDataRequests();
+    myTrackModel->abortDataRequests();
+}
+
+
+
+void AmpacheBrowser::onConnected() {
+    myAmpacheService->connected -= DELEGATE0(&AmpacheBrowser::onConnected);
+    myArtistRepository->fullyLoaded += DELEGATE0(&AmpacheBrowser::onArtistsFullyLoaded);
+    myArtistModel->requestAllData();
+    myUi->setArtistModel(*myArtistModel);
+    myIsArtistDataRequestRunning = true;
+}
+
+
+
 void AmpacheBrowser::onArtistsFullyLoaded() {
+    myIsArtistDataRequestRunning = false;
     myArtistRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onArtistsFullyLoaded);
     myAlbumRepository->fullyLoaded += DELEGATE0(&AmpacheBrowser::onAlbumsFullyLoaded);
-    myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel(*myAlbumRepository)};
+    myAlbumModel->requestAllData();
     myUi->setAlbumModel(*myAlbumModel);
+    myIsAlbumDataRequestRunning = true;
 }
 
 
 
 void AmpacheBrowser::onAlbumsFullyLoaded() {
+    // album data request might be still running because of album arts; therefore we do not set
+    // myIsAlbumDataRequestRunning to false here
+
     myAlbumRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onAlbumsFullyLoaded);
     myTrackRepository->fullyLoaded += DELEGATE0(&AmpacheBrowser::onTracksFullyLoaded);
-    myTrackModel = unique_ptr<TrackModel>{new TrackModel(*myTrackRepository)};
+    myTrackModel->requestAllData();
     myUi->setTrackModel(*myTrackModel);
+    myIsTrackDataRequestRunning = true;
 }
 
 
 
 void AmpacheBrowser::onTracksFullyLoaded() {
+    myIsTrackDataRequestRunning = false;
     myTrackRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onTracksFullyLoaded);
 }
 
 
 
-void AmpacheBrowser::onPlayTriggered(vector<string>& ids) {
+void AmpacheBrowser::onPlayTriggered(const vector<string>& ids) {
+    auto actualIds = ids;
+    
     // if nothing selected, take all
-    if (ids.size() == 0) {
+    if (actualIds.size() == 0) {
         for (int row = 0; row < myTrackModel->rowCount(); ++row) {
-            ids.push_back(myTrackModel->data(myTrackModel->index(row, 3)).toString().toStdString());
+            actualIds.push_back(myTrackModel->data(myTrackModel->index(row, 3)).toString().toStdString());
         }
     }
 
     Index<PlaylistAddItem> playlistAddItems;
-    for (auto id: ids) {
+    for (auto& id: actualIds) {
         Tuple tuple;
         playlistAddItems.append(String{myTrackRepository->getById(id).getUrl().c_str()}, move(tuple), nullptr);
     }
@@ -130,13 +164,13 @@ void AmpacheBrowser::onPlayTriggered(vector<string>& ids) {
 
 
 
-void AmpacheBrowser::onArtistsSelected(vector<string>& ids) {
+void AmpacheBrowser::onArtistsSelected(const vector<string>& ids) {
     if (ids.empty()) {
         myAlbumRepository->unsetFilter();
         myTrackRepository->unsetFilter();
     } else {
         vector<reference_wrapper<const Artist>> artists;
-        for (auto id: ids) {
+        for (auto& id: ids) {
             auto& artist = myArtistRepository->getById(id);
             artists.push_back(artist);
         }
@@ -147,12 +181,12 @@ void AmpacheBrowser::onArtistsSelected(vector<string>& ids) {
 
 
 
-void AmpacheBrowser::onAlbumsSelected(vector<string>& ids) {
+void AmpacheBrowser::onAlbumsSelected(const vector<string>& ids) {
     if (ids.empty()) {
         myTrackRepository->unsetFilter();
     } else {
         vector<reference_wrapper<const Album>> albums;
-        for (auto id: ids) {
+        for (auto& id: ids) {
             auto& album = myAlbumRepository->getById(id);
             albums.push_back(album);
         }
@@ -171,6 +205,38 @@ void AmpacheBrowser::onSearchTriggered(const string& searchText) {
         myArtistRepository->setFilter(unique_ptr<Filter<ArtistData>>{new NameFilterForArtists{searchText}});
         myAlbumRepository->setFilter(unique_ptr<Filter<AlbumData>>{new NameFilterForAlbums{searchText}});
         myTrackRepository->setFilter(unique_ptr<Filter<TrackData>>{new NameFilterForTracks{searchText}});
+    }
+}
+
+
+
+void AmpacheBrowser::onArtistDataRequestsAborted() {
+    myIsArtistDataRequestRunning = false;
+    possiblyRaiseTerminated();
+}
+
+
+
+void AmpacheBrowser::onAlbumDataRequestsAborted() {
+    myIsAlbumDataRequestRunning = false;
+    possiblyRaiseTerminated();
+}
+
+
+
+void AmpacheBrowser::onTrackDataRequestsAborted() {
+    myIsTrackDataRequestRunning = false;
+    possiblyRaiseTerminated();
+}
+
+
+
+void AmpacheBrowser::possiblyRaiseTerminated() {
+    if (!myIsArtistDataRequestRunning && !myIsAlbumDataRequestRunning && !myIsTrackDataRequestRunning) {
+        myArtistModel->dataRequestsAborted -= DELEGATE0(&AmpacheBrowser::onArtistDataRequestsAborted);
+        myAlbumModel->dataRequestsAborted -= DELEGATE0(&AmpacheBrowser::onAlbumDataRequestsAborted);
+        myTrackModel->dataRequestsAborted -= DELEGATE0(&AmpacheBrowser::onTrackDataRequestsAborted);
+        terminated();
     }
 }
 

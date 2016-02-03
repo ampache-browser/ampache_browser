@@ -32,18 +32,25 @@ class ArtistModel: public QAbstractTableModel {
 public:
     explicit ArtistModel(data::ArtistRepository& artistRepository, QObject* parent = 0);
 
+    infrastructure::Event<void> dataRequestsAborted{};
+
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
+    void requestAllData();
+
+    void abortDataRequests();
+
 private:
     data::ArtistRepository& myArtistRepository;
     const std::unique_ptr<Requests> myRequests{new Requests{60}};
+    bool myDataRequestsAborted = false;
 
     void onReadyToExecute(RequestGroup requestGroup);
-    void onReadyArtists(std::pair<int, int> offsetAndLimit);
+    void onLoaded(std::pair<int, int> offsetAndLimit);
     void onFilterChanged();
 };
 

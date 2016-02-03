@@ -152,11 +152,17 @@ void ArtistRepository::onReadyArtists(vector<unique_ptr<ArtistData>>& artistsDat
     myUnfilteredFilter->processUpdatedSourceData(myLoadOffset, artistsData.size());
     myFilter->apply();
     myLoadOffset = -1;
-    loaded(offsetAndLimit);
-
     myLoadProgress += artistsData.size();
-    if (myLoadProgress >= myAmpacheService.numberOfArtists()) {
+
+    bool isFullyLoaded = myLoadProgress >= myAmpacheService.numberOfArtists();
+    if (isFullyLoaded) {
         myCache.saveArtistsData(myArtistsData);
+    }
+
+    // application can be terminated after loaded event therefore there should be no access to instance variables
+    // after it is fired
+    loaded(offsetAndLimit);
+    if (isFullyLoaded) {
         fullyLoaded();
     }
 }
@@ -180,10 +186,12 @@ void ArtistRepository::loadFromCache() {
     myUnfilteredFilter->processUpdatedSourceData(0, myArtistsData.size());
     myFilter->apply();
     myLoadOffset = -1;
+    myLoadProgress += myArtistsData.size();
+
+    // application can be terminated after loaded event therefore there should be no access to instance variables
+    // after it is fired
     auto offsetAndLimit = pair<int, int>{0, myArtistsData.size()};
     loaded(offsetAndLimit);
-
-    myLoadProgress += myArtistsData.size();
     fullyLoaded();
 }
 

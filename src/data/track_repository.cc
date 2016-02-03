@@ -167,11 +167,17 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
     myUnfilteredFilter->processUpdatedSourceData(myLoadOffset, tracksData.size());
     myFilter->apply();
     myLoadOffset = -1;
-    loaded(offsetAndLimit);
-
     myLoadProgress += tracksData.size();
-    if (myLoadProgress >= myAmpacheService.numberOfTracks()) {
+
+    bool isFullyLoaded = myLoadProgress >= myAmpacheService.numberOfTracks();
+    if (isFullyLoaded) {
         myCache.saveTracksData(myTracksData);
+    }
+
+    // application can be terminated after loaded event therefore there should be no access to instance variables
+    // after it is fired
+    loaded(offsetAndLimit);
+    if (isFullyLoaded) {
         fullyLoaded();
     }
 }
@@ -205,10 +211,12 @@ void TrackRepository::loadFromCache() {
     myUnfilteredFilter->processUpdatedSourceData(0, myTracksData.size());
     myFilter->apply();
     myLoadOffset = -1;
+    myLoadProgress += myTracksData.size();
+
+    // application can be terminated after loaded event therefore there should be no access to instance variables
+    // after it is fired
     auto offsetAndLimit = pair<int, int>{0, myTracksData.size()};
     loaded(offsetAndLimit);
-
-    myLoadProgress += myTracksData.size();
     fullyLoaded();
 }
 

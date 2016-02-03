@@ -59,7 +59,7 @@ AmpacheService::AmpacheService(const string& url, const string& user, const stri
 myUrl{url},
 myUser{user},
 myPasswordHash{passwordHash},
-myOnGetContentsFunc{bind(&AmpacheService::onGetContent, this, _1, _2)},
+myOnGetContentsFunc{bind(&AmpacheService::onGetContents, this, _1, _2)},
 myOnAlbumArtFinishedFunc{bind(&AmpacheService::onAlbumArtFinished, this, _1, _2)} {
     connectToServer();
 }
@@ -151,7 +151,7 @@ void AmpacheService::callMethod(const string& name, const map<string, string>& a
 
 
 
-void AmpacheService::onGetContent(const char* url, const Index<char>& contentBuffer) {
+void AmpacheService::onGetContents(const char* url, const Index<char>& contentBuffer) {
     bool error = !contentBuffer.len();
 
     string content = string{contentBuffer.begin(), static_cast<size_t>(contentBuffer.len())};
@@ -219,6 +219,9 @@ void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader, bool er
 
 void AmpacheService::processAlbums(QXmlStreamReader& xmlStreamReader) {
     auto albumsData = createAlbums(xmlStreamReader);
+
+    // application can be terminated after readyAlbums event therefore there should be no access to instance variables
+    // after it is fired
     readyAlbums(albumsData);
 }
 
@@ -324,18 +327,25 @@ void AmpacheService::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scal
     myFinishedAlbumArts.emplace(artUrl, art);
     myPendingAlbumArts.erase(artUrl);
 
-    if (myPendingAlbumArts.empty()) {
-        readyAlbumArts(myFinishedAlbumArts);
-        myFinishedAlbumArts.clear();
-    }
-
     scaleAlbumArtRunnable->deleteLater();
+
+    if (myPendingAlbumArts.empty()) {
+        auto finishedAlbumArts = myFinishedAlbumArts;
+        myFinishedAlbumArts.clear();
+
+        // application can be terminated after readyAlbumArts event therefore there should be no access to instance
+        // variables after it is fired
+        readyAlbumArts(finishedAlbumArts);
+    }
 }
 
 
 
 void AmpacheService::processArtists(QXmlStreamReader& xmlStreamReader) {
     auto artistsData = createArtists(xmlStreamReader);
+
+    // application can be terminated after readyArtists event therefore there should be no access to instance variables
+    // after it is fired
     readyArtists(artistsData);
 }
 
@@ -409,6 +419,9 @@ vector<unique_ptr<ArtistData>> AmpacheService::createArtists(QXmlStreamReader& x
 
 void AmpacheService::processTracks(QXmlStreamReader& xmlStreamReader) {
     auto tracksData = createTracks(xmlStreamReader);
+
+    // application can be terminated after readyTracks event therefore there should be no access to instance variables
+    // after it is fired
     readyTracks(tracksData);
 }
 

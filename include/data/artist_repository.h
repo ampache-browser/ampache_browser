@@ -55,7 +55,7 @@ public:
     domain::Artist& getById(const std::string& id) const;
 
     bool isLoaded(int filteredOffset, int limit = 1) const;
-    
+
     int maxCount();
 
     void setFilter(std::unique_ptr<Filter<ArtistData>> filter);

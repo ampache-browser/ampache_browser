@@ -72,7 +72,7 @@ class AmpacheService: public QObject {
     Q_OBJECT
 
 public:
-    typedef std::function<void (const char* url, const Index<char>& buffer)> OnGetContentsFunc;
+    using OnGetContentsFunc = std::function<void (const char* url, const Index<char>& buffer)>;
 
     explicit AmpacheService(const std::string& url, const std::string& user, const std::string& passwordHash);
 
@@ -137,7 +137,7 @@ private:
     OnGetContentsFunc myOnGetContentsFunc;
     OnGetContentsFunc myOnAlbumArtFinishedFunc;
 
-    void onGetContent(const char* url, const Index<char>& contentBuffer);
+    void onGetContents(const char* url, const Index<char>& contentBuffer);
     void onAlbumArtFinished(const char* artUrl, const Index<char>& contentBuffer);
 
     void connectToServer();

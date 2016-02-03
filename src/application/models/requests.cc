@@ -3,11 +3,10 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
-#include <iostream>
 #include "requests.h"
 
 using namespace std;
@@ -25,10 +24,10 @@ Requests::Requests(): Requests(0) { }
 
 
 
-// SMELL: The algorithm is not clearly visible from here because it heavilly relies on RequestGroups behaviour (sorting
+// SMELL: The algorithm is not clearly visible from here because it heavily relies on RequestGroups behaviour (sorting
 // chops backwards, etc.).
 void Requests::add(int offset) {
-    if (myCurrentRequestGroup.isEmpty()) {
+    if (!isInProgress()) {
         myCurrentRequestGroup = RequestGroup{offset, offset};
         readyToExecute(myCurrentRequestGroup);
         return;
@@ -68,6 +67,12 @@ RequestGroup Requests::setFinished() {
         myLastEnqueuedOffset = numeric_limits<int>::max();
     }
     return finishedRequestGroup;
+}
+
+
+
+bool Requests::isInProgress() const {
+    return !myCurrentRequestGroup.isEmpty();
 }
 
 }

@@ -7,7 +7,6 @@
 
 
 
-#include <iostream>
 #include "request_group.h"
 #include "request_groups.h"
 

@@ -35,16 +35,23 @@ class AlbumModel: public QAbstractTableModel {
 public:
     explicit AlbumModel(data::AlbumRepository& albumRepository, QObject* parent = 0);
 
+    infrastructure::Event<void> dataRequestsAborted{};
+
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
+    void requestAllData();
+
+    void abortDataRequests();
+
 private:
     data::AlbumRepository& myAlbumRepository;
     const std::unique_ptr<Requests> myAlbumRequests{new Requests};
     const std::unique_ptr<Requests> myArtRequests{new Requests{3}};
+    bool myDataRequestsAborted = false;
 
     void onReadyToExecuteAlbums(RequestGroup requestGroup);
     void onLoaded(std::pair<int, int> offsetAndLimit);

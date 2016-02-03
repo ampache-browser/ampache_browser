@@ -38,24 +38,19 @@ myAlbumRepository(albumRepository) {
     myArtRequests->readyToExecute += DELEGATE1(&AlbumModel::onReadyToExecuteArts, RequestGroup);
     myAlbumRepository.artsLoaded += DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
     myAlbumRepository.filterChanged += DELEGATE0(&AlbumModel::onFilterChanged);
-
-    // start populating with data
-    for (int row = 0; row < rowCount(); row++) {
-        myAlbumRequests->add(row);
-    }
 }
 
 
 
 QVariant AlbumModel::data(const QModelIndex& index, int role) const {
-    if (!index.isValid()) {
+    if (!index.isValid() || (role != Qt::DisplayRole && role != Qt::DecorationRole) || myDataRequestsAborted) {
         return QVariant{};
     }
 
     QVariant notLoaded{};
     if (role == Qt::DisplayRole) {
         notLoaded = QVariant{QString{"loading..."}};
-    } else if (role == Qt::DecorationRole) {
+    } else {
         // SMELL: size specified on multiple places
         QPixmap notLoadedPixmap{100, 100};
         notLoadedPixmap.fill(Qt::GlobalColor::lightGray);
@@ -74,15 +69,13 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
     if (index.column() == 0) {
         if (role == Qt::DisplayRole) {
             return QString::fromStdString(album.getName());
-        } else if (role == Qt::DecorationRole) {
+        } else {
             if (!album.hasArt()) {
                 myArtRequests->add(row);
                 return notLoaded;
             } else {
                 return QIcon{album.getArt()};
             }
-        } else {
-            return QVariant{};
         }
     } else {
         if (role == Qt::DisplayRole) {
@@ -107,6 +100,25 @@ int AlbumModel::columnCount(const QModelIndex&) const {
 
 
 
+void AlbumModel::requestAllData() {
+    for (int row = 0; row < rowCount(); row++) {
+        myAlbumRequests->add(row);
+    }
+}
+
+
+
+void AlbumModel::abortDataRequests() {
+    myDataRequestsAborted = true;
+    myAlbumRequests->cancel();
+    myArtRequests->cancel();
+    if (!myAlbumRequests->isInProgress() && !myArtRequests->isInProgress()) {
+        dataRequestsAborted();
+    }
+}
+
+
+
 void AlbumModel::onReadyToExecuteAlbums(RequestGroup requestGroup) {
     myAlbumRepository.load(requestGroup.getLower(), requestGroup.getSize());
 }
@@ -122,6 +134,9 @@ void AlbumModel::onLoaded(pair<int, int>) {
         dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
     }
 
+    if (myDataRequestsAborted && !myArtRequests->isInProgress()) {
+        dataRequestsAborted();
+    }
 }
 
 
@@ -135,6 +150,10 @@ void AlbumModel::onReadyToExecuteArts(RequestGroup requestGroup) {
 void AlbumModel::onArtsLoaded(pair<int, int>) {
     auto finishedRequestGroup = myArtRequests->setFinished();
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+
+    if (myDataRequestsAborted && !myAlbumRequests->isInProgress()) {
+        dataRequestsAborted();
+    }
 }
 
 

@@ -38,6 +38,10 @@ public:
 
     AmpacheBrowser& operator=(const AmpacheBrowser& other) = delete;
 
+    infrastructure::Event<void> terminated{};
+
+    void requestTermination();
+
 private:
     std::unique_ptr<data::AmpacheService> myAmpacheService = nullptr;
     std::unique_ptr<data::Cache> myCache = nullptr;
@@ -52,14 +56,24 @@ private:
 
     ui::Ui* const myUi = nullptr;
 
+    bool myIsArtistDataRequestRunning = false;
+    bool myIsAlbumDataRequestRunning = false;
+    bool myIsTrackDataRequestRunning = false;
+
     void onConnected();
     void onArtistsFullyLoaded();
     void onAlbumsFullyLoaded();
     void onTracksFullyLoaded();
-    void onPlayTriggered(std::vector<std::string>& ids);
-    void onArtistsSelected(std::vector<std::string>& ids);
-    void onAlbumsSelected(std::vector<std::string>& ids);
+    void onPlayTriggered(const std::vector<std::string>& ids);
+    void onArtistsSelected(const std::vector<std::string>& ids);
+    void onAlbumsSelected(const std::vector<std::string>& ids);
     void onSearchTriggered(const std::string& searchText);
+
+    void onArtistDataRequestsAborted();
+    void onAlbumDataRequestsAborted();
+    void onTrackDataRequestsAborted();
+
+    void possiblyRaiseTerminated();
 };
 
 }
