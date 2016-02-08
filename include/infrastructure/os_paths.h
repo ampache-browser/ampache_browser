@@ -18,11 +18,24 @@
 
 namespace infrastructure {
 
+/**
+ * @brief Provides paths to standard disk locations.
+ */
 class OsPaths {
 
 public:
+    /**
+     * @brief Path to user configuration directory.
+     *
+     * @return std::string
+     */
     static std::string getConfigHome();
 
+    /**
+     * @brief Path to uder cache directory.
+     *
+     * @return std::string
+     */
     static std::string getCacheHome();
 
 private:

@@ -31,17 +31,30 @@ class Indices;
 
 
 
+/**
+ * @brief Provides albums data filtered by artists.
+ */
 class ArtistFilterForAlbums: public Filter<AlbumData> {
 
 public:
+    /**
+     * @brief Constructor.
+     *
+     * @param artists Artists by which the albums shall be filtered.
+     * @param indices Access to the data that shall be filtered.
+     */
     explicit ArtistFilterForAlbums(const std::vector<std::reference_wrapper<const domain::Artist>>& artists,
         Indices& indices);
 
     ~ArtistFilterForAlbums() override;
 
+    /**
+     * @sa Filter::apply()
+     */
     void apply() override;
 
 private:
+    // arguments from the constructor
     const std::vector<std::reference_wrapper<const domain::Artist>> myArtists;
     Indices& myIndices;
 

@@ -44,8 +44,8 @@ void ArtistFilterForTracks::apply() {
     myFilteredData.clear();
     set<reference_wrapper<TrackData>, TrackData::NameCompare> filteredUniqueTrackData;
     for (auto& artist: myArtists) {
-        auto artistIndex = myIndices.getArtistTrack(artist.get());
-        filteredUniqueTrackData.insert(artistIndex.begin(), artistIndex.end());
+        auto tracksData = myIndices.getArtistTracks(artist.get());
+        filteredUniqueTrackData.insert(tracksData.begin(), tracksData.end());
     }
     myFilteredData = vector<reference_wrapper<TrackData>>{
         filteredUniqueTrackData.begin(), filteredUniqueTrackData.end()};

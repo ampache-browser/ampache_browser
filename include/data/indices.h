@@ -44,29 +44,77 @@ using AlbumTrackIndex = std::unordered_map<
 
 
 
+/**
+ * @brief Provides fast access to data.
+ */
 class Indices {
 
 public:
     // SMELL: Could be suboptimal to have only one event for all index types.
+    /**
+     * @brief Event fired when some of the indices has been changed.
+     *
+     * @sa updateArtistAlbum(), updateArtistTrack(), updateAlbumTrack()
+     */
     infrastructure::Event<void> changed{};
 
-    AlbumDataUnorderedSet& getArtistAlbum(const domain::Artist& artist);
+    // SMELL: Rename to getArtistAlbums.  For other get methods too.
+    /**
+     * @brief Gets albums data for the given @p artist.
+     *
+     * @param artist The artist which albums data shall be returned.
+     * @return Albums data.
+     */
+    AlbumDataUnorderedSet& getArtistAlbums(const domain::Artist& artist);
 
+    /**
+     * @brief Update album data index for the given @p artist.
+     *
+     * @param artist The artist which index shall be updated.
+     * @param albumData The data which shall be inserted to the index.
+     */
     void updateArtistAlbum(const domain::Artist& artist, AlbumData& albumData);
 
-    TrackDataUnorderedSet& getArtistTrack(const domain::Artist& artist);
+    /**
+     * @brief Gets tracks data for the given @p artist.
+     *
+     * @param artist The artist which tracks data shall be returned.
+     * @return Tracks data.
+     */
+    TrackDataUnorderedSet& getArtistTracks(const domain::Artist& artist);
 
+    /**
+     * @brief Update track data index for the given @p artist.
+     *
+     * @param artist The artist which index shall be updated.
+     * @param trackData The data which shall be inserted to the index.
+     */
     void updateArtistTrack(const domain::Artist& artist, TrackData& trackData);
 
-    TrackDataUnorderedSet& getAlbumTrack(const domain::Album& album);
+    /**
+     * @brief Gets tracks data for the given @p album.
+     *
+     * @param album The album which tracks data shall be returned.
+     * @return Tracks data.
+     */
+    TrackDataUnorderedSet& getAlbumTracks(const domain::Album& album);
 
+    /**
+     * @brief Update track data index for the given @p album.
+     *
+     * @param album The album which index shall be updated.
+     * @param trackData The data which shall be inserted to the index.
+     */
     void updateAlbumTrack(const domain::Album& album, TrackData& trackData);
 
 private:
+    // <artist, albums data> map
     ArtistAlbumIndex myArtistAlbum;
 
+    // <artist, tracks data> map
     ArtistTrackIndex myArtistTrack;
 
+    // <album, tracks data> map
     AlbumTrackIndex myAlbumTrack;
 };
 

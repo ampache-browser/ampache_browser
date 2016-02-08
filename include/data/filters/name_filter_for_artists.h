@@ -22,11 +22,25 @@ class ArtistData;
 
 
 
+/**
+ * @brief Provides artists data filtered by name.
+ *
+ * Filter is making exact, case insensitive match of the artist's name (domain::Album::getName()) with the given
+ * pattern.
+ */
 class NameFilterForArtists: public Filter<ArtistData> {
 
 public:
+    /**
+     * @brief Constructor.
+     *
+     * @param namePattern The pattern that shall be used to match the artist's name.
+     */
     explicit NameFilterForArtists(const std::string& namePattern);
 
+    /**
+     * @sa Filter::apply()
+     */
     void apply() override;
 
 private:

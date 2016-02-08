@@ -44,8 +44,8 @@ void AlbumFilterForTracks::apply() {
     myFilteredData.clear();
     set<reference_wrapper<TrackData>> filteredUniqueTrackData;
     for (auto& album: myAlbums) {
-        auto albumIndex = myIndices.getAlbumTrack(album.get());
-        filteredUniqueTrackData.insert(albumIndex.begin(), albumIndex.end());
+        auto tracksData = myIndices.getAlbumTracks(album.get());
+        filteredUniqueTrackData.insert(tracksData.begin(), tracksData.end());
     }
     myFilteredData = vector<reference_wrapper<TrackData>>{
         filteredUniqueTrackData.begin(), filteredUniqueTrackData.end()};

@@ -22,7 +22,6 @@ namespace infrastructure {
 
 /**
  * @brief Simple event dispatcher.
- *
  */
 template <class T>
 class Event {
@@ -33,7 +32,6 @@ public:
      * @brief Fires the event.
      *
      * @param arg Event argument.
-     * @return void
      */
     void operator()(T& arg) const;
 
@@ -41,7 +39,6 @@ public:
      * @brief Subscribes a subscriber (listener) to the event.
      *
      * @param subscriber A listener that shall be subscribed to the event.
-     * @return void
      */
     void operator+=(Delegate<T> subscriber);
 
@@ -49,7 +46,6 @@ public:
      * @brief Unsubscribes the subscriber from the event.
      *
      * @param subscriber A listener that shall be unsubscribed from the event.
-     * @return void
      */
     void operator-=(Delegate<T> subscriber);
 
@@ -62,7 +58,6 @@ private:
 
 /**
  * @brief Simple patrameter-less event dispatcher.
- *
  */
 template <>
 class Event<void> {
@@ -71,8 +66,6 @@ public:
 
     /**
      * @brief Fires the event.
-     *
-     * @return void
      */
     void operator()() const;
 
@@ -80,7 +73,6 @@ public:
      * @brief Subscribes a subscriber (listener) to the event.
      *
      * @param subscriber A listener that shall be subscribed to the event.
-     * @return void
      */
     void operator+=(Delegate<void> subscriber);
 
@@ -88,7 +80,6 @@ public:
      * @brief Unsubscribes the subscriber from the event.
      *
      * @param subscriber A listener that shall be unsubscribed from the event.
-     * @return void
      */
     void operator-=(Delegate<void> subscriber);
 

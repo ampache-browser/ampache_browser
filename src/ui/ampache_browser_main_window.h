@@ -23,6 +23,9 @@ class QAction;
 
 namespace ui {
 
+/**
+ * @brief Application (plugin) main window.
+ */
 class AmpacheBrowserMainWindow: public QMainWindow {
    Q_OBJECT
 

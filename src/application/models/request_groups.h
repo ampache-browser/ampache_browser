@@ -22,38 +22,76 @@ class RequestGroup;
 
 
 
+/**
+ * @brief Set of size bounded RequestGroup() objects.
+ */
 class RequestGroups {
 
 public:
+    /**
+     * @brief Constructor.
+     *
+     * @param granularity The maximal size of member groups.  0 if unlimited.
+     */
     explicit RequestGroups(int granularity);
 
     RequestGroups(const RequestGroups& other) = delete;
 
     RequestGroups& operator=(const RequestGroups& other) = delete;
 
+    /**
+     * @brief Returns true if the collection is empty.
+     */
     bool isEmpty() const;
 
+    /**
+     * @brief Cuts @p requestGroup from the set and places it on top.
+     *
+     * The operation modifies/removes affected groups as needed.  For example of @p requestGroup is big, spreading
+     * over (intersecting with) several groups in the set, those are removed and groups intersecting on bounds are
+     * shrinked accordingly.
+     *
+     * The entire set is then modified so that no group is bigger than the set granularity.
+     *
+     * @param requestGroup The group that shall be cut and moved.
+     */
     void cutAndPlaceOnTop(RequestGroup requestGroup);
 
+    /**
+     * @brief Make grup determined by @p offset bigger by one.
+     *
+     * Another group may be shrinked in order to prevent overlapping.
+     *
+     * @param offset Group extensible to this offset shall be extended.
+     * @return true if a group was extended, false no group extensible to the @p offset was found.
+     */
     bool extend(int offset);
 
+    /**
+     * @brief Removes and returns group from top of the set.
+     *
+     * @return application::RequestGroup
+     *
+     * @sa cutAndPlaceOnTop()
+     */
     RequestGroup pop();
 
+    /**
+     * @brief Removes all groups
+     */
     void clear();
 
 private:
+    // argument from the constructor
     const int myGranularity;
 
+    // stored groups
     std::vector<RequestGroup> myRequestGroups;
 
     void chop();
-
     void appendOnTop(std::vector<RequestGroup>& groups, RequestGroup groupToPlace);
-
     int findOwningGroupIdx(int offset) const;
-
     int findExtensibleGroupIdx(int offset) const;
-
     std::vector<int> findIntersectingGroupIdxs(RequestGroup requestGroup) const;
 };
 

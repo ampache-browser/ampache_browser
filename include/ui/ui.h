@@ -25,6 +25,9 @@ class QItemSelection;
 
 namespace ui {
 
+/**
+ * @brief Provides access to the user interface.
+ */
 class Ui: QObject {
     Q_OBJECT
 
@@ -35,22 +38,52 @@ public:
 
     Ui& operator=(const Ui& other) = delete;
 
+    /**
+     * @brief Event fired after user triggered play function.
+     */
     infrastructure::Event<std::vector<std::string>> playTriggered{};
 
-    infrastructure::Event<bool> albumWindowRedraw{};
-
+    /**
+     * @brief Event fired after user selected or unselected artists.
+     */
     infrastructure::Event<std::vector<std::string>> artistsSelected{};
 
+    /**
+     * @brief Event fired after user selected or unselected albums.
+     */
     infrastructure::Event<std::vector<std::string>> albumsSelected{};
 
+    /**
+     * @brief Event fired after user triggered search function.
+     */
     infrastructure::Event<std::string> searchTriggered{};
 
+    /**
+     * @brief Gets main window widged of the application (plugin).
+     *
+     * @return QWidget*
+     */
     QWidget* getMainWidget() const;
 
+    /**
+     * @brief Sets artist model to the corresponding UI view.
+     *
+     * @param model
+     */
     void setArtistModel(QAbstractItemModel& model);
 
+    /**
+     * @brief Sets album model to the corresponding UI view.
+     *
+     * @param model
+     */
     void setAlbumModel(QAbstractItemModel& model);
 
+    /**
+     * @brief Sets track model to the corresponding UI view.
+     *
+     * @param model
+     */
     void setTrackModel(QAbstractItemModel& model);
 
 private slots:
@@ -62,6 +95,7 @@ private slots:
     void onSearchReturnPressed();
 
 private:
+    // the main window widget
     AmpacheBrowserMainWindow* myMainWindow;
 
     void raisePlayTriggeredForSelectedTracks() const;

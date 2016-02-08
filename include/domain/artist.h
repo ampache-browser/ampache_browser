@@ -18,20 +18,40 @@
 
 namespace domain {
 
+/**
+ * @brief Represents the artist domain object.
+ */
 class Artist {
 
 public:
+    /**
+     * @brief Constructor.
+     *
+     * @param id Identifier.
+     * @param name Artist's name.
+     */
     Artist(const std::string& id, const std::string& name);
 
     Artist(const Artist& other) = delete;
 
     Artist& operator=(const Artist& other) = delete;
 
+    /**
+     * @brief Gets the identifier.
+     *
+     * @return const std::string
+     */
     const std::string getId() const;
 
+    /**
+     * @brief Gets artist's name.
+     *
+     * @return const std::string
+     */
     const std::string getName() const;
 
 private:
+    // arguments from the constructor
     const std::string myId;
     const std::string myName;
 };

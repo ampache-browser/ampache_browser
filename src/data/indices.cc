@@ -17,7 +17,7 @@ using namespace domain;
 
 namespace data {
 
-AlbumDataUnorderedSet& Indices::getArtistAlbum(const Artist& artist) {
+AlbumDataUnorderedSet& Indices::getArtistAlbums(const Artist& artist) {
     return myArtistAlbum.at(artist);
 }
 
@@ -30,7 +30,7 @@ void Indices::updateArtistAlbum(const Artist& artist, AlbumData& albumData) {
 
 
 
-TrackDataUnorderedSet& Indices::getArtistTrack(const Artist& artist) {
+TrackDataUnorderedSet& Indices::getArtistTracks(const Artist& artist) {
     return myArtistTrack.at(artist);
 }
 
@@ -43,7 +43,7 @@ void Indices::updateArtistTrack(const Artist& artist, TrackData& trackData) {
 
 
 
-TrackDataUnorderedSet& Indices::getAlbumTrack(const Album& album) {
+TrackDataUnorderedSet& Indices::getAlbumTracks(const Album& album) {
     return myAlbumTrack.at(album);
 }
 

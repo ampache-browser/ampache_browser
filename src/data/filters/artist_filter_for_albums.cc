@@ -46,8 +46,8 @@ void ArtistFilterForAlbums::apply() {
 
     // TODO: Include also albums that have matching album artist.
     for (auto& artist: myArtists) {
-        auto artistIndex = myIndices.getArtistAlbum(artist.get());
-        filteredUniqueAlbumData.insert(artistIndex.begin(), artistIndex.end());
+        auto albumsData = myIndices.getArtistAlbums(artist.get());
+        filteredUniqueAlbumData.insert(albumsData.begin(), albumsData.end());
     }
     myFilteredData =
         vector<reference_wrapper<AlbumData>>{filteredUniqueAlbumData.begin(), filteredUniqueAlbumData.end()};

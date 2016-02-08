@@ -24,11 +24,24 @@ class AlbumData;
 
 
 
+/**
+ * @brief Provides albums data filtered by name.
+ *
+ * Filter is making exact, case insensitive match of the album's name (domain::Album::getName()) with the given pattern.
+ */
 class NameFilterForAlbums: public Filter<AlbumData> {
 
 public:
+    /**
+     * @brief Constructor.
+     *
+     * @param namePattern The pattern that shall be used to match the album's name.
+     */
     explicit NameFilterForAlbums(const std::string& namePattern);
 
+    /**
+     * @sa Filter::apply()
+     */
     void apply() override;
 
 private:

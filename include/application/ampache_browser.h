@@ -27,19 +27,47 @@
 
 namespace application {
 
+/**
+ * @brief The application.
+ *
+ * Class represents the application and contains the application logic.
+ */
 class AmpacheBrowser {
 
 public:
+    /**
+     * @brief Constructor.
+     *
+     * @param ui The user interface.
+     */
     explicit AmpacheBrowser(ui::Ui& ui);
 
+    /**
+     * @brief Destructor.
+     *
+     * @note Should be called only after ::terminated event was fired due to gracefull termination of asynchronous
+     * operations.
+     */
     ~AmpacheBrowser();
 
     AmpacheBrowser(const AmpacheBrowser& other) = delete;
 
     AmpacheBrowser& operator=(const AmpacheBrowser& other) = delete;
 
+    /**
+     * @brief Fired after all asynchronous operations has been terminated.
+     *
+     * @sa requestTermination()
+     */
     infrastructure::Event<void> terminated{};
 
+    /**
+     * @brief Request to terminate the application.
+     *
+     * This method should be used to end the application gracefully.  It signals to terminate all asynchronous
+     * operations and once they are terminated it fires ::terminated event.  The consumer of the event then can delete
+     * the instance.
+     */
     void requestTermination();
 
 private:
