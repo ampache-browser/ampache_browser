@@ -84,9 +84,9 @@ private:
 
     ui::Ui* const myUi = nullptr;
 
-    bool myIsArtistDataRequestRunning = false;
-    bool myIsAlbumDataRequestRunning = false;
-    bool myIsTrackDataRequestRunning = false;
+    bool myIsArtistDataRequestAborted = false;
+    bool myIsAlbumDataRequestAborted = false;
+    bool myIsTrackDataRequestAborted = false;
 
     void onConnected();
     void onArtistsFullyLoaded();

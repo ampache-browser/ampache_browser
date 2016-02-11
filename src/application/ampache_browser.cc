@@ -107,37 +107,29 @@ void AmpacheBrowser::onConnected() {
     myArtistRepository->fullyLoaded += DELEGATE0(&AmpacheBrowser::onArtistsFullyLoaded);
     myArtistModel->requestAllData();
     myUi->setArtistModel(*myArtistModel);
-    myIsArtistDataRequestRunning = true;
 }
 
 
 
 void AmpacheBrowser::onArtistsFullyLoaded() {
-    myIsArtistDataRequestRunning = false;
     myArtistRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onArtistsFullyLoaded);
     myAlbumRepository->fullyLoaded += DELEGATE0(&AmpacheBrowser::onAlbumsFullyLoaded);
     myAlbumModel->requestAllData();
     myUi->setAlbumModel(*myAlbumModel);
-    myIsAlbumDataRequestRunning = true;
 }
 
 
 
 void AmpacheBrowser::onAlbumsFullyLoaded() {
-    // album data request might be still running because of album arts; therefore we do not set
-    // myIsAlbumDataRequestRunning to false here
-
     myAlbumRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onAlbumsFullyLoaded);
     myTrackRepository->fullyLoaded += DELEGATE0(&AmpacheBrowser::onTracksFullyLoaded);
     myTrackModel->requestAllData();
     myUi->setTrackModel(*myTrackModel);
-    myIsTrackDataRequestRunning = true;
 }
 
 
 
 void AmpacheBrowser::onTracksFullyLoaded() {
-    myIsTrackDataRequestRunning = false;
     myTrackRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onTracksFullyLoaded);
 }
 
@@ -211,28 +203,28 @@ void AmpacheBrowser::onSearchTriggered(const string& searchText) {
 
 
 void AmpacheBrowser::onArtistDataRequestsAborted() {
-    myIsArtistDataRequestRunning = false;
+    myIsArtistDataRequestAborted = true;
     possiblyRaiseTerminated();
 }
 
 
 
 void AmpacheBrowser::onAlbumDataRequestsAborted() {
-    myIsAlbumDataRequestRunning = false;
+    myIsAlbumDataRequestAborted = true;
     possiblyRaiseTerminated();
 }
 
 
 
 void AmpacheBrowser::onTrackDataRequestsAborted() {
-    myIsTrackDataRequestRunning = false;
+    myIsTrackDataRequestAborted = true;
     possiblyRaiseTerminated();
 }
 
 
 
 void AmpacheBrowser::possiblyRaiseTerminated() {
-    if (!myIsArtistDataRequestRunning && !myIsAlbumDataRequestRunning && !myIsTrackDataRequestRunning) {
+    if (myIsArtistDataRequestAborted && myIsAlbumDataRequestAborted && myIsTrackDataRequestAborted) {
         myArtistModel->dataRequestsAborted -= DELEGATE0(&AmpacheBrowser::onArtistDataRequestsAborted);
         myAlbumModel->dataRequestsAborted -= DELEGATE0(&AmpacheBrowser::onAlbumDataRequestsAborted);
         myTrackModel->dataRequestsAborted -= DELEGATE0(&AmpacheBrowser::onTrackDataRequestsAborted);

@@ -58,7 +58,6 @@ public:
      */
     infrastructure::Event<void> changed{};
 
-    // SMELL: Rename to getArtistAlbums.  For other get methods too.
     /**
      * @brief Gets albums data for the given @p artist.
      *
