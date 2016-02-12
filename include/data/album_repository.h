@@ -32,6 +32,7 @@ namespace data {
 class AmpacheService;
 class Cache;
 class ArtistRepository;
+class Indices;
 
 
 
@@ -47,8 +48,10 @@ public:
      * @param ampacheService Used for communication with Ampache server.
      * @param cache Used for accessing the disk cache.
      * @param artistRepository Used to set artist of the album.
+     * @param indices Indices to update.
      */
-    explicit AlbumRepository(AmpacheService& ampacheService, Cache& cache, const ArtistRepository& artistRepository);
+    explicit AlbumRepository(AmpacheService& ampacheService, Cache& cache, const ArtistRepository& artistRepository,
+        Indices& indices);
 
     ~AlbumRepository();
 
@@ -187,6 +190,7 @@ private:
     AmpacheService& myAmpacheService;
     Cache& myCache;
     const ArtistRepository& myArtistRepository;
+    Indices& myIndices;
 
     // number of loaded albums so far
     int myLoadProgress = 0;
@@ -218,6 +222,7 @@ private:
     void onFilterChanged();
 
     void loadFromCache();
+    void updateIndices(AlbumData& albumData);
     int computeMaxCount() const;
 };
 

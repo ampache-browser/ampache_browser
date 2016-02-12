@@ -190,8 +190,8 @@ private:
     void onReadyTracks(std::vector<std::unique_ptr<TrackData>>& trackData);
     void onFilterChanged();
 
-    void updateIndicies(TrackData& trackData);
     void loadFromCache();
+    void updateIndicies(TrackData& trackData);
     int computeMaxCount() const;
 };
 

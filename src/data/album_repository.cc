@@ -36,10 +36,11 @@ using namespace domain;
 namespace data {
 
 AlbumRepository::AlbumRepository(AmpacheService& ampacheService, Cache& cache,
-    const ArtistRepository& artistRepository):
+    const ArtistRepository& artistRepository, Indices& indices):
 myAmpacheService(ampacheService),
 myCache(cache),
-myArtistRepository(artistRepository) {
+myArtistRepository(artistRepository),
+myIndices{indices} {
     myUnfilteredFilter->setSourceData(myAlbumsData);
     myUnfilteredFilter->changed += DELEGATE0(&AlbumRepository::onFilterChanged);
     myFilter = myUnfilteredFilter;
@@ -214,6 +215,8 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
         if (albumData->hasArtist()) {
             auto& artist = myArtistRepository.getById(albumData->getArtistId());
             albumData->getAlbum().setArtist(artist);
+
+            updateIndices(*albumData);
         }
 
         myAlbumsData[offset] = move(albumData);
@@ -307,6 +310,8 @@ void AlbumRepository::loadFromCache() {
         if (albumData->hasArtist()) {
             auto& artist = myArtistRepository.getById(albumData->getArtistId());
             albumData->getAlbum().setArtist(artist);
+
+            updateIndices(*albumData);
         }
     }
 
@@ -320,6 +325,16 @@ void AlbumRepository::loadFromCache() {
     auto offsetAndLimit = pair<int, int>{0, myAlbumsData.size()};
     loaded(offsetAndLimit);
     fullyLoaded();
+}
+
+
+
+void AlbumRepository::updateIndices(AlbumData& albumData) {
+    // Ampache (3.7.0) seems to ignore Album Artist info.  Only single-artist albums have Artist ID set.  Albums with
+    // various artists does not (even if the Album Artist is set in the track's tags).  Therefore this code is
+    // redundand; it is kept however in case Ampache is fixed.
+    auto& artist = myArtistRepository.getById(albumData.getArtistId());
+    myIndices.updateArtistAlbum(artist, albumData);
 }
 
 
