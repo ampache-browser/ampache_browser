@@ -42,6 +42,16 @@ myAlbumRepository(albumRepository) {
 
 
 
+AlbumModel::~AlbumModel() {
+    myAlbumRepository.filterChanged -= DELEGATE0(&AlbumModel::onFilterChanged);
+    myAlbumRepository.artsLoaded -= DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
+    myArtRequests->readyToExecute -= DELEGATE1(&AlbumModel::onReadyToExecuteArts, RequestGroup);
+    myAlbumRepository.loaded -= DELEGATE1(&AlbumModel::onLoaded, pair<int, int>);
+    myAlbumRequests->readyToExecute -= DELEGATE1(&AlbumModel::onReadyToExecuteAlbums, RequestGroup);
+}
+
+
+
 QVariant AlbumModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid() || (role != Qt::DisplayRole && role != Qt::DecorationRole) || myDataRequestsAborted) {
         return QVariant{};

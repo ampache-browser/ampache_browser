@@ -36,6 +36,14 @@ myArtistRepository(artistRepository) {
 
 
 
+ArtistModel::~ArtistModel() {
+    myArtistRepository.filterChanged -= DELEGATE0(&ArtistModel::onFilterChanged);
+    myArtistRepository.loaded -= DELEGATE1(&ArtistModel::onLoaded, pair<int, int>);
+    myRequests->readyToExecute -= DELEGATE1(&ArtistModel::onReadyToExecute, RequestGroup);
+}
+
+
+
 QVariant ArtistModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid() || role != Qt::DisplayRole || myDataRequestsAborted) {
         return QVariant{};

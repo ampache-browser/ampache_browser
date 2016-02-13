@@ -36,6 +36,14 @@ myTrackRepository(trackRepository) {
 
 
 
+TrackModel::~TrackModel() {
+    myTrackRepository.filterChanged -= DELEGATE0(&TrackModel::onFilterChanged);
+    myTrackRepository.loaded -= DELEGATE1(&TrackModel::onLoaded, pair<int, int>);
+    myRequests->readyToExecute -= DELEGATE1(&TrackModel::onReadyToExecute, RequestGroup);
+}
+
+
+
 QVariant TrackModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid() || role != Qt::DisplayRole) {
         return QVariant{};

@@ -41,6 +41,8 @@ public:
      */
     explicit ArtistModel(data::ArtistRepository& artistRepository, QObject* parent = 0);
 
+    virtual ~ArtistModel();
+
     /**
      * @brief Fired when loading artists from an external source has been aborted.
      *

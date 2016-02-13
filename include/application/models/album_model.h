@@ -44,6 +44,8 @@ public:
      */
     explicit AlbumModel(data::AlbumRepository& albumRepository, QObject* parent = 0);
 
+    virtual ~AlbumModel();
+
     /**
      * @brief Fired when loading albums from an external source has been aborted.
      *

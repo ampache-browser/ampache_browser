@@ -41,6 +41,8 @@ public:
      */
     explicit TrackModel(data::TrackRepository& trackRepository, QObject* parent = 0);
 
+    virtual ~TrackModel();
+
     /**
      * @brief Fired when loading tracks from an external source has been aborted.
      *
