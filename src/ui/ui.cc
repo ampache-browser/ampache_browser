@@ -64,6 +64,7 @@ void Ui::setAlbumModel(QAbstractItemModel& model) {
 
 void Ui::setTrackModel(QAbstractItemModel& model) {
     myMainWindow->tracksTreeView->setModel(&model);
+    myMainWindow->tracksTreeView->hideColumn(3);
 }
 
 

@@ -72,6 +72,7 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     artistsListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     artistsListView->setSelectionBehavior(QAbstractItemView::SelectRows);
     tracksTreeView = new QTreeView{};
+    tracksTreeView->setIndentation(0);
 
     artistsDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     artistsDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
