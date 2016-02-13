@@ -330,11 +330,13 @@ void AlbumRepository::loadFromCache() {
 
 
 void AlbumRepository::updateIndices(AlbumData& albumData) {
+    myIndices.addAlbum(albumData.getAlbum());
+
     // Ampache (3.7.0) seems to ignore Album Artist info.  Only single-artist albums have Artist ID set.  Albums with
     // various artists does not (even if the Album Artist is set in the track's tags).  Therefore this code is
     // redundand; it is kept however in case Ampache is fixed.
     auto& artist = myArtistRepository.getById(albumData.getArtistId());
-    myIndices.updateArtistAlbum(artist, albumData);
+    myIndices.updateArtistAlbums(artist, albumData);
 }
 
 

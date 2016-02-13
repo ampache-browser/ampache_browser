@@ -59,7 +59,7 @@ myUi(&ui) {
 
     myIndices = unique_ptr<Indices>{new Indices{}};
 
-    myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpacheService, *myCache}};
+    myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpacheService, *myCache, *myIndices}};
     myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpacheService, *myCache,
       *myArtistRepository, *myIndices}};
     myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpacheService, *myCache,

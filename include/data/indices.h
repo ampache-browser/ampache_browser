@@ -30,22 +30,22 @@ using AlbumDataUnorderedSet = std::unordered_set<std::reference_wrapper<AlbumDat
 
 using TrackDataUnorderedSet = std::unordered_set<std::reference_wrapper<TrackData>, std::hash<TrackData>>;
 
-using ArtistAlbumIndex = std::unordered_map<
+using ArtistAlbumsIndex = std::unordered_map<
     std::reference_wrapper<const domain::Artist>, AlbumDataUnorderedSet,
     std::hash<domain::Artist>>;
 
-using ArtistTrackIndex = std::unordered_map<
+using ArtistTracksIndex = std::unordered_map<
     std::reference_wrapper<const domain::Artist>, TrackDataUnorderedSet,
     std::hash<domain::Artist>>;
 
-using AlbumTrackIndex = std::unordered_map<
+using AlbumTracksIndex = std::unordered_map<
     std::reference_wrapper<const domain::Album>, TrackDataUnorderedSet,
     std::hash<domain::Album>>;
 
 
 
 /**
- * @brief Provides fast access to data.
+ * @brief Provides fast access to domain data.
  */
 class Indices {
 
@@ -59,6 +59,24 @@ public:
     infrastructure::Event<void> changed{};
 
     /**
+     * @brief Adds the specified artist to all artist indices.
+     *
+     * Artist will be added with empty index data.
+     *
+     * @param artist Artist that shall be added.
+     */
+    void addArtist(const domain::Artist& artist);
+
+    /**
+     * @brief Adds the specified album to all album indices.
+     *
+     * Album will be added with empty index data.
+     *
+     * @param album Album that shall be added.
+     */
+    void addAlbum(const domain::Album& album);
+
+    /**
      * @brief Gets albums data for the given @p artist.
      *
      * @param artist The artist which albums data shall be returned.
@@ -67,12 +85,12 @@ public:
     AlbumDataUnorderedSet& getArtistAlbums(const domain::Artist& artist);
 
     /**
-     * @brief Update album data index for the given @p artist.
+     * @brief Updates artist-albums index by inserting the given album data.
      *
-     * @param artist The artist which index shall be updated.
-     * @param albumData The data which shall be inserted to the index.
+     * @param artist The artist which the track data shall be inserted for.
+     * @param albumData The data that shall be inserted into the index.
      */
-    void updateArtistAlbum(const domain::Artist& artist, AlbumData& albumData);
+    void updateArtistAlbums(const domain::Artist& artist, AlbumData& albumData);
 
     /**
      * @brief Gets tracks data for the given @p artist.
@@ -83,12 +101,12 @@ public:
     TrackDataUnorderedSet& getArtistTracks(const domain::Artist& artist);
 
     /**
-     * @brief Update track data index for the given @p artist.
+     * @brief Updates artist-tracks index by inserting the given track data.
      *
-     * @param artist The artist which index shall be updated.
-     * @param trackData The data which shall be inserted to the index.
+     * @param artist The artist which the track data shall be inserted for.
+     * @param trackData The data that shall be inserted into the index.
      */
-    void updateArtistTrack(const domain::Artist& artist, TrackData& trackData);
+    void updateArtistTracks(const domain::Artist& artist, TrackData& trackData);
 
     /**
      * @brief Gets tracks data for the given @p album.
@@ -99,22 +117,22 @@ public:
     TrackDataUnorderedSet& getAlbumTracks(const domain::Album& album);
 
     /**
-     * @brief Update track data index for the given @p album.
+     * @brief Updates album-tracks index by inserting the given track data.
      *
-     * @param album The album which index shall be updated.
-     * @param trackData The data which shall be inserted to the index.
+     * @param album The album which the track data shall be inserted for.
+     * @param trackData The data that shall be inserted into the index.
      */
-    void updateAlbumTrack(const domain::Album& album, TrackData& trackData);
+    void updateAlbumTracks(const domain::Album& album, TrackData& trackData);
 
 private:
     // <artist, albums data> map
-    ArtistAlbumIndex myArtistAlbum;
+    ArtistAlbumsIndex myArtistAlbums;
 
     // <artist, tracks data> map
-    ArtistTrackIndex myArtistTrack;
+    ArtistTracksIndex myArtistTracks;
 
     // <album, tracks data> map
-    AlbumTrackIndex myAlbumTrack;
+    AlbumTracksIndex myAlbumTracks;
 };
 
 }

@@ -12,6 +12,7 @@
 #include "infrastructure/event/delegate.h"
 #include "data/providers/ampache_service.h"
 #include "data_objects/artist_data.h"
+#include "data/indices.h"
 #include "data/providers/cache.h"
 #include "data/filters/filter.h"
 #include "data/artist_repository.h"
@@ -25,9 +26,10 @@ using namespace domain;
 
 namespace data {
 
-ArtistRepository::ArtistRepository(AmpacheService& ampacheService, Cache& cache):
+ArtistRepository::ArtistRepository(AmpacheService& ampacheService, Cache& cache, Indices& indices):
 myAmpacheService(ampacheService),
-myCache(cache) {
+myCache(cache),
+myIndices(indices) {
     myUnfilteredFilter->setSourceData(myArtistsData);
     myUnfilteredFilter->changed += DELEGATE0(&ArtistRepository::onFilterChanged);
     myFilter = myUnfilteredFilter;
@@ -144,6 +146,7 @@ void ArtistRepository::onReadyArtists(vector<unique_ptr<ArtistData>>& artistsDat
     }
 
     for (auto& artistData: artistsData) {
+        updateIndices(*artistData);
         myArtistsData[offset] = move(artistData);
         offset++;
     }
@@ -183,6 +186,10 @@ void ArtistRepository::onFilterChanged() {
 void ArtistRepository::loadFromCache() {
     myArtistsData = myCache.loadArtistsData();
 
+    for (auto& artistData: myArtistsData) {
+        updateIndices(*artistData);
+    }
+
     myUnfilteredFilter->processUpdatedSourceData(0, myArtistsData.size());
     myFilter->apply();
     myLoadOffset = -1;
@@ -193,6 +200,12 @@ void ArtistRepository::loadFromCache() {
     auto offsetAndLimit = pair<int, int>{0, myArtistsData.size()};
     loaded(offsetAndLimit);
     fullyLoaded();
+}
+
+
+
+void ArtistRepository::updateIndices(const ArtistData& artistData) {
+    myIndices.addArtist(artistData.getArtist());
 }
 
 

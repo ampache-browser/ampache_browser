@@ -225,10 +225,10 @@ void TrackRepository::loadFromCache() {
 void TrackRepository::updateIndicies(TrackData& trackData) {
     auto& artist = myArtistRepository.getById(trackData.getArtistId());
     auto& albumData = myAlbumRepository.getAlbumDataById(trackData.getAlbumId());
-    myIndices.updateArtistAlbum(artist, albumData);
-    myIndices.updateArtistTrack(artist, trackData);
+    myIndices.updateArtistAlbums(artist, albumData);
+    myIndices.updateArtistTracks(artist, trackData);
     auto& album = albumData.getAlbum();
-    myIndices.updateAlbumTrack(album, trackData);
+    myIndices.updateAlbumTracks(album, trackData);
 }
 
 
