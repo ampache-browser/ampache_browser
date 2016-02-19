@@ -222,11 +222,14 @@ public:
     /**
      * @brief Request album arts from the server.
      *
-     * @param urls URL adresses of the album art images that shall be requested.
+     * @note If this method is called before the the ::connected event it immediately raises ::readyAlbumArts with
+     * zero loaded arts.
+     *
+     * @param ids Identifiers of the album art images that shall be requested.  These IDs are equal to album IDs.
      *
      * @sa ::readyAlbumArts
      */
-    void requestAlbumArts(const std::vector<std::string>& urls);
+    void requestAlbumArts(const std::vector<std::string>& ids);
 
 private slots:
     void onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable);
@@ -281,7 +284,6 @@ private:
     void processTracks(QXmlStreamReader& xmlStreamReader);
     std::vector<std::unique_ptr<TrackData>> createTracks(QXmlStreamReader& xmlStreamReader) const;
     std::string assembleUrlBase() const;
-    std::string parseMethodName(const std::string& methodCallUrl) const;
 };
 
 }

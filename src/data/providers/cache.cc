@@ -133,7 +133,7 @@ vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() const {
         albumsDataStream.read(reinterpret_cast<char*>(&mediaNumber), sizeof mediaNumber);
 
         albumsData.emplace_back(
-            new AlbumData{id, "",  artistId, numberOfTracks, unique_ptr<Album>{
+            new AlbumData{id, artistId, numberOfTracks, unique_ptr<Album>{
                 new Album{id, name, releaseYear, mediaNumber}}});
     }
 

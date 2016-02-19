@@ -36,6 +36,7 @@
 #include "../data_objects/album_data.h"
 #include "../data_objects/artist_data.h"
 #include "../data_objects/track_data.h"
+#include "ampache_url.h"
 #include "data/providers/ampache_service.h"
 
 using namespace std;
@@ -114,10 +115,17 @@ void AmpacheService::requestTracks(int offset, int limit) {
 
 
 
-void AmpacheService::requestAlbumArts(const vector<string>& urls) {
-    for (auto artUrl: urls) {
-        myPendingAlbumArts.insert(artUrl);
-        vfs_async_file_get_contents(artUrl.c_str(), onGetContentsCStyleWrapper, &myOnAlbumArtFinishedFunc);
+void AmpacheService::requestAlbumArts(const vector<string>& ids) {
+    if (ids.empty() || !getIsConnected()) {
+        auto emptyAlbumArts = map<string, QPixmap>{};
+        readyAlbumArts(emptyAlbumArts);
+        return;
+    }
+
+    for (auto id: ids) {
+        myPendingAlbumArts.insert(id);
+        vfs_async_file_get_contents(AmpacheUrl::createAlbumArtUrl(id, myUrl, myAuthToken).str().c_str(),
+            onGetContentsCStyleWrapper, &myOnAlbumArtFinishedFunc);
     }
 }
 
@@ -157,7 +165,7 @@ void AmpacheService::onGetContents(const char* url, const Index<char>& contentBu
     string content = string{contentBuffer.begin(), static_cast<size_t>(contentBuffer.len())};
     QXmlStreamReader xmlStreamReader{QString::fromStdString(content)};
 
-    string methodName = parseMethodName(url);
+    string methodName = AmpacheUrl{url}.parseActionValue();
     if (methodName == Method.Handshake) {
         processHandshake(xmlStreamReader, error);
     } else if (methodName == Method.Ping) {
@@ -243,7 +251,6 @@ vector<unique_ptr<AlbumData>> AmpacheService::createAlbums(QXmlStreamReader& xml
     int year = 0;
     int disk = 0;
     int tracks = 0;
-    string artUrl = "";
     string artistId = "";
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
@@ -251,7 +258,7 @@ vector<unique_ptr<AlbumData>> AmpacheService::createAlbums(QXmlStreamReader& xml
 
         if (xmlStreamReader.isEndElement()) {
             if (xmlElement == "album") {albumData.emplace_back(
-                new AlbumData{id, artUrl, artistId, tracks, unique_ptr<Album>{new Album{id, albumName, year, disk}}});
+                new AlbumData{id, artistId, tracks, unique_ptr<Album>{new Album{id, albumName, year, disk}}});
             }
         }
 
@@ -293,8 +300,6 @@ vector<unique_ptr<AlbumData>> AmpacheService::createAlbums(QXmlStreamReader& xml
                     tracks = stoi(value);
                 } catch (const invalid_argument& ex) {}
                 catch (const out_of_range& ex) {}
-            } else if (xmlElement == "art") {
-                artUrl = value;
             }
         }
     }
@@ -309,7 +314,7 @@ vector<unique_ptr<AlbumData>> AmpacheService::createAlbums(QXmlStreamReader& xml
 
 
 void AmpacheService::onAlbumArtFinished(const char* artUrl, const Index<char>& contentBuffer) {
-    auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(artUrl,
+    auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(AmpacheUrl{artUrl}.parseIdValue(),
         QByteArray{contentBuffer.begin(), contentBuffer.len()});
     scaleAlbumArtRunnable->setAutoDelete(false);
     connect(scaleAlbumArtRunnable, SIGNAL(finished(ScaleAlbumArtRunnable*)), this,
@@ -320,12 +325,12 @@ void AmpacheService::onAlbumArtFinished(const char* artUrl, const Index<char>& c
 
 
 void AmpacheService::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable) {
-    auto artUrl = *(myPendingAlbumArts.find(scaleAlbumArtRunnable->getId()));
+    auto albumId = *(myPendingAlbumArts.find(scaleAlbumArtRunnable->getId()));
     QPixmap art;
     art.convertFromImage(scaleAlbumArtRunnable->getResult());
 
-    myFinishedAlbumArts.emplace(artUrl, art);
-    myPendingAlbumArts.erase(artUrl);
+    myFinishedAlbumArts.emplace(albumId, art);
+    myPendingAlbumArts.erase(albumId);
 
     scaleAlbumArtRunnable->deleteLater();
 
@@ -503,14 +508,6 @@ vector<unique_ptr<TrackData>> AmpacheService::createTracks(QXmlStreamReader& xml
 
 string AmpacheService::assembleUrlBase() const {
     return myUrl + "/server/xml.server.php?action=";
-}
-
-
-
-string AmpacheService::parseMethodName(const string& methodCallUrl) const {
-    auto nameBeginPos = assembleUrlBase().length();
-    auto nameEndPos = methodCallUrl.find("&", nameBeginPos);
-    return methodCallUrl.substr(nameBeginPos, nameEndPos - nameBeginPos);
 }
 
 

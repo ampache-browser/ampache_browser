@@ -84,11 +84,11 @@ Artist& ArtistRepository::getById(const string& id) const {
 
 
 
-bool ArtistRepository::isLoaded(int filteredOffset, int limit) const {
-    uint end = filteredOffset + limit;
+bool ArtistRepository::isLoaded(int filteredOffset, int count) const {
+    uint end = filteredOffset + count;
     auto filteredArtistsData = myFilter->getFilteredData();
     return (filteredArtistsData.size() >= end) && all_of(filteredArtistsData.begin() + filteredOffset,
-        filteredArtistsData.begin() + filteredOffset + limit, [](const ArtistData& ad) {return &ad != nullptr;});
+        filteredArtistsData.begin() + filteredOffset + count, [](const ArtistData& ad) {return &ad != nullptr;});
 }
 
 

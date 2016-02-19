@@ -48,15 +48,15 @@ myIndices{indices} {
     // SMELL: Should we subscribe to myAmpacheService.connected? (Subscribing to it would allow reservation
     // of the vector size and also initialization of (max.) number of albums.)
     myAmpacheService.readyAlbums += DELEGATE1(&AlbumRepository::onReadyAlbums, vector<unique_ptr<AlbumData>>);
-    myAmpacheService.readyAlbumArts += DELEGATE1(&AlbumRepository::onReadyArts, map<string, QPixmap>);
-    myCache.readyAlbumArts += DELEGATE1(&AlbumRepository::onReadyArts, map<string, QPixmap>);
+    myAmpacheService.readyAlbumArts += DELEGATE1(&AlbumRepository::onAmpacheReadyArts, map<string, QPixmap>);
+    myCache.readyAlbumArts += DELEGATE1(&AlbumRepository::onCacheReadyArts, map<string, QPixmap>);
 }
 
 
 
 AlbumRepository::~AlbumRepository() {
-    myCache.readyAlbumArts -= DELEGATE1(&AlbumRepository::onReadyArts, map<string, QPixmap>);
-    myAmpacheService.readyAlbumArts -= DELEGATE1(&AlbumRepository::onReadyArts, map<string, QPixmap>);
+    myCache.readyAlbumArts -= DELEGATE1(&AlbumRepository::onCacheReadyArts, map<string, QPixmap>);
+    myAmpacheService.readyAlbumArts -= DELEGATE1(&AlbumRepository::onAmpacheReadyArts, map<string, QPixmap>);
     myAmpacheService.readyAlbums -= DELEGATE1(&AlbumRepository::onReadyAlbums, vector<unique_ptr<AlbumData>>);
     myUnfilteredFilter->changed -= DELEGATE0(&AlbumRepository::onFilterChanged);
     if (isFiltered()) {
@@ -121,40 +121,33 @@ AlbumData& AlbumRepository::getAlbumDataById(const string& id) const {
 /**
  * @warning Albums for requested arts have to be loaded (via load() method) prior to calling this method.
  */
-bool AlbumRepository::loadArts(int filteredOffset, int limit) {
+bool AlbumRepository::loadArts(int filteredOffset, int count) {
     if (myArtsLoadOffset != -1) {
         return false;
     }
 
     myArtsLoadOffset = filteredOffset;
-    if (myCachedLoad || !myAmpacheService.getIsConnected()) {
-        vector<string> artIds;
-        for (auto idx = filteredOffset; idx < filteredOffset + limit; idx++) {
-            AlbumData& albumData = myFilter->getFilteredData()[idx];
-            auto id = albumData.getId();
-            artIds.push_back(id);
-        }
-
-        myCache.requestAlbumArts(artIds);
+    myArtsLoadCount = count;
+    vector<string> albumIds;
+    for (auto idx = filteredOffset; idx < filteredOffset + count; idx++) {
+        AlbumData& albumData = myFilter->getFilteredData()[idx];
+        albumIds.push_back(albumData.getId());
+    }
+    if (myCachedLoad) {
+        myCache.requestAlbumArts(albumIds);
     } else {
-        vector<string> urls;
-        for (auto idx = filteredOffset; idx < filteredOffset + limit; idx++) {
-            AlbumData& albumData = myFilter->getFilteredData()[idx];
-            urls.push_back(albumData.getArtUrl());
-        }
-
-        myAmpacheService.requestAlbumArts(urls);
+        myAmpacheService.requestAlbumArts(albumIds);
     }
     return true;
 }
 
 
 
-bool AlbumRepository::isLoaded(int filteredOffset, int limit) const {
-    uint end = filteredOffset + limit;
+bool AlbumRepository::isLoaded(int filteredOffset, int count) const {
+    uint end = filteredOffset + count;
     auto filteredAlbumsData = myFilter->getFilteredData();
     return (filteredAlbumsData.size() >= end) && all_of(filteredAlbumsData.begin() + filteredOffset,
-        filteredAlbumsData.begin() + filteredOffset + limit, [](const AlbumData& ad) {return &ad != nullptr;});
+        filteredAlbumsData.begin() + filteredOffset + count, [](const AlbumData& ad) {return &ad != nullptr;});
 }
 
 
@@ -244,55 +237,65 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
 
 
 
-void AlbumRepository::onReadyArts(const std::map<std::string, QPixmap>& arts) {
-    // there might be some change during loading (e.g. filter was changed) so ignore the result
-    if (myArtsLoadOffset == -1) {
-        auto offsetAndLimit = pair<int, int>{0, 0};
-        artsLoaded(offsetAndLimit);
+void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
+    if (raiseEmptyIfResultNotValid()) {
         return;
     }
 
-    auto filteredAlbumsData = myFilter->getFilteredData();
-    map<string, QPixmap> idAndArts;
-    for (auto urlAndArt: arts) {
-        auto albumDataIter = filteredAlbumsData.begin();
-        if (myCachedLoad) {
-            albumDataIter = find_if(filteredAlbumsData.begin() + myArtsLoadOffset,
-                filteredAlbumsData.begin() + myArtsLoadOffset + arts.size(),
-                [&urlAndArt](AlbumData& ad) {return ad.getId() == urlAndArt.first;});
-
-        } else {
-            albumDataIter = find_if(filteredAlbumsData.begin() + myArtsLoadOffset,
-                filteredAlbumsData.begin() + myArtsLoadOffset + arts.size(),
-                [&urlAndArt](AlbumData& ad) {return ad.getArtUrl() == urlAndArt.first;});
+    map<string, QPixmap> loadedIdsAndArts;
+    for (auto& idAndArt: arts) {
+        Album* album = nullptr;
+        if (!idAndArt.second.isNull()) {
+            album = findFilteredAlbumById(idAndArt.first, myArtsLoadOffset, myArtsLoadCount);
         }
-        if (albumDataIter == filteredAlbumsData.begin() + myArtsLoadOffset + arts.size()) {
+        if (album == nullptr) {
             continue;
         }
 
-        AlbumData& albumData = *albumDataIter;
-        auto& album = albumData.getAlbum();
-
-        album.setArt(unique_ptr<QPixmap>{new QPixmap{urlAndArt.second}});
-
-        idAndArts.emplace(album.getId(), urlAndArt.second);
+        album->setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
+        loadedIdsAndArts.emplace(idAndArt);
     }
 
-    if (!myCachedLoad) {
-        myCache.updateAlbumArts(idAndArts);
-    }
+    myCache.updateAlbumArts(loadedIdsAndArts);
 
     // application can be terminated after artsLoaded event therefore there should be no access to instance variables
     // after it is fired
-    auto offsetAndLimit = pair<int, int>{myArtsLoadOffset, arts.size()};
+    auto offsetAndLimit = pair<int, int>{myArtsLoadOffset, myArtsLoadCount};
     myArtsLoadOffset = -1;
+    myArtsLoadCount = -1;
     artsLoaded(offsetAndLimit);
+}
+
+
+
+void AlbumRepository::onCacheReadyArts(const map<string, QPixmap>& arts) {
+    if (raiseEmptyIfResultNotValid()) {
+        return;
+    }
+
+    vector<string> notLoadedArtIds;
+    for (auto& idAndArt: arts) {
+        Album* album = nullptr;
+        if (!idAndArt.second.isNull()) {
+            album = findFilteredAlbumById(idAndArt.first, myArtsLoadOffset, myArtsLoadCount);
+        } else {
+            notLoadedArtIds.push_back(idAndArt.first);
+        }
+        if (album == nullptr) {
+            continue;
+        }
+
+        album->setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
+    }
+
+    myAmpacheService.requestAlbumArts(notLoadedArtIds);
 }
 
 
 
 void AlbumRepository::onFilterChanged() {
     myArtsLoadOffset = -1;
+    myArtsLoadCount = -1;
     myCachedMaxCount = -1;
 
     // to the outside world there is no filter to change if not filtered
@@ -346,6 +349,41 @@ int AlbumRepository::computeMaxCount() const {
         return myFilter->getFilteredData().size();
     }
     return myAmpacheService.getIsConnected() ? myAmpacheService.numberOfAlbums() : myCache.numberOfAlbums();
+}
+
+
+
+Album* AlbumRepository::findFilteredAlbumById(const string& id, int offset, int count) const {
+    auto filteredAlbumsData = myFilter->getFilteredData();
+    auto albumDataIter = filteredAlbumsData.begin() + offset + count;
+
+    albumDataIter = find_if(filteredAlbumsData.begin() + offset,
+        filteredAlbumsData.begin() + offset + count,
+        [&id](AlbumData& ad) {return ad.getId() == id;});
+    if (albumDataIter == filteredAlbumsData.begin() + offset + count) {
+        return nullptr;
+    }
+    return &(*albumDataIter).get().getAlbum();
+}
+
+
+
+/**
+ * @brief If myArtsLoadOffset is -1 raises that no arts are loaded.
+ *
+ * If myArtsLoadOffset is -1 it indicates that the result is invalid due to some change during arts loading
+ * (e.g. filter was changed).
+ *
+ * @return true if result is invalid and the event was raised.
+ */
+bool AlbumRepository::raiseEmptyIfResultNotValid() const {
+    // there might be some change during loading (e.g. filter was changed) so ignore the result
+    if (myArtsLoadOffset == -1) {
+        auto offsetAndLimit = pair<int, int>{0, 0};
+        artsLoaded(offsetAndLimit);
+        return true;
+    }
+    return false;
 }
 
 }

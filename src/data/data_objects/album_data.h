@@ -30,13 +30,12 @@ public:
      * @brief Constructor.
      *
      * @param id Identifier.
-     * @param artUrl URL of the album art (cover).
      * @param artistId ID of album's artist.
      * @param numberOfTracks
      * @param album Album domain object.
      */
-    explicit AlbumData(const std::string& id, const std::string& artUrl, const std::string& artistId,
-        int numberOfTracks, std::unique_ptr<domain::Album> album);
+    explicit AlbumData(const std::string& id, const std::string& artistId, int numberOfTracks,
+        std::unique_ptr<domain::Album> album);
 
     AlbumData(const AlbumData& other) = delete;
 
@@ -48,13 +47,6 @@ public:
      * @return std::string
      */
     std::string getId() const;
-
-    /**
-     * @brief Gets URL of the album art (cover).
-     *
-     * @return std::string
-     */
-    std::string getArtUrl() const;
 
     /**
      * @brief Gets the identifier of album's artist.
@@ -87,7 +79,6 @@ public:
 private:
     // arguments from the constructor
     const std::string myId;
-    const std::string myArtUrl;
     const std::string myArtistId;
     const int myNumberOfTracks;
     const std::unique_ptr<domain::Album> myAlbum;

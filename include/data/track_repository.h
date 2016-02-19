@@ -117,10 +117,10 @@ public:
      *
      * @param filteredOffset Offset of the track data record which load status shall be checked.  It takes
      *        filtering into account.  If no filter is set then it is the same as @p offset in the load() function.
-     * @param limit Number of track data records to check.
+     * @param count Number of track data records to check.
      * @return true if each specified track data record is already loaded.
      */
-    bool isLoaded(int filteredOffset, int limit = 1) const;
+    bool isLoaded(int filteredOffset, int count = 1) const;
 
     /**
      * @brief Gets maximal number of track data records.

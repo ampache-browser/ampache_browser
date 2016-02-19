@@ -89,11 +89,11 @@ Track& TrackRepository::getById(const string& id) const {
 
 
 
-bool TrackRepository::isLoaded(int filteredOffset, int limit) const {
-    uint end = filteredOffset + limit;
+bool TrackRepository::isLoaded(int filteredOffset, int count) const {
+    uint end = filteredOffset + count;
     auto filteredTracksData = myFilter->getFilteredData();
     return (filteredTracksData.size() >= end) && all_of(filteredTracksData.begin() + filteredOffset,
-        filteredTracksData.begin() + filteredOffset + limit, [](const TrackData& td) {return &td != nullptr;});
+        filteredTracksData.begin() + filteredOffset + count, [](const TrackData& td) {return &td != nullptr;});
 }
 
 

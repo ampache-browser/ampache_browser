@@ -19,6 +19,7 @@ SRCS = src/infrastructure/os_paths.cc \
        src/data/data_objects/artist_data.cc \
        src/data/data_objects/album_data.cc \
        src/data/providers/ampache_service.cc \
+       src/data/providers/ampache_url.cc \
        src/data/providers/cache.cc \
        src/data/filters/artist_filter_for_albums.cc \
        src/data/filters/name_filter_for_albums.cc \

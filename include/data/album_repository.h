@@ -89,7 +89,7 @@ public:
      * @brief Trigger load of albums data from Ampache server or the cache.
      *
      * @param offset Starting offset.
-     * @param limit Number of album data records to load.
+     * @param limit Maximum number of album data records to load.
      * @return true if loading was triggered, false otherwise.
      *
      * @sa ::loaded, ::fullyLoaded
@@ -130,22 +130,22 @@ public:
      *
      * @param filteredOffset Starting offset.  It takes filtering into account.  If no filter is set then it is the
      *        same as @p offset in the load() function.
-     * @param limit Number of album arts to load.
+     * @param count Number of album arts to load.
      * @return true if loading was triggered, false otherwise.
      *
      * @sa ::artsLoaded
      */
-    bool loadArts(int filteredOffset, int limit);
+    bool loadArts(int filteredOffset, int count);
 
     /**
      * @brief Gets the load status of the given album data records.
      *
      * @param filteredOffset Offset of the album data record which load status shall be checked.  It takes filtering
      *        into account.  If no filter is set then it is the same as @p offset in the load() function.
-     * @param limit Number of album data records to check.
+     * @param count Number of album data records to check.
      * @return true if each specified album data record is already loaded.
      */
-    bool isLoaded(int filteredOffset, int limit = 1) const;
+    bool isLoaded(int filteredOffset, int count = 1) const;
 
     /**
      * @brief Gets maximal number of album data records.
@@ -198,8 +198,10 @@ private:
     // starting offset of album records that are being currently loaded; -1 if no album loading is in progress
     int myLoadOffset = -1;
 
-    // starting offset of album arts that are being currently loaded; -1 if no arts loading is in progress
+    // starting offset and number of album arts that are being currently loaded; -1 if no arts loading
+    // is in progress
     int myArtsLoadOffset = -1;
+    int myArtsLoadCount = -1;
 
     // filter which is active when no filter is set
     std::shared_ptr<UnfilteredFilter<AlbumData>> myUnfilteredFilter = std::shared_ptr<UnfilteredFilter<AlbumData>>{
@@ -218,12 +220,15 @@ private:
     bool myCachedLoad = false;
 
     void onReadyAlbums(std::vector<std::unique_ptr<data::AlbumData>>& albumsData);
-    void onReadyArts(const std::map<std::string, QPixmap>& arts);
+    void onAmpacheReadyArts(const std::map<std::string, QPixmap>& arts);
+    void onCacheReadyArts(const std::map<std::string, QPixmap>& arts);
     void onFilterChanged();
 
     void loadFromCache();
     void updateIndices(AlbumData& albumData);
     int computeMaxCount() const;
+    domain::Album* findFilteredAlbumById(const std::string& id, int offset, int count) const;
+    bool raiseEmptyIfResultNotValid() const;
 };
 
 }
