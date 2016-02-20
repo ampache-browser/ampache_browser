@@ -148,7 +148,8 @@ void AmpacheBrowser::onPlayTriggered(const vector<string>& ids) {
     Index<PlaylistAddItem> playlistAddItems;
     for (auto& id: actualIds) {
         Tuple tuple;
-        playlistAddItems.append(String{myTrackRepository->getById(id).getUrl().c_str()}, move(tuple), nullptr);
+        auto trackUrl = myAmpacheService->refreshUrl(myTrackRepository->getById(id).getUrl());
+        playlistAddItems.append(String{trackUrl.c_str()}, move(tuple), nullptr);
     }
     auto activePlaylist = aud_playlist_get_active();
     aud_playlist_entry_insert_batch(activePlaylist, -1, move(playlistAddItems), true);

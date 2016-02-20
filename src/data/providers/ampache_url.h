@@ -58,6 +58,22 @@ public:
     std::string parseActionValue() const;
 
     /**
+     * @brief Replaces value of parameter 'ssid' with the given one.
+     *
+     * @param newSsidValue The new value of the parameter 'ssid'.
+     * @return The url with the new 'ssid' value.
+     */
+    AmpacheUrl replaceSsidValue(const std::string& newSsidValue) const;
+
+    /**
+     * @brief Replaces value of parameter 'auth' with the given one.
+     *
+     * @param newAuthValue The new value of the parameter 'auth'.
+     * @return The url with the new 'auth' value.
+     */
+    AmpacheUrl replaceAuthValue(const std::string& newAuthValue) const;
+
+    /**
      * @brief Gets the string representation of the URL.
      *
      * @return std::string
@@ -66,6 +82,7 @@ public:
 
 private:
     // parameter names
+    static const std::string PARAM_SSID;
     static const std::string PARAM_AUTH;
     static const std::string PARAM_ID;
     static const std::string PARAM_ACTION;
@@ -74,6 +91,9 @@ private:
     const std::string myUrl;
 
     std::string parseValue(const std::string& parameterName) const;
+    AmpacheUrl replaceValue(const std::string& parameterName, const std::string& newValue) const;
+    std::pair<std::string::size_type, std::string::size_type> findParameterValue(const std::string& parameterName)
+      const;
 };
 
 }

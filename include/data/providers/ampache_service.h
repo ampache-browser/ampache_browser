@@ -231,6 +231,17 @@ public:
      */
     void requestAlbumArts(const std::vector<std::string>& ids);
 
+    /**
+     * @brief Update authentication parameters which may have expired.
+     *
+     * The values are replaced with those obtained upon server connection.  This method does not extends/refreshes
+     * the session with the server.
+     *
+     * @param url The URL string.
+     * @return URL string with authentication values possibly replaced.
+     */
+    std::string refreshUrl(const std::string& url) const;
+
 private slots:
     void onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable);
 

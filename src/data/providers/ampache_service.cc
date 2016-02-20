@@ -131,6 +131,13 @@ void AmpacheService::requestAlbumArts(const vector<string>& ids) {
 
 
 
+string AmpacheService::refreshUrl(const string& url) const {
+    // SMELL: We are replacing session ID value with authentication token, which is different, however it works.
+    return AmpacheUrl{url}.replaceSsidValue(myAuthToken).replaceAuthValue(myAuthToken).str();
+}
+
+
+
 void AmpacheService::connectToServer() {
     auto currentTime = to_string(chrono::duration_cast<chrono::seconds>(chrono::system_clock::now().
         time_since_epoch()).count());
