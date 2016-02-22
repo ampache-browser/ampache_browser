@@ -10,7 +10,7 @@
 #include <functional>
 
 #include "infrastructure/event/delegate.h"
-#include "data/providers/ampache_service.h"
+#include "data/providers/ampache.h"
 #include "data_objects/artist_data.h"
 #include "data/indices.h"
 #include "data/providers/cache.h"
@@ -26,21 +26,21 @@ using namespace domain;
 
 namespace data {
 
-ArtistRepository::ArtistRepository(AmpacheService& ampacheService, Cache& cache, Indices& indices):
-myAmpacheService(ampacheService),
+ArtistRepository::ArtistRepository(Ampache& ampache, Cache& cache, Indices& indices):
+myAmpache(ampache),
 myCache(cache),
 myIndices(indices) {
     myUnfilteredFilter->setSourceData(myArtistsData);
     myUnfilteredFilter->changed += DELEGATE0(&ArtistRepository::onFilterChanged);
     myFilter = myUnfilteredFilter;
 
-    myAmpacheService.readyArtists += DELEGATE1(&ArtistRepository::onReadyArtists, vector<unique_ptr<ArtistData>>);
+    myAmpache.readyArtists += DELEGATE1(&ArtistRepository::onReadyArtists, vector<unique_ptr<ArtistData>>);
 }
 
 
 
 ArtistRepository::~ArtistRepository() {
-    myAmpacheService.readyArtists -= DELEGATE1(&ArtistRepository::onReadyArtists, vector<unique_ptr<ArtistData>>);
+    myAmpache.readyArtists -= DELEGATE1(&ArtistRepository::onReadyArtists, vector<unique_ptr<ArtistData>>);
     myUnfilteredFilter->changed -= DELEGATE0(&ArtistRepository::onFilterChanged);
     if (isFiltered()) {
         myFilter->changed -= DELEGATE0(&ArtistRepository::onFilterChanged);
@@ -54,13 +54,13 @@ bool ArtistRepository::load(int offset, int limit) {
         return false;
     }
 
-    if (!myAmpacheService.getIsConnected() || (myCache.getLastUpdate() > myAmpacheService.getLastUpdate())) {
+    if (!myAmpache.getIsConnected() || (myCache.getLastUpdate() > myAmpache.getLastUpdate())) {
         if (myLoadProgress == 0) {
             loadFromCache();
         }
     } else {
         myLoadOffset = offset;
-        myAmpacheService.requestArtists(offset, limit);
+        myAmpache.requestArtists(offset, limit);
     }
     return true;
 }
@@ -157,7 +157,7 @@ void ArtistRepository::onReadyArtists(vector<unique_ptr<ArtistData>>& artistsDat
     myLoadOffset = -1;
     myLoadProgress += artistsData.size();
 
-    bool isFullyLoaded = myLoadProgress >= myAmpacheService.numberOfArtists();
+    bool isFullyLoaded = myLoadProgress >= myAmpache.numberOfArtists();
     if (isFullyLoaded) {
         myCache.saveArtistsData(myArtistsData);
     }
@@ -214,7 +214,7 @@ int ArtistRepository::computeMaxCount() const {
     if (myIsFilterSet && myLoadProgress != 0) {
         return myFilter->getFilteredData().size();
     }
-    return myAmpacheService.getIsConnected() ? myAmpacheService.numberOfArtists() : myCache.numberOfArtists();
+    return myAmpache.getIsConnected() ? myAmpache.numberOfArtists() : myCache.numberOfArtists();
 }
 
 }

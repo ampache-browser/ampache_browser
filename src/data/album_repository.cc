@@ -17,7 +17,7 @@
 
 #include "infrastructure/event/delegate.h"
 #include "domain/artist.h"
-#include "data/providers/ampache_service.h"
+#include "data/providers/ampache.h"
 #include "data/providers/cache.h"
 #include "data_objects/album_data.h"
 #include "data/indices.h"
@@ -35,9 +35,9 @@ using namespace domain;
 
 namespace data {
 
-AlbumRepository::AlbumRepository(AmpacheService& ampacheService, Cache& cache,
-    const ArtistRepository& artistRepository, Indices& indices):
-myAmpacheService(ampacheService),
+AlbumRepository::AlbumRepository(Ampache& ampache, Cache& cache, const ArtistRepository& artistRepository,
+    Indices& indices):
+myAmpache(ampache),
 myCache(cache),
 myArtistRepository(artistRepository),
 myIndices{indices} {
@@ -45,10 +45,10 @@ myIndices{indices} {
     myUnfilteredFilter->changed += DELEGATE0(&AlbumRepository::onFilterChanged);
     myFilter = myUnfilteredFilter;
 
-    // SMELL: Should we subscribe to myAmpacheService.connected? (Subscribing to it would allow reservation
+    // SMELL: Should we subscribe to myAmpache.connected? (Subscribing to it would allow reservation
     // of the vector size and also initialization of (max.) number of albums.)
-    myAmpacheService.readyAlbums += DELEGATE1(&AlbumRepository::onReadyAlbums, vector<unique_ptr<AlbumData>>);
-    myAmpacheService.readyAlbumArts += DELEGATE1(&AlbumRepository::onAmpacheReadyArts, map<string, QPixmap>);
+    myAmpache.readyAlbums += DELEGATE1(&AlbumRepository::onReadyAlbums, vector<unique_ptr<AlbumData>>);
+    myAmpache.readyAlbumArts += DELEGATE1(&AlbumRepository::onAmpacheReadyArts, map<string, QPixmap>);
     myCache.readyAlbumArts += DELEGATE1(&AlbumRepository::onCacheReadyArts, map<string, QPixmap>);
 }
 
@@ -56,8 +56,8 @@ myIndices{indices} {
 
 AlbumRepository::~AlbumRepository() {
     myCache.readyAlbumArts -= DELEGATE1(&AlbumRepository::onCacheReadyArts, map<string, QPixmap>);
-    myAmpacheService.readyAlbumArts -= DELEGATE1(&AlbumRepository::onAmpacheReadyArts, map<string, QPixmap>);
-    myAmpacheService.readyAlbums -= DELEGATE1(&AlbumRepository::onReadyAlbums, vector<unique_ptr<AlbumData>>);
+    myAmpache.readyAlbumArts -= DELEGATE1(&AlbumRepository::onAmpacheReadyArts, map<string, QPixmap>);
+    myAmpache.readyAlbums -= DELEGATE1(&AlbumRepository::onReadyAlbums, vector<unique_ptr<AlbumData>>);
     myUnfilteredFilter->changed -= DELEGATE0(&AlbumRepository::onFilterChanged);
     if (isFiltered()) {
         myFilter->changed -= DELEGATE0(&AlbumRepository::onFilterChanged);
@@ -75,7 +75,7 @@ bool AlbumRepository::load(int offset, int limit) {
         return false;
     }
 
-    if (!myAmpacheService.getIsConnected() || (myCache.getLastUpdate() > myAmpacheService.getLastUpdate())) {
+    if (!myAmpache.getIsConnected() || (myCache.getLastUpdate() > myAmpache.getLastUpdate())) {
         myCachedLoad = true;
 
         // SMELL: The condition below is to ignore subsequent requests from model which are not needed since the
@@ -88,7 +88,7 @@ bool AlbumRepository::load(int offset, int limit) {
     } else {
         myCachedLoad = false;
         myLoadOffset = offset;
-        myAmpacheService.requestAlbums(offset, limit);
+        myAmpache.requestAlbums(offset, limit);
     }
     return true;
 }
@@ -136,7 +136,7 @@ bool AlbumRepository::loadArts(int filteredOffset, int count) {
     if (myCachedLoad) {
         myCache.requestAlbumArts(albumIds);
     } else {
-        myAmpacheService.requestAlbumArts(albumIds);
+        myAmpache.requestAlbumArts(albumIds);
     }
     return true;
 }
@@ -222,7 +222,7 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
     myLoadOffset = -1;
     myLoadProgress += albumsData.size();
 
-    bool isFullyLoaded = myLoadProgress >= myAmpacheService.numberOfAlbums();
+    bool isFullyLoaded = myLoadProgress >= myAmpache.numberOfAlbums();
     if (isFullyLoaded) {
         myCache.saveAlbumsData(myAlbumsData);
     }
@@ -288,7 +288,7 @@ void AlbumRepository::onCacheReadyArts(const map<string, QPixmap>& arts) {
         album->setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
     }
 
-    myAmpacheService.requestAlbumArts(notLoadedArtIds);
+    myAmpache.requestAlbumArts(notLoadedArtIds);
 }
 
 
@@ -348,7 +348,7 @@ int AlbumRepository::computeMaxCount() const {
     if (isFiltered() && myLoadProgress != 0) {
         return myFilter->getFilteredData().size();
     }
-    return myAmpacheService.getIsConnected() ? myAmpacheService.numberOfAlbums() : myCache.numberOfAlbums();
+    return myAmpache.getIsConnected() ? myAmpache.numberOfAlbums() : myCache.numberOfAlbums();
 }
 
 

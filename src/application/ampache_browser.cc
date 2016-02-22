@@ -21,7 +21,7 @@
 #include "application/models/album_model.h"
 #include "application/models/artist_model.h"
 #include "application/models/track_model.h"
-#include "data/providers/ampache_service.h"
+#include "data/providers/ampache.h"
 #include "data/providers/cache.h"
 #include "data/filters/name_filter_for_artists.h"
 #include "data/filters/artist_filter_for_albums.h"
@@ -52,17 +52,17 @@ myUi(&ui) {
     auto username = string{aud_get_str("ampache_browser", "username")};
     auto passwordHash = string{aud_get_str("ampache_browser", "password_hash")};
 
-    myAmpacheService = unique_ptr<AmpacheService>{new AmpacheService{url, username, passwordHash}};
-    myAmpacheService->connected += DELEGATE0(&AmpacheBrowser::onConnected);
+    myAmpache = unique_ptr<Ampache>{new Ampache{url, username, passwordHash}};
+    myAmpache->connected += DELEGATE0(&AmpacheBrowser::onConnected);
 
     myCache = unique_ptr<Cache>{new Cache{}};
 
     myIndices = unique_ptr<Indices>{new Indices{}};
 
-    myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpacheService, *myCache, *myIndices}};
-    myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpacheService, *myCache,
+    myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpache, *myCache, *myIndices}};
+    myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpache, *myCache,
       *myArtistRepository, *myIndices}};
-    myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpacheService, *myCache,
+    myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpache, *myCache,
       *myArtistRepository, *myAlbumRepository, *myIndices}};
 
     myArtistModel = unique_ptr<ArtistModel>{new ArtistModel(*myArtistRepository)};
@@ -87,7 +87,7 @@ AmpacheBrowser::~AmpacheBrowser() {
 
 
 void AmpacheBrowser::requestTermination() {
-    myAmpacheService->connected -= DELEGATE0(&AmpacheBrowser::onConnected);
+    myAmpache->connected -= DELEGATE0(&AmpacheBrowser::onConnected);
     myArtistRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onArtistsFullyLoaded);
     myAlbumRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onAlbumsFullyLoaded);
     myTrackRepository->fullyLoaded -= DELEGATE0(&AmpacheBrowser::onTracksFullyLoaded);
@@ -103,7 +103,7 @@ void AmpacheBrowser::requestTermination() {
 
 
 void AmpacheBrowser::onConnected() {
-    myAmpacheService->connected -= DELEGATE0(&AmpacheBrowser::onConnected);
+    myAmpache->connected -= DELEGATE0(&AmpacheBrowser::onConnected);
     myArtistRepository->fullyLoaded += DELEGATE0(&AmpacheBrowser::onArtistsFullyLoaded);
     myArtistModel->requestAllData();
     myUi->setArtistModel(*myArtistModel);
@@ -148,7 +148,7 @@ void AmpacheBrowser::onPlayTriggered(const vector<string>& ids) {
     Index<PlaylistAddItem> playlistAddItems;
     for (auto& id: actualIds) {
         Tuple tuple;
-        auto trackUrl = myAmpacheService->refreshUrl(myTrackRepository->getById(id).getUrl());
+        auto trackUrl = myAmpache->refreshUrl(myTrackRepository->getById(id).getUrl());
         playlistAddItems.append(String{trackUrl.c_str()}, move(tuple), nullptr);
     }
     auto activePlaylist = aud_playlist_get_active();

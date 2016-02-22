@@ -8,7 +8,7 @@
 
 
 #include "infrastructure/event/delegate.h"
-#include "data/providers/ampache_service.h"
+#include "data/providers/ampache.h"
 #include "data/providers/cache.h"
 #include "data_objects/track_data.h"
 #include "data_objects/album_data.h"
@@ -27,9 +27,9 @@ using namespace domain;
 
 namespace data {
 
-TrackRepository::TrackRepository(AmpacheService& ampacheService, Cache& cache, const ArtistRepository& artistRepository,
+TrackRepository::TrackRepository(Ampache& ampache, Cache& cache, const ArtistRepository& artistRepository,
     const AlbumRepository& albumRepository, Indices& indices):
-myAmpacheService(ampacheService),
+myAmpache(ampache),
 myCache(cache),
 myArtistRepository(artistRepository),
 myAlbumRepository(albumRepository),
@@ -38,13 +38,13 @@ myIndices(indices) {
     myUnfilteredFilter->changed += DELEGATE0(&TrackRepository::onFilterChanged);
     myFilter = myUnfilteredFilter;
 
-    myAmpacheService.readyTracks += DELEGATE1(&TrackRepository::onReadyTracks, vector<unique_ptr<TrackData>>);
+    myAmpache.readyTracks += DELEGATE1(&TrackRepository::onReadyTracks, vector<unique_ptr<TrackData>>);
 }
 
 
 
 TrackRepository::~TrackRepository() {
-    myAmpacheService.readyTracks -= DELEGATE1(&TrackRepository::onReadyTracks, vector<unique_ptr<TrackData>>);
+    myAmpache.readyTracks -= DELEGATE1(&TrackRepository::onReadyTracks, vector<unique_ptr<TrackData>>);
     myUnfilteredFilter->changed -= DELEGATE0(&TrackRepository::onFilterChanged);
     if (isFiltered()) {
         myFilter->changed -= DELEGATE0(&TrackRepository::onFilterChanged);
@@ -61,13 +61,13 @@ bool TrackRepository::load(int offset, int limit) {
         return false;
     }
 
-    if (!myAmpacheService.getIsConnected() || (myCache.getLastUpdate() > myAmpacheService.getLastUpdate())) {
+    if (!myAmpache.getIsConnected() || (myCache.getLastUpdate() > myAmpache.getLastUpdate())) {
         if (myLoadProgress == 0) {
             loadFromCache();
         }
     } else {
         myLoadOffset = offset;
-        myAmpacheService.requestTracks(offset, limit);
+        myAmpache.requestTracks(offset, limit);
     }
     return true;
 }
@@ -169,7 +169,7 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
     myLoadOffset = -1;
     myLoadProgress += tracksData.size();
 
-    bool isFullyLoaded = myLoadProgress >= myAmpacheService.numberOfTracks();
+    bool isFullyLoaded = myLoadProgress >= myAmpache.numberOfTracks();
     if (isFullyLoaded) {
         myCache.saveTracksData(myTracksData);
     }
@@ -237,7 +237,7 @@ int TrackRepository::computeMaxCount() const {
     if (myIsFilterSet && myLoadProgress != 0) {
         return myFilter->getFilteredData().size();
     }
-    return myAmpacheService.getIsConnected() ? myAmpacheService.numberOfTracks() : myCache.numberOfTracks();
+    return myAmpache.getIsConnected() ? myAmpache.numberOfTracks() : myCache.numberOfTracks();
 }
 
 }

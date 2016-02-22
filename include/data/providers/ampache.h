@@ -1,4 +1,4 @@
-// ampache_service.h
+// ampache.h
 //
 // Project: Ampache Browser
 // License: GNU GPLv3
@@ -7,8 +7,8 @@
 
 
 
-#ifndef AMPACHESERVICE_H
-#define AMPACHESERVICE_H
+#ifndef AMPACHE_H
+#define AMPACHE_H
 
 
 
@@ -20,11 +20,7 @@
 #include <chrono>
 
 #include <QtCore/QObject>
-#include <QtCore/QRunnable>
-#include <QImage>
 #include <QPixmap>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
 
 #include <libaudcore/index.h>
 
@@ -39,54 +35,7 @@ namespace data {
 class AlbumData;
 class ArtistData;
 class TrackData;
-
-
-
-// SMELL: No need to expose this one.
-/**
- * @brief Scales the given image to a predefined size.
- *
- * Intended to run asynchronously using the QT threading support.
- */
-class ScaleAlbumArtRunnable: public QObject, public QRunnable {
-    Q_OBJECT
-
-signals:
-    void finished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable);
-
-public:
-    /**
-     * @brief Constructor.
-     *
-     * @param id Identifier of the scaled image.
-     * @param imageData The image which shall be scaled.
-     */
-    explicit ScaleAlbumArtRunnable(const std::string id, const QByteArray imageData);
-
-    /**
-     * @brief Gets the identifier of the scaled image (which was passed to the constructor).
-     *
-     * @return std::string.
-     */
-    std::string getId() const;
-
-    /**
-     * @brief Gets the scaled image.
-     *
-     * @return QImage
-     */
-    QImage getResult() const;
-
-private:
-    // arguments from the constructor
-    const std::string myId;
-    const QByteArray myImageData;
-
-    // scaled image
-    QImage myScaledAlbumArt;
-
-    void run() override;
-};
+class ScaleAlbumArtRunnable;
 
 
 
@@ -95,7 +44,7 @@ private:
 /**
  * @brief Provides access to Ampache server.
  */
-class AmpacheService: public QObject {
+class Ampache: public QObject {
     Q_OBJECT
 
 public:
@@ -111,11 +60,11 @@ public:
      * @param user User name to login with.
      * @param passwordHash SHA256 hash of the password in hexadecimal string format.
      */
-    explicit AmpacheService(const std::string& url, const std::string& user, const std::string& passwordHash);
+    explicit Ampache(const std::string& url, const std::string& user, const std::string& passwordHash);
 
-    AmpacheService(const AmpacheService& other) = delete;
+    Ampache(const Ampache& other) = delete;
 
-    AmpacheService& operator=(const AmpacheService& other) = delete;
+    Ampache& operator=(const Ampache& other) = delete;
 
     /**
      * @brief Event fired when handshake with the server was successful.
@@ -301,4 +250,4 @@ private:
 
 
 
-#endif // AMPACHESERVICE_H
+#endif // AMPACHE_H

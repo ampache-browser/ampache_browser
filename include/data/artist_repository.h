@@ -26,7 +26,7 @@
 
 namespace data {
 
-class AmpacheService;
+class Ampache;
 class Cache;
 class Indices;
 
@@ -41,11 +41,11 @@ public:
     /**
      * @brief Constructor.
      *
-     * @param ampacheService Used for communication with Ampache server.
+     * @param ampache Used for communication with Ampache server.
      * @param cache Used for accessing the disk cache.
      * @param indices Indices to update.
      */
-    explicit ArtistRepository(AmpacheService& ampacheService, Cache& cache, Indices& indices);
+    explicit ArtistRepository(Ampache& ampache, Cache& cache, Indices& indices);
 
     ~ArtistRepository();
 
@@ -152,7 +152,7 @@ private:
     std::vector<std::unique_ptr<ArtistData>> myArtistsData;
 
     // arguments from the constructor
-    AmpacheService& myAmpacheService;
+    Ampache& myAmpache;
     Cache& myCache;
     Indices& myIndices;
 

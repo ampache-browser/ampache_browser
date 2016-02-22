@@ -15,7 +15,7 @@
 #include "models/album_model.h"
 #include "models/artist_model.h"
 #include "models/track_model.h"
-#include "data/providers/ampache_service.h"
+#include "data/providers/ampache.h"
 #include "data/providers/cache.h"
 #include "data/album_repository.h"
 #include "data/artist_repository.h"
@@ -71,7 +71,7 @@ public:
     void requestTermination();
 
 private:
-    std::unique_ptr<data::AmpacheService> myAmpacheService = nullptr;
+    std::unique_ptr<data::Ampache> myAmpache = nullptr;
     std::unique_ptr<data::Cache> myCache = nullptr;
     std::unique_ptr<data::Indices> myIndices = nullptr;
     std::unique_ptr<data::ArtistRepository> myArtistRepository = nullptr;

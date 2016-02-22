@@ -18,8 +18,9 @@ SRCS = src/infrastructure/os_paths.cc \
        src/data/data_objects/track_data.cc \
        src/data/data_objects/artist_data.cc \
        src/data/data_objects/album_data.cc \
-       src/data/providers/ampache_service.cc \
-       src/data/providers/ampache_url.cc \
+       src/data/providers/ampache/ampache.cc \
+       src/data/providers/ampache/ampache_url.cc \
+       src/data/providers/ampache/scale_album_art_runnable.cc \
        src/data/providers/cache.cc \
        src/data/filters/artist_filter_for_albums.cc \
        src/data/filters/name_filter_for_albums.cc \
@@ -44,7 +45,8 @@ MOC_SRCS = include/ui/moc_ui.cc \
            include/application/models/moc_album_model.cc \
            include/application/models/moc_artist_model.cc \
            include/application/models/moc_track_model.cc \
-           include/data/providers/moc_ampache_service.cc \
+           include/data/providers/moc_ampache.cc \
+           src/data/providers/ampache/moc_scale_album_art_runnable.cc \
            include/data/providers/moc_cache.cc \
            src/ui/moc_ampache_browser_main_window.cc
 

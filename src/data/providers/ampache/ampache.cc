@@ -1,4 +1,4 @@
-// ampache_service.cc
+// ampache.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3
@@ -7,7 +7,6 @@
 
 
 
-#include <iostream>
 #include <sstream>
 #include <chrono>
 #include <memory>
@@ -16,14 +15,8 @@
 #include <QObject>
 #include <QString>
 #include <QUrl>
-#include <QVariant>
-#include <QCoreApplication>
+#include <QDateTime>
 #include <QThreadPool>
-#include <QNetworkAccessManager>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QImageReader>
-#include <QImage>
 #include <QPixmap>
 #include <QXmlStreamReader>
 #include <QCryptographicHash>
@@ -33,11 +26,12 @@
 #include "domain/artist.h"
 #include "domain/album.h"
 #include "domain/track.h"
-#include "../data_objects/album_data.h"
-#include "../data_objects/artist_data.h"
-#include "../data_objects/track_data.h"
+#include "../../data_objects/album_data.h"
+#include "../../data_objects/artist_data.h"
+#include "../../data_objects/track_data.h"
+#include "scale_album_art_runnable.h"
 #include "ampache_url.h"
-#include "data/providers/ampache_service.h"
+#include "data/providers/ampache.h"
 
 using namespace std;
 using namespace placeholders;
@@ -50,72 +44,72 @@ using namespace domain;
 namespace data {
 
 void onGetContentsCStyleWrapper(const char* url, const Index<char>& buffer, void* userData) {
-    auto& callback = *reinterpret_cast<AmpacheService::OnGetContentsFunc*>(userData);
+    auto& callback = *reinterpret_cast<Ampache::OnGetContentsFunc*>(userData);
     callback(url, buffer);
 }
 
 
 
-AmpacheService::AmpacheService(const string& url, const string& user, const string& passwordHash):
+Ampache::Ampache(const string& url, const string& user, const string& passwordHash):
 myUrl{url},
 myUser{user},
 myPasswordHash{passwordHash},
-myOnGetContentsFunc{bind(&AmpacheService::onGetContents, this, _1, _2)},
-myOnAlbumArtFinishedFunc{bind(&AmpacheService::onAlbumArtFinished, this, _1, _2)} {
+myOnGetContentsFunc{bind(&Ampache::onGetContents, this, _1, _2)},
+myOnAlbumArtFinishedFunc{bind(&Ampache::onAlbumArtFinished, this, _1, _2)} {
     connectToServer();
 }
 
 
 
-bool AmpacheService::getIsConnected() const {
+bool Ampache::getIsConnected() const {
     return myIsConnected;
 }
 
 
 
-system_clock::time_point AmpacheService::getLastUpdate() const {
+system_clock::time_point Ampache::getLastUpdate() const {
     return myLastUpdate;
 }
 
 
 
-int AmpacheService::numberOfAlbums() const {
+int Ampache::numberOfAlbums() const {
     return myNumberOfAlbums;
 }
 
 
 
-int AmpacheService::numberOfArtists() const {
+int Ampache::numberOfArtists() const {
     return myNumberOfArtists;
 }
 
 
 
-int AmpacheService::numberOfTracks() const {
+int Ampache::numberOfTracks() const {
     return myNumberOfTracks;
 }
 
 
 
-void AmpacheService::requestAlbums(int offset, int limit) {
+void Ampache::requestAlbums(int offset, int limit) {
     callMethod(Method.Albums, {{"offset", to_string(offset)}, {"limit", to_string(limit)}});
 }
 
 
 
-void AmpacheService::requestArtists(int offset, int limit) {
+void Ampache::requestArtists(int offset, int limit) {
     callMethod(Method.Artists, {{"offset",  to_string(offset)}, {"limit", to_string(limit)}});
 }
 
 
 
-void AmpacheService::requestTracks(int offset, int limit) {
+void Ampache::requestTracks(int offset, int limit) {
     callMethod(Method.Tracks, {{"offset", to_string(offset)}, {"limit", to_string(limit)}});
 }
 
 
 
-void AmpacheService::requestAlbumArts(const vector<string>& ids) {
+void Ampache::requestAlbumArts(const vector<string>& ids) {
     if (ids.empty() || !getIsConnected()) {
         auto emptyAlbumArts = map<string, QPixmap>{};
         readyAlbumArts(emptyAlbumArts);
@@ -131,14 +125,14 @@ void AmpacheService::requestAlbumArts(const vector<string>& ids) {
 
 
 
-string AmpacheService::refreshUrl(const string& url) const {
+string Ampache::refreshUrl(const string& url) const {
     // SMELL: We are replacing session ID value with authentication token, which is different, however it works.
     return AmpacheUrl{url}.replaceSsidValue(myAuthToken).replaceAuthValue(myAuthToken).str();
 }
 
 
 
-void AmpacheService::connectToServer() {
+void Ampache::connectToServer() {
     auto currentTime = to_string(chrono::duration_cast<chrono::seconds>(chrono::system_clock::now().
         time_since_epoch()).count());
     auto passphrase = QCryptographicHash::hash(
@@ -154,7 +148,7 @@ void AmpacheService::connectToServer() {
 
 
 
-void AmpacheService::callMethod(const string& name, const map<string, string>& arguments) {
+void Ampache::callMethod(const string& name, const map<string, string>& arguments) {
     ostringstream urlStream;
     urlStream << assembleUrlBase() << name << "&auth=" << myAuthToken;
     for (auto nameValuePair: arguments) {
@@ -166,7 +160,7 @@ void AmpacheService::callMethod(const string& name, const map<string, string>& a
 
 
 
-void AmpacheService::onGetContents(const char* url, const Index<char>& contentBuffer) {
+void Ampache::onGetContents(const char* url, const Index<char>& contentBuffer) {
     bool error = !contentBuffer.len();
 
     string content = string{contentBuffer.begin(), static_cast<size_t>(contentBuffer.len())};
@@ -188,7 +182,7 @@ void AmpacheService::onGetContents(const char* url, const Index<char>& contentBu
 
 
 
-void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader, bool error) {
+void Ampache::processHandshake(QXmlStreamReader& xmlStreamReader, bool error) {
     if (error) {
         myIsConnected = false;
         connected();
@@ -232,7 +226,7 @@ void AmpacheService::processHandshake(QXmlStreamReader& xmlStreamReader, bool er
 
 
 
-void AmpacheService::processAlbums(QXmlStreamReader& xmlStreamReader) {
+void Ampache::processAlbums(QXmlStreamReader& xmlStreamReader) {
     auto albumsData = createAlbums(xmlStreamReader);
 
     // application can be terminated after readyAlbums event therefore there should be no access to instance variables
@@ -242,7 +236,7 @@ void AmpacheService::processAlbums(QXmlStreamReader& xmlStreamReader) {
 
 
 
-vector<unique_ptr<AlbumData>> AmpacheService::createAlbums(QXmlStreamReader& xmlStreamReader) const {
+vector<unique_ptr<AlbumData>> Ampache::createAlbums(QXmlStreamReader& xmlStreamReader) const {
     vector<unique_ptr<AlbumData>> albumData{};
 
     QString xmlElement;
@@ -320,7 +314,7 @@ vector<unique_ptr<AlbumData>> AmpacheService::createAlbums(QXmlStreamReader& xml
 
 
 
-void AmpacheService::onAlbumArtFinished(const char* artUrl, const Index<char>& contentBuffer) {
+void Ampache::onAlbumArtFinished(const char* artUrl, const Index<char>& contentBuffer) {
     auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(AmpacheUrl{artUrl}.parseIdValue(),
         QByteArray{contentBuffer.begin(), contentBuffer.len()});
     scaleAlbumArtRunnable->setAutoDelete(false);
@@ -331,7 +325,7 @@ void AmpacheService::onAlbumArtFinished(const char* artUrl, const Index<char>& c
 
 
 
-void AmpacheService::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable) {
+void Ampache::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable) {
     auto albumId = *(myPendingAlbumArts.find(scaleAlbumArtRunnable->getId()));
     QPixmap art;
     art.convertFromImage(scaleAlbumArtRunnable->getResult());
@@ -353,7 +347,7 @@ void AmpacheService::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scal
 
 
 
-void AmpacheService::processArtists(QXmlStreamReader& xmlStreamReader) {
+void Ampache::processArtists(QXmlStreamReader& xmlStreamReader) {
     auto artistsData = createArtists(xmlStreamReader);
 
     // application can be terminated after readyArtists event therefore there should be no access to instance variables
@@ -363,7 +357,7 @@ void AmpacheService::processArtists(QXmlStreamReader& xmlStreamReader) {
 
 
 
-vector<unique_ptr<ArtistData>> AmpacheService::createArtists(QXmlStreamReader& xmlStreamReader) const {
+vector<unique_ptr<ArtistData>> Ampache::createArtists(QXmlStreamReader& xmlStreamReader) const {
     vector<unique_ptr<ArtistData>> artistsData{};
 
     QString xmlElement;
@@ -429,7 +423,7 @@ vector<unique_ptr<ArtistData>> AmpacheService::createArtists(QXmlStreamReader& x
 
 
 
-void AmpacheService::processTracks(QXmlStreamReader& xmlStreamReader) {
+void Ampache::processTracks(QXmlStreamReader& xmlStreamReader) {
     auto tracksData = createTracks(xmlStreamReader);
 
     // application can be terminated after readyTracks event therefore there should be no access to instance variables
@@ -439,7 +433,7 @@ void AmpacheService::processTracks(QXmlStreamReader& xmlStreamReader) {
 
 
 
-vector<unique_ptr<TrackData>> AmpacheService::createTracks(QXmlStreamReader& xmlStreamReader) const {
+vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamReader) const {
     vector<unique_ptr<TrackData>> tracksData{};
 
     QString xmlElement;
@@ -513,37 +507,8 @@ vector<unique_ptr<TrackData>> AmpacheService::createTracks(QXmlStreamReader& xml
 
 
 
-string AmpacheService::assembleUrlBase() const {
+string Ampache::assembleUrlBase() const {
     return myUrl + "/server/xml.server.php?action=";
-}
-
-
-
-ScaleAlbumArtRunnable::ScaleAlbumArtRunnable(const string id, const QByteArray imageData):
-myId{id},
-myImageData{imageData} { }
-
-
-
-string ScaleAlbumArtRunnable::getId() const {
-    return myId;
-}
-
-
-
-QImage ScaleAlbumArtRunnable::getResult() const {
-    return myScaledAlbumArt;
-}
-
-
-
-void ScaleAlbumArtRunnable::run() {
-    QImage art{};
-    art.loadFromData(myImageData);
-    // SMELL: Image size is specified here.
-    myScaledAlbumArt = art.scaled(100, 100, Qt::AspectRatioMode::IgnoreAspectRatio,
-        Qt::TransformationMode::SmoothTransformation);
-    emit finished(this);
 }
 
 }
