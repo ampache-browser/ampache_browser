@@ -54,7 +54,8 @@ public:
      * If this time point is earlier that the one read directly from Ampache server then the cached data should be
      * treated as obsolete.
      *
-     * @return std::chrono::system_clock::time_point
+     * @return Time point of lastest update or std::chrono::system_clock::time_point::min() if cache data are not
+     *         available.
      */
     std::chrono::system_clock::time_point getLastUpdate() const;
 

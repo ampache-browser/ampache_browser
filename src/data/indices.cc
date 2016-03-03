@@ -20,12 +20,14 @@ namespace data {
 void Indices::addArtist(const Artist& artist) {
     myArtistAlbums[artist] = move(AlbumDataUnorderedSet{});
     myArtistTracks[artist] = move(TrackDataUnorderedSet{});
+    changed();
 }
 
 
 
 void Indices::addAlbum(const Album& album) {
     myAlbumTracks[album] = move(TrackDataUnorderedSet{});
+    changed();
 }
 
 
@@ -65,6 +67,45 @@ TrackDataUnorderedSet& Indices::getAlbumTracks(const Album& album) {
 void Indices::updateAlbumTracks(const Album& album, TrackData& trackData) {
     myAlbumTracks[album].insert(trackData);
     changed();
+}
+
+
+
+void Indices::clearArtists() {
+    myArtistAlbums.clear();
+    myArtistTracks.clear();
+    changed();
+}
+
+
+
+void Indices::clearAlbums() {
+    myAlbumTracks.clear();
+    changed();
+}
+
+
+
+void Indices::clearArtistsAlbums() {
+    for (auto& artistAndAlbums: myArtistAlbums) {
+        artistAndAlbums.second.clear();
+    }
+}
+
+
+
+void Indices::clearArtistsTracks() {
+    for (auto& artistAndTracls: myArtistTracks) {
+        artistAndTracls.second.clear();
+    }
+}
+
+
+
+void Indices::clearAlbumsTracks() {
+    for (auto& albumAndTracks: myAlbumTracks) {
+        albumAndTracks.second.clear();
+    }
 }
 
 }

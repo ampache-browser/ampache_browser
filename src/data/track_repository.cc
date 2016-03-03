@@ -8,6 +8,7 @@
 
 
 #include "infrastructure/event/delegate.h"
+#include "data/provider_type.h"
 #include "data/providers/ampache.h"
 #include "data/providers/cache.h"
 #include "data_objects/track_data.h"
@@ -53,21 +54,37 @@ TrackRepository::~TrackRepository() {
 
 
 
+void TrackRepository::setProviderType(ProviderType providerType) {
+    if (myProviderType != providerType) {
+        myProviderType = providerType;
+        clear();
+
+        providerChanged();
+
+        if (maxCount() == 0) {
+            auto error = false;
+            fullyLoaded(error);
+        }
+    }
+}
+
+
+
 /**
  * @warning Class does not work correctly if this method is called multiple times for the same data.
  */
 bool TrackRepository::load(int offset, int limit) {
-    if (myLoadOffset != -1) {
+    if (myLoadOffset != -1 || !myLoadingEnabled) {
         return false;
     }
 
-    if (!myAmpache.getIsConnected() || (myCache.getLastUpdate() > myAmpache.getLastUpdate())) {
+    if (myProviderType == ProviderType::Ampache) {
+        myLoadOffset = offset;
+        myAmpache.requestTracks(offset, limit);
+    } else if (myProviderType == ProviderType::Cache) {
         if (myLoadProgress == 0) {
             loadFromCache();
         }
-    } else {
-        myLoadOffset = offset;
-        myAmpache.requestTracks(offset, limit);
     }
     return true;
 }
@@ -103,6 +120,18 @@ int TrackRepository::maxCount() {
         myCachedMaxCount = computeMaxCount();
     }
     return myCachedMaxCount;
+}
+
+
+
+void TrackRepository::disableLoading() {
+    myLoadingEnabled = false;
+    myCachedMaxCount = -1;
+    loadingDisabled();
+    if (myLoadOffset == -1) {
+        auto error = false;
+        fullyLoaded(error);
+    }
 }
 
 
@@ -144,6 +173,26 @@ bool TrackRepository::isFiltered() const {
 
 
 void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
+    bool error = false;
+
+    // return an empty result if the loaded data are not valid anymore (e. g. due to a provider change)
+    if (myLoadOffset == -1) {
+
+        // fire loaded event to give a chance to consumers to continue their processing; even in the case of provider
+        // change it might not be necessary since consumers should react on providerChanged event by cancelling
+        // of all requests
+        auto offsetAndLimit = pair<int, int>{0, 0};
+        loaded(offsetAndLimit);
+
+        return;
+    }
+
+    if (tracksData.size() == 0) {
+        error = true;
+        fullyLoaded(error);
+        return;
+    }
+
     uint offset = myLoadOffset;
     auto end = offset + tracksData.size();
     if (end > myTracksData.size()) {
@@ -177,8 +226,8 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
     // application can be terminated after loaded event therefore there should be no access to instance variables
     // after it is fired
     loaded(offsetAndLimit);
-    if (isFullyLoaded) {
-        fullyLoaded();
+    if (isFullyLoaded || !myLoadingEnabled) {
+        fullyLoaded(error);
     }
 }
 
@@ -191,6 +240,21 @@ void TrackRepository::onFilterChanged() {
     if (isFiltered()) {
         filterChanged();
     }
+}
+
+
+
+void TrackRepository::clear() {
+    myTracksData.clear();
+    myLoadProgress = 0;
+    myLoadOffset = -1;
+    myCachedMaxCount = -1;
+
+    myUnfilteredFilter->processUpdatedSourceData(-1, 0);
+    myFilter->apply();
+    myIndices.clearAlbumsTracks();
+    myIndices.clearArtistsAlbums();
+    myIndices.clearArtistsTracks();
 }
 
 
@@ -217,7 +281,8 @@ void TrackRepository::loadFromCache() {
     // after it is fired
     auto offsetAndLimit = pair<int, int>{0, myTracksData.size()};
     loaded(offsetAndLimit);
-    fullyLoaded();
+    bool error = false;
+    fullyLoaded(error);
 }
 
 
@@ -234,10 +299,16 @@ void TrackRepository::updateIndicies(TrackData& trackData) {
 
 
 int TrackRepository::computeMaxCount() const {
-    if (myIsFilterSet && myLoadProgress != 0) {
+    if (!myLoadingEnabled || (isFiltered() && myLoadProgress != 0)) {
         return myFilter->getFilteredData().size();
     }
-    return myAmpache.getIsConnected() ? myAmpache.numberOfTracks() : myCache.numberOfTracks();
+    if (myProviderType == ProviderType::Ampache) {
+        return myAmpache.numberOfTracks();
+    };
+    if (myProviderType == ProviderType::Cache) {
+        return myCache.numberOfTracks();
+    };
+    return 0;
 }
 
 }

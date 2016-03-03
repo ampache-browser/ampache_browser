@@ -8,6 +8,7 @@
 
 
 #include <QToolBar>
+#include <QStatusBar>
 #include <QStyle>
 #include <QAction>
 #include <QLineEdit>
@@ -82,6 +83,8 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     tracksDockWidget->setWidget(tracksTreeView);
     addDockWidget(Qt::RightDockWidgetArea, artistsDockWidget);
     addDockWidget(Qt::RightDockWidgetArea, tracksDockWidget);
+
+    statusBar()->setSizeGripEnabled(false);
 }
 
 

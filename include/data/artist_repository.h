@@ -21,6 +21,7 @@
 #include "filters/filter.h"
 #include "filters/unfiltered_filter.h"
 #include "domain/artist.h"
+#include "data/provider_type.h"
 
 
 
@@ -32,6 +33,7 @@ class Indices;
 
 
 
+// SMELL: Factor-out loading related functionality into a base class (WritableRepository?).
 /**
  * @brief Stores artists data and provides means to trigger their load from Ampache server or a cache.
  */
@@ -62,8 +64,10 @@ public:
 
     /**
      * @brief Event fired when all artists data were loaded.
+     *
+     * @param bool true if an error occured, false otherwise
      */
-    infrastructure::Event<void> fullyLoaded{};
+    infrastructure::Event<bool> fullyLoaded{};
 
     /**
      * @brief Event fired when a filter was changed.
@@ -71,6 +75,31 @@ public:
      * @sa setFilter(), unsetFilter()
      */
     infrastructure::Event<void> filterChanged{};
+
+    /**
+     * @brief Event fired when further loading was disabled.
+     *
+     * @sa disableLoading()
+     */
+    infrastructure::Event<void> loadingDisabled{};
+
+    /**
+     * @brief Event fired when a provider was changed.
+     *
+     * @sa setProviderType()
+     */
+    infrastructure::Event<void> providerChanged{};
+
+    /**
+     * @brief Sets the which provider should be used to load data.
+     *
+     * @note maxCount() can change when setting the provider type.
+     *
+     * @param providerType The type of provider that shall be used to load data.
+     *
+     * @sa ::providerChanged
+     */
+    void setProviderType(ProviderType providerType);
 
     /**
      * @brief Trigger load of artists data from Ampache server or the cache.
@@ -122,6 +151,8 @@ public:
      */
     int maxCount();
 
+    void disableLoading();
+
     /**
      * @brief Sets a filter.
      *
@@ -156,11 +187,16 @@ private:
     Cache& myCache;
     Indices& myIndices;
 
+    // used data provder type
+    ProviderType myProviderType = ProviderType::None;
+
     // number of loaded artists so far
     int myLoadProgress = 0;
 
     // starting offset of artist records that are being currently loaded; -1 if no artist loading is in progress
     int myLoadOffset = -1;
+
+    bool myLoadingEnabled = true;
 
     // filter which is active when no filter is set
     std::shared_ptr<UnfilteredFilter<ArtistData>> myUnfilteredFilter = std::shared_ptr<UnfilteredFilter<ArtistData>>{
@@ -178,6 +214,7 @@ private:
     void onReadyArtists(std::vector<std::unique_ptr<ArtistData>>& artistData);
     void onFilterChanged();
 
+    void clear();
     void loadFromCache();
     void updateIndices(const ArtistData& artistData);
     int computeMaxCount() const;

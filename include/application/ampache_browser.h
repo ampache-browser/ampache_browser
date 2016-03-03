@@ -22,10 +22,15 @@
 #include "data/track_repository.h"
 #include "data/indices.h"
 #include "ui/ui.h"
+#include "application/data_loader.h"
 
 
 
 namespace application {
+
+class DataLoader;
+
+
 
 /**
  * @brief The application.
@@ -71,6 +76,8 @@ public:
     void requestTermination();
 
 private:
+    std::unique_ptr<DataLoader> myDataLoader = nullptr;
+
     std::unique_ptr<data::Ampache> myAmpache = nullptr;
     std::unique_ptr<data::Cache> myCache = nullptr;
     std::unique_ptr<data::Indices> myIndices = nullptr;
@@ -88,20 +95,11 @@ private:
     bool myIsAlbumDataRequestAborted = false;
     bool myIsTrackDataRequestAborted = false;
 
-    void onConnected();
-    void onArtistsFullyLoaded();
-    void onAlbumsFullyLoaded();
-    void onTracksFullyLoaded();
+    void onDataLoaderFinished(LoadingResult loadingResult);
     void onPlayTriggered(const std::vector<std::string>& ids);
     void onArtistsSelected(const std::vector<std::string>& ids);
     void onAlbumsSelected(const std::vector<std::string>& ids);
     void onSearchTriggered(const std::string& searchText);
-
-    void onArtistDataRequestsAborted();
-    void onAlbumDataRequestsAborted();
-    void onTrackDataRequestsAborted();
-
-    void possiblyRaiseTerminated();
 };
 
 }

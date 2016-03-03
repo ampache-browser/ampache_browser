@@ -36,6 +36,7 @@ SRCS = src/infrastructure/os_paths.cc \
        src/application/models/requests.cc \
        src/application/models/request_group.cc \
        src/application/models/album_model.cc \
+       src/application/data_loader.cc \
        src/application/ampache_browser.cc \
        src/ui/ui.cc \
        src/ui/ampache_browser_main_window.cc \

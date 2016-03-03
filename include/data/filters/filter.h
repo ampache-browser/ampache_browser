@@ -44,7 +44,7 @@ public:
      *
      * @param sourceData The data that shall be filtered.
      */
-    void setSourceData(const std::vector<std::unique_ptr<T>>& sourceData);
+    virtual void setSourceData(const std::vector<std::unique_ptr<T>>& sourceData);
 
     /**
      * @brief Gets the result of the filter.

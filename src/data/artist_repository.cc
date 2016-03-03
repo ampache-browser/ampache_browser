@@ -10,6 +10,7 @@
 #include <functional>
 
 #include "infrastructure/event/delegate.h"
+#include "data/provider_type.h"
 #include "data/providers/ampache.h"
 #include "data_objects/artist_data.h"
 #include "data/indices.h"
@@ -49,18 +50,34 @@ ArtistRepository::~ArtistRepository() {
 
 
 
+void ArtistRepository::setProviderType(ProviderType providerType) {
+    if (myProviderType != providerType) {
+        myProviderType = providerType;
+        clear();
+
+        providerChanged();
+
+        if (maxCount() == 0) {
+            auto error = false;
+            fullyLoaded(error);
+        }
+    }
+}
+
+
+
 bool ArtistRepository::load(int offset, int limit) {
-    if (myLoadOffset != -1) {
+    if (myLoadOffset != -1 || !myLoadingEnabled) {
         return false;
     }
 
-    if (!myAmpache.getIsConnected() || (myCache.getLastUpdate() > myAmpache.getLastUpdate())) {
+    if (myProviderType == ProviderType::Ampache) {
+        myLoadOffset = offset;
+        myAmpache.requestArtists(offset, limit);
+    } else if (myProviderType == ProviderType::Cache) {
         if (myLoadProgress == 0) {
             loadFromCache();
         }
-    } else {
-        myLoadOffset = offset;
-        myAmpache.requestArtists(offset, limit);
     }
     return true;
 }
@@ -102,6 +119,18 @@ int ArtistRepository::maxCount() {
 
 
 
+void ArtistRepository::disableLoading() {
+    myLoadingEnabled = false;
+    myCachedMaxCount = -1;
+    loadingDisabled();
+    if (myLoadOffset == -1) {
+        auto error = false;
+        fullyLoaded(error);
+    }
+}
+
+
+
 void ArtistRepository::setFilter(unique_ptr<Filter<ArtistData>> filter) {
     myIsFilterSet = true;
 
@@ -139,6 +168,26 @@ bool ArtistRepository::isFiltered() const {
 
 
 void ArtistRepository::onReadyArtists(vector<unique_ptr<ArtistData>>& artistsData) {
+    bool error = false;
+
+    // return an empty result if the loaded data are not valid anymore (e. g. due to a provider change)
+    if (myLoadOffset == -1) {
+
+        // fire loaded event to give a chance to consumers to continue their processing; even in the case of provider
+        // change it might not be necessary since consumers should react on providerChanged event by cancelling
+        // of all requests
+        auto offsetAndLimit = pair<int, int>{0, 0};
+        loaded(offsetAndLimit);
+
+        return;
+    }
+
+    if (artistsData.size() == 0) {
+        error = true;
+        fullyLoaded(error);
+        return;
+    }
+
     uint offset = myLoadOffset;
     auto end = offset + artistsData.size();
     if (end > myArtistsData.size()) {
@@ -165,8 +214,8 @@ void ArtistRepository::onReadyArtists(vector<unique_ptr<ArtistData>>& artistsDat
     // application can be terminated after loaded event therefore there should be no access to instance variables
     // after it is fired
     loaded(offsetAndLimit);
-    if (isFullyLoaded) {
-        fullyLoaded();
+    if (isFullyLoaded || !myLoadingEnabled) {
+        fullyLoaded(error);
     }
 }
 
@@ -179,6 +228,19 @@ void ArtistRepository::onFilterChanged() {
     if (isFiltered()) {
         filterChanged();
     }
+}
+
+
+
+void ArtistRepository::clear() {
+    myArtistsData.clear();
+    myLoadProgress = 0;
+    myLoadOffset = -1;
+    myCachedMaxCount = -1;
+
+    myUnfilteredFilter->processUpdatedSourceData(-1, 0);
+    myFilter->apply();
+    myIndices.clearArtists();
 }
 
 
@@ -199,7 +261,8 @@ void ArtistRepository::loadFromCache() {
     // after it is fired
     auto offsetAndLimit = pair<int, int>{0, myArtistsData.size()};
     loaded(offsetAndLimit);
-    fullyLoaded();
+    bool error = false;
+    fullyLoaded(error);
 }
 
 
@@ -211,10 +274,16 @@ void ArtistRepository::updateIndices(const ArtistData& artistData) {
 
 
 int ArtistRepository::computeMaxCount() const {
-    if (myIsFilterSet && myLoadProgress != 0) {
+    if (!myLoadingEnabled || (isFiltered() && myLoadProgress != 0)) {
         return myFilter->getFilteredData().size();
     }
-    return myAmpache.getIsConnected() ? myAmpache.numberOfArtists() : myCache.numberOfArtists();
+    if (myProviderType == ProviderType::Ampache) {
+        return myAmpache.numberOfArtists();
+    };
+    if (myProviderType == ProviderType::Cache) {
+        return myCache.numberOfArtists();
+    };
+    return 0;
 }
 
 }

@@ -55,6 +55,9 @@ public:
      */
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
+    /**
+     * @sa QAbstractTableModel::data()
+     */
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     /**
@@ -94,6 +97,8 @@ private:
     void onReadyToExecute(RequestGroup requestGroup);
     void onLoaded(std::pair<int, int> offsetAndLimit);
     void onFilterChanged();
+    void onLoadingDisabled();
+    void onProviderChanged();
 };
 
 }

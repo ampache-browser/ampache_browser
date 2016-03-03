@@ -56,13 +56,12 @@ myUser{user},
 myPasswordHash{passwordHash},
 myOnGetContentsFunc{bind(&Ampache::onGetContents, this, _1, _2)},
 myOnAlbumArtFinishedFunc{bind(&Ampache::onAlbumArtFinished, this, _1, _2)} {
-    connectToServer();
 }
 
 
 
-bool Ampache::getIsConnected() const {
-    return myIsConnected;
+bool Ampache::getIsInitialized() const {
+    return myIsInitialized;
 }
 
 
@@ -91,6 +90,12 @@ int Ampache::numberOfTracks() const {
 
 
 
+void Ampache::initialize() {
+    connectToServer();
+}
+
+
+
 void Ampache::requestAlbums(int offset, int limit) {
     callMethod(Method.Albums, {{"offset", to_string(offset)}, {"limit", to_string(limit)}});
 }
@@ -110,7 +115,7 @@ void Ampache::requestTracks(int offset, int limit) {
 
 
 void Ampache::requestAlbumArts(const vector<string>& ids) {
-    if (ids.empty() || !getIsConnected()) {
+    if (ids.empty() || !getIsInitialized()) {
         auto emptyAlbumArts = map<string, QPixmap>{};
         readyAlbumArts(emptyAlbumArts);
         return;
@@ -126,8 +131,11 @@ void Ampache::requestAlbumArts(const vector<string>& ids) {
 
 
 string Ampache::refreshUrl(const string& url) const {
-    // SMELL: We are replacing session ID value with authentication token, which is different, however it works.
-    return AmpacheUrl{url}.replaceSsidValue(myAuthToken).replaceAuthValue(myAuthToken).str();
+    if (getIsInitialized()) {
+        // SMELL: We are replacing session ID value with authentication token, which is different, however it works.
+        return AmpacheUrl{url}.replaceSsidValue(myAuthToken).replaceAuthValue(myAuthToken).str();
+    }
+    return url;
 }
 
 
@@ -149,6 +157,11 @@ void Ampache::connectToServer() {
 
 
 void Ampache::callMethod(const string& name, const map<string, string>& arguments) {
+    if (!getIsInitialized()) {
+        QXmlStreamReader xmlStreamReader;
+        dispatchToMethodHandler(name, xmlStreamReader, true);
+    }
+
     ostringstream urlStream;
     urlStream << assembleUrlBase() << name << "&auth=" << myAuthToken;
     for (auto nameValuePair: arguments) {
@@ -162,21 +175,29 @@ void Ampache::callMethod(const string& name, const map<string, string>& argument
 
 void Ampache::onGetContents(const char* url, const Index<char>& contentBuffer) {
     bool error = !contentBuffer.len();
-
     string content = string{contentBuffer.begin(), static_cast<size_t>(contentBuffer.len())};
     QXmlStreamReader xmlStreamReader{QString::fromStdString(content)};
-
     string methodName = AmpacheUrl{url}.parseActionValue();
+    dispatchToMethodHandler(methodName, xmlStreamReader, error);
+}
+
+
+
+void Ampache::dispatchToMethodHandler(const string& methodName, QXmlStreamReader& xmlStreamReader, bool error) {
+    if (error) {
+        myIsInitialized = false;
+    }
+
     if (methodName == Method.Handshake) {
         processHandshake(xmlStreamReader, error);
     } else if (methodName == Method.Ping) {
 //         processPing(xmlStreamReader);
     } else if (methodName == Method.Albums) {
-        processAlbums(xmlStreamReader);
+        processAlbums(xmlStreamReader, error);
     } else if (methodName == Method.Artists) {
-        processArtists(xmlStreamReader);
+        processArtists(xmlStreamReader, error);
     } else if (methodName == Method.Tracks) {
-        processTracks(xmlStreamReader);
+        processTracks(xmlStreamReader, error);
     }
 }
 
@@ -184,12 +205,11 @@ void Ampache::onGetContents(const char* url, const Index<char>& contentBuffer) {
 
 void Ampache::processHandshake(QXmlStreamReader& xmlStreamReader, bool error) {
     if (error) {
-        myIsConnected = false;
-        connected();
+        initialized(error);
         return;
     }
 
-    myIsConnected = true;
+    myIsInitialized = true;
 
     QDateTime update{};
     QDateTime add{};
@@ -221,13 +241,16 @@ void Ampache::processHandshake(QXmlStreamReader& xmlStreamReader, bool error) {
       // TODO: handle error
     }
 
-    connected();
+    initialized(error);
 }
 
 
 
-void Ampache::processAlbums(QXmlStreamReader& xmlStreamReader) {
-    auto albumsData = createAlbums(xmlStreamReader);
+void Ampache::processAlbums(QXmlStreamReader& xmlStreamReader, bool error) {
+    vector<unique_ptr<AlbumData>> albumsData{};
+    if (!error) {
+        albumsData = createAlbums(xmlStreamReader);
+    }
 
     // application can be terminated after readyAlbums event therefore there should be no access to instance variables
     // after it is fired
@@ -347,8 +370,11 @@ void Ampache::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumA
 
 
 
-void Ampache::processArtists(QXmlStreamReader& xmlStreamReader) {
-    auto artistsData = createArtists(xmlStreamReader);
+void Ampache::processArtists(QXmlStreamReader& xmlStreamReader, bool error) {
+    vector<unique_ptr<ArtistData>> artistsData{};
+    if (!error) {
+        artistsData = createArtists(xmlStreamReader);
+    }
 
     // application can be terminated after readyArtists event therefore there should be no access to instance variables
     // after it is fired
@@ -423,8 +449,11 @@ vector<unique_ptr<ArtistData>> Ampache::createArtists(QXmlStreamReader& xmlStrea
 
 
 
-void Ampache::processTracks(QXmlStreamReader& xmlStreamReader) {
-    auto tracksData = createTracks(xmlStreamReader);
+void Ampache::processTracks(QXmlStreamReader& xmlStreamReader, bool error) {
+    vector<unique_ptr<TrackData>> tracksData{};
+    if (!error) {
+        tracksData = createTracks(xmlStreamReader);
+    }
 
     // application can be terminated after readyTracks event therefore there should be no access to instance variables
     // after it is fired

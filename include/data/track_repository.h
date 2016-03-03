@@ -26,6 +26,7 @@
 #include "domain/track.h"
 #include "domain/album.h"
 #include "domain/artist.h"
+#include "data/provider_type.h"
 
 
 
@@ -41,6 +42,8 @@ class Indices;
 
 /**
  * @brief Stores tracks data, provides means to trigger their load from Ampache server or a cache and updates indices.
+ *
+ * @note This repository can be used only after AlbumRepository is fully loaded.
  */
 class TrackRepository {
 
@@ -73,7 +76,7 @@ public:
     /**
      * @brief Event fired when all tracks data were loaded.
      */
-    infrastructure::Event<void> fullyLoaded{};
+    infrastructure::Event<bool> fullyLoaded{};
 
     /**
      * @brief Event fired when a filter was changed.
@@ -81,6 +84,31 @@ public:
      * @sa setFilter(), unsetFilter()
      */
     infrastructure::Event<void> filterChanged{};
+
+    /**
+     * @brief Event fired when further loading was disabled.
+     *
+     * @sa disableLoading()
+     */
+    infrastructure::Event<void> loadingDisabled{};
+
+    /**
+     * @brief Event fired when a provider was changed.
+     *
+     * @sa setProviderType()
+     */
+    infrastructure::Event<void> providerChanged{};
+
+    /**
+     * @brief Sets the which provider should be used to load data.
+     *
+     * @note maxCount() can change when setting the provider type.
+     *
+     * @param providerType The type of provider that shall be used to load data.
+     *
+     * @sa ::providerChanged
+     */
+    void setProviderType(ProviderType providerType);
 
     /**
      * @brief Trigger load of tracks data from Ampache server or the cache.
@@ -132,6 +160,8 @@ public:
      */
     int maxCount();
 
+    void disableLoading();
+
     /**
      * @brief Sets a filter.
      *
@@ -168,11 +198,16 @@ private:
     const AlbumRepository& myAlbumRepository;
     Indices& myIndices;
 
+    // used data provder type
+    ProviderType myProviderType = ProviderType::None;
+
     // number of loaded tracks so far
     int myLoadProgress = 0;
 
     // starting offset of track records that are being currently loaded; -1 if no track loading is in progress
     int myLoadOffset = -1;
+
+    bool myLoadingEnabled = true;
 
     // filter which is active when no filter is set
     std::shared_ptr<UnfilteredFilter<TrackData>> myUnfilteredFilter = std::shared_ptr<UnfilteredFilter<TrackData>>{
@@ -190,6 +225,7 @@ private:
     void onReadyTracks(std::vector<std::unique_ptr<TrackData>>& trackData);
     void onFilterChanged();
 
+    void clear();
     void loadFromCache();
     void updateIndicies(TrackData& trackData);
     int computeMaxCount() const;

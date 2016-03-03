@@ -67,11 +67,13 @@ public:
     Ampache& operator=(const Ampache& other) = delete;
 
     /**
-     * @brief Event fired when handshake with the server was successful.
+     * @brief Event fired when initial handshake with the server was successful.
      *
-     * @note The instance is usable only after this event is fired.
+     * @note Most of the methods are usable only after this event is fired.
+     *
+     * @param error true if an error occured, false if the initialization was successful
      */
-    infrastructure::Event<void> connected{};
+    infrastructure::Event<bool> initialized{};
 
     /**
      * @brief Event fired when some albums data has been retrieved from the server.
@@ -102,13 +104,14 @@ public:
     infrastructure::Event<std::map<std::string, QPixmap>> readyAlbumArts{};
 
     /**
-     * @brief Return the connection status with the server.
+     * @brief Return the initialization status of the instance.
      *
-     * @note This method can be called even if the ::connected event was not fired.
+     * @note This method can be called even if the ::initialized event was not fired.
      *
      * @return bool
+     * @sa ::initialized
      */
-    bool getIsConnected() const;
+    bool getIsInitialized() const;
 
     /**
      * @brief Gets time point of the latest database update as reported by the server during handshake.
@@ -137,6 +140,13 @@ public:
      * @return int
      */
     int numberOfTracks() const;
+
+    /**
+     * @brief Performs handshake with the server and obtains authentication token and basic data.
+     *
+     * @sa ::initialized
+     */
+    void initialize();
 
     /**
      * @brief Request album records from the server.
@@ -171,7 +181,7 @@ public:
     /**
      * @brief Request album arts from the server.
      *
-     * @note If this method is called before the the ::connected event it immediately raises ::readyAlbumArts with
+     * @note If this method is called before the the ::initialized event it immediately raises ::readyAlbumArts with
      * zero loaded arts.
      *
      * @param ids Identifiers of the album art images that shall be requested.  These IDs are equal to album IDs.
@@ -210,7 +220,7 @@ private:
     const std::string myPasswordHash;
 
     // true if handshake with the server was successful
-    bool myIsConnected = false;
+    bool myIsInitialized = false;
 
     // authentication token as returned by the server
     std::string myAuthToken = "";
@@ -236,12 +246,13 @@ private:
 
     void connectToServer();
     void callMethod(const std::string& name, const std::map<std::string, std::string>& arguments);
+    void dispatchToMethodHandler(const std::string& methodName, QXmlStreamReader& xmlStreamReader, bool error);
     void processHandshake(QXmlStreamReader& xmlStreamReader, bool error);
-    void processAlbums(QXmlStreamReader& xmlStreamReader);
+    void processAlbums(QXmlStreamReader& xmlStreamReader, bool error);
     std::vector<std::unique_ptr<AlbumData>> createAlbums(QXmlStreamReader& xmlStreamReader) const;
-    void processArtists(QXmlStreamReader& xmlStreamReader);
+    void processArtists(QXmlStreamReader& xmlStreamReader, bool error);
     std::vector<std::unique_ptr<ArtistData>> createArtists(QXmlStreamReader& xmlStreamReader) const;
-    void processTracks(QXmlStreamReader& xmlStreamReader);
+    void processTracks(QXmlStreamReader& xmlStreamReader, bool error);
     std::vector<std::unique_ptr<TrackData>> createTracks(QXmlStreamReader& xmlStreamReader) const;
     std::string assembleUrlBase() const;
 };

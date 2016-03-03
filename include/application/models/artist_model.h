@@ -70,6 +70,7 @@ public:
      */
     void requestAllData();
 
+    // TODO: Not needed?
     /**
      * @brief Tell the model to abort all pending requests for loading artists from an external source.
      *
@@ -92,6 +93,8 @@ private:
     void onReadyToExecute(RequestGroup requestGroup);
     void onLoaded(std::pair<int, int> offsetAndLimit);
     void onFilterChanged();
+    void onLoadingDisabled();
+    void onProviderChanged();
 };
 
 }

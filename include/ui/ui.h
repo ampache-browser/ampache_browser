@@ -65,6 +65,8 @@ public:
      */
     QWidget* getMainWidget() const;
 
+    void showNotification(std::string message);
+
     /**
      * @brief Sets artist model to the corresponding UI view.
      *

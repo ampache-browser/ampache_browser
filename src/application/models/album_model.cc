@@ -38,11 +38,15 @@ myAlbumRepository(albumRepository) {
     myArtRequests->readyToExecute += DELEGATE1(&AlbumModel::onReadyToExecuteArts, RequestGroup);
     myAlbumRepository.artsLoaded += DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
     myAlbumRepository.filterChanged += DELEGATE0(&AlbumModel::onFilterChanged);
+    myAlbumRepository.loadingDisabled += DELEGATE0(&AlbumModel::onLoadingDisabled);
+    myAlbumRepository.providerChanged += DELEGATE0(&AlbumModel::onProviderChanged);
 }
 
 
 
 AlbumModel::~AlbumModel() {
+    myAlbumRepository.providerChanged -= DELEGATE0(&AlbumModel::onProviderChanged);
+    myAlbumRepository.loadingDisabled -= DELEGATE0(&AlbumModel::onLoadingDisabled);
     myAlbumRepository.filterChanged -= DELEGATE0(&AlbumModel::onFilterChanged);
     myAlbumRepository.artsLoaded -= DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
     myArtRequests->readyToExecute -= DELEGATE1(&AlbumModel::onReadyToExecuteArts, RequestGroup);
@@ -120,8 +124,8 @@ void AlbumModel::requestAllData() {
 
 void AlbumModel::abortDataRequests() {
     myDataRequestsAborted = true;
-    myAlbumRequests->cancel();
-    myArtRequests->cancel();
+    myAlbumRequests->removeAll();
+    myArtRequests->removeAll();
     if (!myAlbumRequests->isInProgress() && !myArtRequests->isInProgress()) {
         dataRequestsAborted();
     }
@@ -137,6 +141,8 @@ void AlbumModel::onReadyToExecuteAlbums(RequestGroup requestGroup) {
 
 void AlbumModel::onLoaded(pair<int, int>) {
     auto finishedRequestGroup = myAlbumRequests->setFinished();
+
+    // TODO: Is this required?  Filter changed event should handle it.
     if (myAlbumRepository.isFiltered()) {
         beginResetModel();
         endResetModel();
@@ -169,7 +175,32 @@ void AlbumModel::onArtsLoaded(pair<int, int>) {
 
 
 void AlbumModel::onFilterChanged() {
-    myArtRequests->cancel();
+    myArtRequests->removeAll();
+    beginResetModel();
+    endResetModel();
+}
+
+
+
+void AlbumModel::onLoadingDisabled() {
+    myAlbumRequests->removeAll();
+    myAlbumRequests->cancelCurrent();
+    myArtRequests->removeAll();
+    myArtRequests->cancelCurrent();
+
+    // reset model to re-read number of rows
+    beginResetModel();
+    endResetModel();
+}
+
+
+
+void AlbumModel::onProviderChanged() {
+    myAlbumRequests->removeAll();
+    myAlbumRequests->cancelCurrent();
+    myArtRequests->removeAll();
+    myArtRequests->cancelCurrent();
+    requestAllData();
     beginResetModel();
     endResetModel();
 }

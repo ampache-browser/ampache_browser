@@ -68,9 +68,18 @@ public:
     void add(int offset);
 
     /**
-     * @brief Cancel all requests.
+     * @brief Cancel current request.
+     *
+     * @sa removeAll()
      */
-    void cancel();
+    void cancelCurrent();
+
+    /**
+     * @brief Remove all requests.
+     *
+     * @sa add(), cancelCurrent()
+     */
+    void removeAll();
 
     /**
      * @brief Inform the instance that the operation started upon ::readyToExecute event has finished.

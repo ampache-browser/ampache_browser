@@ -8,11 +8,12 @@
 
 
 #include <vector>
-#include <QtCore/QObject>
+#include <QObject>
+#include <QStatusBar>
 #include <QListView>
 #include <QTreeView>
 #include <QAction>
-#include <QtGui/QStandardItemModel>
+#include <QStandardItemModel>
 #include <QItemSelection>
 #include <QLineEdit>
 #include <QCompleter>
@@ -42,6 +43,12 @@ myMainWindow{new AmpacheBrowserMainWindow{}} {
 
 QWidget* Ui::getMainWidget() const {
     return myMainWindow;
+}
+
+
+
+void Ui::showNotification(string message) {
+    myMainWindow->statusBar()->showMessage(QString::fromStdString(message));
 }
 
 

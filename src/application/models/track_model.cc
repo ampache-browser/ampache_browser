@@ -32,11 +32,15 @@ myTrackRepository(trackRepository) {
     myRequests->readyToExecute += DELEGATE1(&TrackModel::onReadyToExecute, RequestGroup);
     myTrackRepository.loaded += DELEGATE1(&TrackModel::onLoaded, pair<int, int>);
     myTrackRepository.filterChanged += DELEGATE0(&TrackModel::onFilterChanged);
+    myTrackRepository.loadingDisabled += DELEGATE0(&TrackModel::onLoadingDisabled);
+    myTrackRepository.providerChanged += DELEGATE0(&TrackModel::onProviderChanged);
 }
 
 
 
 TrackModel::~TrackModel() {
+    myTrackRepository.providerChanged -= DELEGATE0(&TrackModel::onProviderChanged);
+    myTrackRepository.loadingDisabled -= DELEGATE0(&TrackModel::onLoadingDisabled);
     myTrackRepository.filterChanged -= DELEGATE0(&TrackModel::onFilterChanged);
     myTrackRepository.loaded -= DELEGATE1(&TrackModel::onLoaded, pair<int, int>);
     myRequests->readyToExecute -= DELEGATE1(&TrackModel::onReadyToExecute, RequestGroup);
@@ -116,7 +120,7 @@ void TrackModel::requestAllData() {
 
 void TrackModel::abortDataRequests() {
     myDataRequestsAborted = true;
-    myRequests->cancel();
+    myRequests->removeAll();
     if (!myRequests->isInProgress()) {
         dataRequestsAborted();
     }
@@ -142,6 +146,27 @@ void TrackModel::onLoaded(pair<int, int>) {
 
 
 void TrackModel::onFilterChanged() {
+    beginResetModel();
+    endResetModel();
+}
+
+
+
+void TrackModel::onLoadingDisabled() {
+    myRequests->removeAll();
+    myRequests->cancelCurrent();
+
+    // reset model to re-read number of rows
+    beginResetModel();
+    endResetModel();
+}
+
+
+
+void TrackModel::onProviderChanged() {
+    myRequests->removeAll();
+    myRequests->cancelCurrent();
+    requestAllData();
     beginResetModel();
     endResetModel();
 }

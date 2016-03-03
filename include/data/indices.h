@@ -124,6 +124,41 @@ public:
      */
     void updateAlbumTracks(const domain::Album& album, TrackData& trackData);
 
+    /**
+     * @brief Removes all artist indices.
+     *
+     * @sa addArtist()
+     */
+    void clearArtists();
+
+     /**
+     * @brief Removes all album indices.
+     *
+     * @sa addAlbum()
+     */
+    void clearAlbums();
+
+    /**
+     * @brief Removes albums from each artist.
+     *
+     * @sa updateArtistAlbums()
+     */
+    void clearArtistsAlbums();
+
+    /**
+     * @brief Removes tracks from each artist.
+     *
+     * @sa updateArtistTracks()
+     */
+    void clearArtistsTracks();
+
+    /**
+     * @brief Removes tracks from each album.
+     *
+     * @sa updateAlbumTracks()
+     */
+    void clearAlbumsTracks();
+
 private:
     // <artist, albums data> map
     ArtistAlbumsIndex myArtistAlbums;

@@ -24,6 +24,7 @@
 #include "domain/artist.h"
 #include "filters/filter.h"
 #include "filters/unfiltered_filter.h"
+#include "data/provider_type.h"
 
 
 
@@ -38,6 +39,8 @@ class Indices;
 
 /**
  * @brief Stores albums data and provides means to trigger their load from Ampache server or a cache.
+ *
+ * @note This repository can be used only after ArtistRepository is fully loaded.
  */
 class AlbumRepository {
 
@@ -75,8 +78,19 @@ public:
 
     /**
      * @brief Event fired when all albums data were loaded. This does not include album arts.
+     *
+     * @param bool true if an error occured, false otherwise
+     *
+     * @sa ::artsFullyLoaded
      */
-    infrastructure::Event<void> fullyLoaded{};
+    infrastructure::Event<bool> fullyLoaded{};
+
+    /**
+     * @brief Event fired when all albums arts were loaded.
+     *
+     * @param bool true if an error occured, false otherwise
+     */
+    infrastructure::Event<bool> artsFullyLoaded{};
 
     /**
      * @brief Event fired when a filter was changed.
@@ -84,6 +98,31 @@ public:
      * @sa setFilter(), unsetFilter()
      */
     infrastructure::Event<void> filterChanged{};
+
+    /**
+     * @brief Event fired when further loading was disabled.
+     *
+     * @sa disableLoading()
+     */
+    infrastructure::Event<void> loadingDisabled{};
+
+    /**
+     * @brief Event fired when a provider was changed.
+     *
+     * @sa setProviderType()
+     */
+    infrastructure::Event<void> providerChanged{};
+
+    /**
+     * @brief Sets the which provider should be used to load data.
+     *
+     * @note maxCount() can change when setting the provider type.
+     *
+     * @param providerType The type of provider that shall be used to load data.
+     *
+     * @sa ::providerChanged
+     */
+    void setProviderType(ProviderType providerType);
 
     /**
      * @brief Trigger load of albums data from Ampache server or the cache.
@@ -157,6 +196,8 @@ public:
      */
     int maxCount();
 
+    void disableLoading();
+
     /**
      * @brief Sets a filter.
      *
@@ -192,11 +233,17 @@ private:
     const ArtistRepository& myArtistRepository;
     Indices& myIndices;
 
-    // number of loaded albums so far
-    int myLoadProgress = 0;
+    // used data provder type
+    ProviderType myProviderType = ProviderType::None;
+
+    // number of loaded albums and arts so far
+    int myAlbumsLoadProgress = 0;
+    int myArtsLoadProgress = 0;
 
     // starting offset of album records that are being currently loaded; -1 if no album loading is in progress
     int myLoadOffset = -1;
+
+    bool myLoadingEnabled = true;
 
     // starting offset and number of album arts that are being currently loaded; -1 if no arts loading
     // is in progress
@@ -216,17 +263,16 @@ private:
     // cached value for maxCount() method
     int myCachedMaxCount = -1;
 
-    // true if cache is used to load records; false if records are loaded from Ampache server
-    bool myCachedLoad = false;
-
     void onReadyAlbums(std::vector<std::unique_ptr<data::AlbumData>>& albumsData);
     void onAmpacheReadyArts(const std::map<std::string, QPixmap>& arts);
     void onCacheReadyArts(const std::map<std::string, QPixmap>& arts);
     void onFilterChanged();
 
+    void clear();
     void loadFromCache();
     void updateIndices(AlbumData& albumData);
     int computeMaxCount() const;
+    int computeUnfilteredMaxCount() const;
     domain::Album* findFilteredAlbumById(const std::string& id, int offset, int count) const;
     bool raiseEmptyIfResultNotValid() const;
 };
