@@ -15,6 +15,8 @@
 #include <iterator>
 #include <unordered_set>
 
+#include <libaudcore/runtime.h>
+
 #include "infrastructure/event/delegate.h"
 #include "domain/artist.h"
 #include "data/provider_type.h"
@@ -75,6 +77,7 @@ void AlbumRepository::setProviderType(ProviderType providerType) {
         if (maxCount() == 0) {
             auto error = false;
             fullyLoaded(error);
+            artsFullyLoaded(error);
         }
     }
 }
@@ -85,11 +88,11 @@ void AlbumRepository::setProviderType(ProviderType providerType) {
  * @warning Class does not work correctly if this method is called multiple times for the same data.
  */
 bool AlbumRepository::load(int offset, int limit) {
-    // SMELL: Use exceptions?
     if (myLoadOffset != -1 || !myLoadingEnabled) {
         return false;
     }
 
+    AUDDBG("Load from %d, limit %d.\n", offset, limit);
     if (myProviderType == ProviderType::Ampache) {
         myLoadOffset = offset;
         myAmpache.requestAlbums(offset, limit);
@@ -138,6 +141,7 @@ bool AlbumRepository::loadArts(int filteredOffset, int count) {
         return false;
     }
 
+    AUDDBG("Load arts from filtered offset %d, count %d.\n", filteredOffset, count);
     myArtsLoadOffset = filteredOffset;
     myArtsLoadCount = count;
     vector<string> albumIds;
@@ -190,6 +194,7 @@ void AlbumRepository::disableLoading() {
 
 
 void AlbumRepository::setFilter(unique_ptr<Filter<AlbumData>> filter) {
+    AUDDBG("Setting a filter.\n");
     myIsFilterSet = true;
 
     myFilter->changed -= DELEGATE0(&AlbumRepository::onFilterChanged);
@@ -206,6 +211,7 @@ void AlbumRepository::unsetFilter() {
     if (!isFiltered()) {
         return;
     }
+    AUDDBG("Unsetting a filter.\n");
     myIsFilterSet = false;
 
     myFilter->changed -= DELEGATE0(&AlbumRepository::onFilterChanged);
@@ -226,6 +232,7 @@ bool AlbumRepository::isFiltered() const {
 
 
 void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
+    AUDDBG("Ready %d entries from offset %d.\n", albumsData.size(), myLoadOffset);
     bool error = false;
 
     // return an empty result if the loaded data are not valid anymore (e. g. due to a provider change)
@@ -269,6 +276,7 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
     myFilter->apply();
     myLoadOffset = -1;
     myAlbumsLoadProgress += albumsData.size();
+    AUDDBG("Load progress: %d.\n", myAlbumsLoadProgress);
 
     bool isFullyLoaded = myAlbumsLoadProgress >= myAmpache.numberOfAlbums();
     if (isFullyLoaded) {
@@ -286,6 +294,8 @@ void AlbumRepository::onReadyAlbums(vector<unique_ptr<AlbumData>>& albumsData) {
 
 
 void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
+    AUDDBG("Ready %d art entries from offset %d; requested count was %d.\n", arts.size(), myArtsLoadOffset,
+        myArtsLoadCount);
     if (raiseEmptyIfResultNotValid()) {
         return;
     }
@@ -294,6 +304,9 @@ void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
     for (auto& idAndArt: arts) {
         auto album = findFilteredAlbumById(idAndArt.first, myArtsLoadOffset, myArtsLoadCount);
         if (album == nullptr) {
+            // SMELL: We still can search through all data for the album ID and set it.  We should raise artsLoaded
+            // event with empty offset and count in this case.  This will increase loading performance since there are
+            // number of ignored results due to filter chages during data loading.
             continue;
         }
 
@@ -303,6 +316,7 @@ void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
 
     myCache.updateAlbumArts(loadedIdsAndArts);
     myArtsLoadProgress += loadedIdsAndArts.size();
+    AUDDBG("Arts load progress: %d.\n", myArtsLoadProgress);
 
     // application can be terminated after artsLoaded event therefore there should be no access to instance variables
     // after it is fired
@@ -319,6 +333,8 @@ void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
 
 
 void AlbumRepository::onCacheReadyArts(const map<string, QPixmap>& arts) {
+    AUDDBG("Ready %d art entries from offset %d; requested count was %d.\n", arts.size(), myArtsLoadOffset,
+        myArtsLoadCount);
     if (raiseEmptyIfResultNotValid()) {
         return;
     }
@@ -345,6 +361,7 @@ void AlbumRepository::onCacheReadyArts(const map<string, QPixmap>& arts) {
 
 
 void AlbumRepository::onFilterChanged() {
+    AUDDBG("Processing filter changed event.\n");
     myArtsLoadOffset = -1;
     myArtsLoadCount = -1;
     myCachedMaxCount = -1;
@@ -358,6 +375,7 @@ void AlbumRepository::onFilterChanged() {
 
 
 void AlbumRepository::clear() {
+    AUDDBG("Clearing.\n");
     myAlbumsData.clear();
     myAlbumsLoadProgress = 0;
     myArtsLoadProgress = 0;

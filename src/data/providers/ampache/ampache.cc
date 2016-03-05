@@ -12,6 +12,7 @@
 #include <memory>
 #include <utility>
 
+#include <libaudcore/runtime.h>
 #include <QObject>
 #include <QString>
 #include <QUrl>
@@ -121,6 +122,7 @@ void Ampache::requestAlbumArts(const vector<string>& ids) {
         return;
     }
 
+    AUDDBG("Getting %d album arts.\n", ids.size());
     for (auto id: ids) {
         myPendingAlbumArts.insert(id);
         vfs_async_file_get_contents(AmpacheUrl::createAlbumArtUrl(id, myUrl, myAuthToken).str().c_str(),
@@ -141,6 +143,7 @@ string Ampache::refreshUrl(const string& url) const {
 
 
 void Ampache::connectToServer() {
+    AUDDBG("Handshaking with server.\n");
     auto currentTime = to_string(chrono::duration_cast<chrono::seconds>(chrono::system_clock::now().
         time_since_epoch()).count());
     auto passphrase = QCryptographicHash::hash(
@@ -162,6 +165,7 @@ void Ampache::callMethod(const string& name, const map<string, string>& argument
         dispatchToMethodHandler(name, xmlStreamReader, true);
     }
 
+    AUDDBG("Calling server method '%s'.\n", name.c_str());
     ostringstream urlStream;
     urlStream << assembleUrlBase() << name << "&auth=" << myAuthToken;
     for (auto nameValuePair: arguments) {
@@ -178,6 +182,8 @@ void Ampache::onGetContents(const char* url, const Index<char>& contentBuffer) {
     string content = string{contentBuffer.begin(), static_cast<size_t>(contentBuffer.len())};
     QXmlStreamReader xmlStreamReader{QString::fromStdString(content)};
     string methodName = AmpacheUrl{url}.parseActionValue();
+    AUDDBG("Server call of method '%s' has returned with content of length %d.\n", methodName.c_str(),
+        contentBuffer.len());
     dispatchToMethodHandler(methodName, xmlStreamReader, error);
 }
 
@@ -338,6 +344,7 @@ vector<unique_ptr<AlbumData>> Ampache::createAlbums(QXmlStreamReader& xmlStreamR
 
 
 void Ampache::onAlbumArtFinished(const char* artUrl, const Index<char>& contentBuffer) {
+    AUDDBG("Album art request has returned with content of length %d.\n", contentBuffer.len());
     auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(AmpacheUrl{artUrl}.parseIdValue(),
         QByteArray{contentBuffer.begin(), contentBuffer.len()});
     scaleAlbumArtRunnable->setAutoDelete(false);
@@ -349,6 +356,9 @@ void Ampache::onAlbumArtFinished(const char* artUrl, const Index<char>& contentB
 
 
 void Ampache::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable) {
+    AUDDBG("Scaling of album art with ID %s has returned.\n", scaleAlbumArtRunnable->getId().c_str());
+    // SMELL: It crashes when not found.  Either use condition or do not search for ID at all and use the one from
+    // scaleAlbumArtRunnable.
     auto albumId = *(myPendingAlbumArts.find(scaleAlbumArtRunnable->getId()));
     QPixmap art;
     art.convertFromImage(scaleAlbumArtRunnable->getResult());

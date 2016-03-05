@@ -67,6 +67,13 @@ private:
     data::Cache& myCache;
 
     State myState = Idle;
+
+    // true if all all repositories are fully loaded (this does not include album arts)
+    bool myDataLoaded = false;
+
+    // true if album arts are fully loaded
+    bool myAlbumArtsLoaded = false;
+
     data::ProviderType myProviderType = data::ProviderType::None;
 
     void onAmpacheInitialized(bool error);
@@ -76,6 +83,7 @@ private:
     void onTracksFullyLoaded(bool error);
     void onArtsFullyLoaded(bool error);
 
+    void possiblyFireFinished();
     void fireFinished(LoadingResult loadingResult);
 
 };

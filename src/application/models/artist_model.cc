@@ -7,6 +7,7 @@
 
 
 
+#include <libaudcore/runtime.h>
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
 #include <QAbstractTableModel>
@@ -85,6 +86,7 @@ int ArtistModel::columnCount(const QModelIndex&) const {
 
 
 void ArtistModel::requestAllData() {
+    AUDDBG("Requesting all data (%d).\n", rowCount());
     for (int row = 0; row < rowCount(); row++) {
         myRequests->add(row);
     }

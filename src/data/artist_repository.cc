@@ -7,7 +7,7 @@
 
 
 
-#include <functional>
+#include <libaudcore/runtime.h>
 
 #include "infrastructure/event/delegate.h"
 #include "data/provider_type.h"
@@ -71,6 +71,7 @@ bool ArtistRepository::load(int offset, int limit) {
         return false;
     }
 
+    AUDDBG("Load from %d, limit %d.\n", offset, limit);
     if (myProviderType == ProviderType::Ampache) {
         myLoadOffset = offset;
         myAmpache.requestArtists(offset, limit);
@@ -132,6 +133,7 @@ void ArtistRepository::disableLoading() {
 
 
 void ArtistRepository::setFilter(unique_ptr<Filter<ArtistData>> filter) {
+    AUDDBG("Setting a filter.\n");
     myIsFilterSet = true;
 
     myFilter->changed -= DELEGATE0(&ArtistRepository::onFilterChanged);
@@ -148,6 +150,7 @@ void ArtistRepository::unsetFilter() {
     if (!isFiltered()) {
         return;
     }
+    AUDDBG("Unsetting a filter.\n");
     myIsFilterSet = false;
 
     myFilter->changed -= DELEGATE0(&ArtistRepository::onFilterChanged);
@@ -168,6 +171,7 @@ bool ArtistRepository::isFiltered() const {
 
 
 void ArtistRepository::onReadyArtists(vector<unique_ptr<ArtistData>>& artistsData) {
+    AUDDBG("Ready %d entries from offset %d.\n", artistsData.size(), myLoadOffset);
     bool error = false;
 
     // return an empty result if the loaded data are not valid anymore (e. g. due to a provider change)
@@ -205,6 +209,7 @@ void ArtistRepository::onReadyArtists(vector<unique_ptr<ArtistData>>& artistsDat
     myFilter->apply();
     myLoadOffset = -1;
     myLoadProgress += artistsData.size();
+    AUDDBG("Load progress: %d.\n", myLoadProgress);
 
     bool isFullyLoaded = myLoadProgress >= myAmpache.numberOfArtists();
     if (isFullyLoaded) {
@@ -222,6 +227,7 @@ void ArtistRepository::onReadyArtists(vector<unique_ptr<ArtistData>>& artistsDat
 
 
 void ArtistRepository::onFilterChanged() {
+    AUDDBG("Processing filter changed event.\n");
     myCachedMaxCount = -1;
 
     // to the outside world there is no filter to change if not filtered
@@ -233,6 +239,7 @@ void ArtistRepository::onFilterChanged() {
 
 
 void ArtistRepository::clear() {
+    AUDDBG("Clearing.\n");
     myArtistsData.clear();
     myLoadProgress = 0;
     myLoadOffset = -1;

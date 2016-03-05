@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 
+#include <libaudcore/runtime.h>
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
 #include <QtCore/QAbstractListModel>
@@ -115,6 +116,7 @@ int AlbumModel::columnCount(const QModelIndex&) const {
 
 
 void AlbumModel::requestAllData() {
+    AUDDBG("Requesting all data (%d).\n", rowCount());
     for (int row = 0; row < rowCount(); row++) {
         myAlbumRequests->add(row);
     }

@@ -7,6 +7,8 @@
 
 
 
+#include <libaudcore/runtime.h>
+
 #include "infrastructure/event/delegate.h"
 #include "data/provider_type.h"
 #include "data/providers/ampache.h"
@@ -78,6 +80,7 @@ bool TrackRepository::load(int offset, int limit) {
         return false;
     }
 
+    AUDDBG("Load from %d, limit %d.\n", offset, limit);
     if (myProviderType == ProviderType::Ampache) {
         myLoadOffset = offset;
         myAmpache.requestTracks(offset, limit);
@@ -137,6 +140,7 @@ void TrackRepository::disableLoading() {
 
 
 void TrackRepository::setFilter(unique_ptr<Filter<TrackData>> filter) {
+    AUDDBG("Setting a filter.\n");
     myIsFilterSet = true;
 
     myFilter->changed -= DELEGATE0(&TrackRepository::onFilterChanged);
@@ -153,6 +157,7 @@ void TrackRepository::unsetFilter() {
     if (!isFiltered()) {
         return;
     }
+    AUDDBG("Unsetting a filter.\n");
     myIsFilterSet = false;
 
     myFilter->changed -= DELEGATE0(&TrackRepository::onFilterChanged);
@@ -173,6 +178,7 @@ bool TrackRepository::isFiltered() const {
 
 
 void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
+    AUDDBG("Ready %d entries from offset %d.\n", tracksData.size(), myLoadOffset);
     bool error = false;
 
     // return an empty result if the loaded data are not valid anymore (e. g. due to a provider change)
@@ -217,6 +223,7 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
     myFilter->apply();
     myLoadOffset = -1;
     myLoadProgress += tracksData.size();
+    AUDDBG("Load progress: %d.\n", myLoadProgress);
 
     bool isFullyLoaded = myLoadProgress >= myAmpache.numberOfTracks();
     if (isFullyLoaded) {
@@ -234,6 +241,7 @@ void TrackRepository::onReadyTracks(vector<unique_ptr<TrackData>>& tracksData) {
 
 
 void TrackRepository::onFilterChanged() {
+    AUDDBG("Processing filter changed event.\n");
     myCachedMaxCount = -1;
 
     // to the outside world there is no filter to change if not filtered
@@ -245,6 +253,7 @@ void TrackRepository::onFilterChanged() {
 
 
 void TrackRepository::clear() {
+    AUDDBG("Clearing.\n");
     myTracksData.clear();
     myLoadProgress = 0;
     myLoadOffset = -1;

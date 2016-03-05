@@ -14,6 +14,8 @@
 #include <memory>
 #include <fstream>
 #include <chrono>
+
+#include <libaudcore/runtime.h>
 #include <QString>
 #include <QPixmap>
 #include <QFutureWatcher>
@@ -168,6 +170,7 @@ vector<unique_ptr<TrackData>> Cache::loadTracksData() const {
 
 
 void Cache::requestAlbumArts(const vector<string>& ids) {
+    AUDDBG("Getting %d album arts.\n", ids.size());
     myRequestedAlbumArtIds = ids;
     auto artsLoadFutureWatcher = new QFutureWatcher<pair<string, QPixmap>>();
     connect(artsLoadFutureWatcher, SIGNAL(finished()), this, SLOT(onArtsLoadFinished()));
@@ -266,6 +269,7 @@ void Cache::updateAlbumArts(const map<string, QPixmap>& arts) const {
 
 
 void Cache::onArtsLoadFinished() {
+    AUDDBG("Album art request has returned.\n");
     auto artsLoadFutureWatcher = reinterpret_cast<QFutureWatcher<pair<string, QPixmap>>*>(sender());
     QFutureIterator<pair<string, QPixmap>> results{artsLoadFutureWatcher->future()};
 

@@ -7,6 +7,7 @@
 
 
 
+#include <libaudcore/runtime.h>
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
 #include <QtCore/QAbstractTableModel>
@@ -111,6 +112,7 @@ int TrackModel::columnCount(const QModelIndex&) const {
 
 
 void TrackModel::requestAllData() {
+    AUDDBG("Requesting all data (%d).\n", rowCount());
     for (int row = 0; row < rowCount(); row++) {
         myRequests->add(row);
     }

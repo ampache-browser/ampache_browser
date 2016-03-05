@@ -12,6 +12,7 @@
 #include <libaudcore/drct.h>
 #include <libaudcore/i18n.h>
 #include <libaudcore/interface.h>
+#include <libaudcore/runtime.h>
 #include <libaudcore/plugin.h>
 
 #include "infrastructure/event/delegate.h"
@@ -82,6 +83,7 @@ void* AmpacheBrowserPlugin::get_qt_widget()
 
 
 void AmpacheBrowserPlugin::onTerminated() {
+    AUDINFO("Terminating.\n");
     myAmpacheBrowser->terminated -= DELEGATE0(&AmpacheBrowserPlugin::onTerminated);
     delete(myAmpacheBrowser);
     delete(myUi);

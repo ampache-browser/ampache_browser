@@ -96,6 +96,7 @@ AmpacheBrowser::~AmpacheBrowser() {
 
 
 void AmpacheBrowser::requestTermination() {
+    AUDINFO("Termination request.\n");
     myDataLoader->abort();
 }
 
