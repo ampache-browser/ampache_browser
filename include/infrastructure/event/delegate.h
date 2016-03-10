@@ -29,7 +29,7 @@ namespace infrastructure {
 /**
  * @brief Simple delegate.
  */
-template <class T>
+template <typename T>
 class Delegate {
 
 public:

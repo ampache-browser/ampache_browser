@@ -76,13 +76,13 @@ void Ui::setTrackModel(QAbstractItemModel& model) {
 
 
 
-void Ui::onPlayActionTriggered() const {
+void Ui::onPlayActionTriggered() {
     raisePlayTriggeredForSelectedTracks();
 }
 
 
 
-void Ui::onActivated(const QModelIndex&) const {
+void Ui::onActivated(const QModelIndex&) {
     raisePlayTriggeredForSelectedTracks();
 }
 
@@ -124,7 +124,7 @@ void Ui::onSearchReturnPressed() {
 
 
 
-void Ui::raisePlayTriggeredForSelectedTracks() const {
+void Ui::raisePlayTriggeredForSelectedTracks() {
     auto selectedRows = myMainWindow->tracksTreeView->selectionModel()->selectedRows(3);
     vector<string> trackIds;
     for (auto hiddenColumnIndex: selectedRows) {

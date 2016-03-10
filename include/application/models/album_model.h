@@ -17,9 +17,11 @@
 
 #include <QtCore/QAbstractListModel>
 
-#include "domain/album.h"
-#include "data/album_repository.h"
 #include "src/application/models/requests.h"
+
+namespace data {
+class AlbumRepository;
+}
 
 
 
@@ -42,7 +44,7 @@ public:
      * @param albumRepository Provides albums and means to trigger their loading from an external source.
      * @param parent
      */
-    explicit AlbumModel(data::AlbumRepository& albumRepository, QObject* parent = 0);
+    explicit AlbumModel(data::AlbumRepository* const albumRepository, QObject* parent = 0);
 
     virtual ~AlbumModel();
 
@@ -84,7 +86,7 @@ public:
 
 private:
     // stores album repository provided in the constuctor
-    data::AlbumRepository& myAlbumRepository;
+    data::AlbumRepository* const myAlbumRepository = nullptr;
 
     // requests to load albums from an external source
     const std::unique_ptr<Requests> myAlbumRequests{new Requests};

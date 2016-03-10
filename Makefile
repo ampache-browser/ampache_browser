@@ -28,8 +28,10 @@ SRCS = src/infrastructure/os_paths.cc \
        src/data/filters/artist_filter_for_tracks.cc \
        src/data/filters/album_filter_for_tracks.cc \
        src/data/filters/name_filter_for_tracks.cc \
-       src/data/track_repository.cc src/data/artist_repository.cc \
-       src/data/album_repository.cc src/data/indices.cc \
+       src/data/repositories/track_repository.cc \
+       src/data/repositories/artist_repository.cc \
+       src/data/repositories/album_repository.cc \
+       src/data/indices.cc \
        src/application/models/track_model.cc \
        src/application/models/artist_model.cc \
        src/application/models/request_groups.cc \

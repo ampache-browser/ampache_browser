@@ -23,7 +23,7 @@ namespace data {
 /**
  * @brief Filter that does not do any filtering.
  */
-template <class T>
+template <typename T>
 class UnfilteredFilter: public Filter<T> {
 
 public:

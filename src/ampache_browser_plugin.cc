@@ -41,10 +41,8 @@ public:
     void* get_qt_widget() override;
 
 private:
-    Ui* myUi = nullptr;
-    AmpacheBrowser* myAmpacheBrowser = nullptr;
-
-    void onTerminated();
+    std::unique_ptr<Ui> myUi = nullptr;
+    std::unique_ptr<AmpacheBrowser> myAmpacheBrowser = nullptr;
 };
 
 
@@ -67,7 +65,9 @@ const PluginInfo AmpacheBrowserPlugin::pluginInfo = {
 
 
 void AmpacheBrowserPlugin::cleanup() {
-    myAmpacheBrowser->terminated += DELEGATE0(&AmpacheBrowserPlugin::onTerminated);
+    // the termination may be executed asynchronously; normally handler of termination finished event would
+    // destroy myUi and myAmpacheBrowser instances; it is however not a good idea since the objects would be
+    // destroyed while handling the event
     myAmpacheBrowser->requestTermination();
 }
 
@@ -75,18 +75,10 @@ void AmpacheBrowserPlugin::cleanup() {
 
 void* AmpacheBrowserPlugin::get_qt_widget()
 {
-    myUi = new Ui{};
-    myAmpacheBrowser = new AmpacheBrowser{*myUi};
+    auto ui = std::unique_ptr<Ui>{new Ui{}};
+    myAmpacheBrowser = std::unique_ptr<AmpacheBrowser>{new AmpacheBrowser{*ui}};
+    myUi = std::move(ui);
     return myUi->getMainWidget();
-}
-
-
-
-void AmpacheBrowserPlugin::onTerminated() {
-    AUDINFO("Terminating.\n");
-    myAmpacheBrowser->terminated -= DELEGATE0(&AmpacheBrowserPlugin::onTerminated);
-    delete(myAmpacheBrowser);
-    delete(myUi);
 }
 
 

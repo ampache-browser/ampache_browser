@@ -13,7 +13,7 @@
 
 namespace infrastructure {
 
-template <class T>
+template <typename T>
 Delegate<T>::Delegate(const std::string& name, const void* const instance, std::function<void(T&)> function):
 myName(name),
 myInstance(instance),
@@ -22,21 +22,21 @@ myFunction(function) {
 
 
 
-template <class T>
+template <typename T>
 void Delegate<T>::operator()(T& arg) const {
     myFunction(arg);
 }
 
 
 
-template <class T>
+template <typename T>
 std::string Delegate<T>::name() const {
     return myName;
 }
 
 
 
-template <class T>
+template <typename T>
 const void* Delegate<T>::instance() const {
     return myInstance;
 }

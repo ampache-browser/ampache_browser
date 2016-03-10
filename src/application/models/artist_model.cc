@@ -14,7 +14,7 @@
 
 #include "infrastructure/event/delegate.h"
 #include "domain/artist.h"
-#include "data/artist_repository.h"
+#include "data//repositories/artist_repository.h"
 #include "requests.h"
 #include "application/models/artist_model.h"
 
@@ -28,22 +28,22 @@ using namespace domain;
 
 namespace application {
 
-ArtistModel::ArtistModel(ArtistRepository& artistRepository, QObject* parent): QAbstractTableModel(parent),
+ArtistModel::ArtistModel(ArtistRepository* const artistRepository, QObject* parent): QAbstractTableModel(parent),
 myArtistRepository(artistRepository) {
     myRequests->readyToExecute += DELEGATE1(&ArtistModel::onReadyToExecute, RequestGroup);
-    myArtistRepository.loaded += DELEGATE1(&ArtistModel::onLoaded, pair<int, int>);
-    myArtistRepository.filterChanged += DELEGATE0(&ArtistModel::onFilterChanged);
-    myArtistRepository.loadingDisabled += DELEGATE0(&ArtistModel::onLoadingDisabled);
-    myArtistRepository.providerChanged += DELEGATE0(&ArtistModel::onProviderChanged);
+    myArtistRepository->loaded += DELEGATE1(&ArtistModel::onLoaded, pair<int, int>);
+    myArtistRepository->filterChanged += DELEGATE0(&ArtistModel::onFilterChanged);
+    myArtistRepository->loadingDisabled += DELEGATE0(&ArtistModel::onLoadingDisabled);
+    myArtistRepository->providerChanged += DELEGATE0(&ArtistModel::onProviderChanged);
 }
 
 
 
 ArtistModel::~ArtistModel() {
-    myArtistRepository.providerChanged -= DELEGATE0(&ArtistModel::onProviderChanged);
-    myArtistRepository.loadingDisabled -= DELEGATE0(&ArtistModel::onLoadingDisabled);
-    myArtistRepository.filterChanged -= DELEGATE0(&ArtistModel::onFilterChanged);
-    myArtistRepository.loaded -= DELEGATE1(&ArtistModel::onLoaded, pair<int, int>);
+    myArtistRepository->providerChanged -= DELEGATE0(&ArtistModel::onProviderChanged);
+    myArtistRepository->loadingDisabled -= DELEGATE0(&ArtistModel::onLoadingDisabled);
+    myArtistRepository->filterChanged -= DELEGATE0(&ArtistModel::onFilterChanged);
+    myArtistRepository->loaded -= DELEGATE1(&ArtistModel::onLoaded, pair<int, int>);
     myRequests->readyToExecute -= DELEGATE1(&ArtistModel::onReadyToExecute, RequestGroup);
 }
 
@@ -55,14 +55,14 @@ QVariant ArtistModel::data(const QModelIndex& index, int role) const {
     }
 
     int row = index.row();
-    if (!myArtistRepository.isLoaded(row)) {
-        if (role == Qt::DisplayRole && !myArtistRepository.isFiltered()) {
+    if (!myArtistRepository->isLoaded(row)) {
+        if (role == Qt::DisplayRole && !myArtistRepository->isFiltered()) {
             myRequests->add(row);
         }
         return "...";
     }
 
-    auto& artist = myArtistRepository.get(row);
+    auto& artist = myArtistRepository->get(row);
     if (index.column() == 0) {
         return QString::fromStdString(artist.getName());
     }
@@ -74,7 +74,7 @@ QVariant ArtistModel::data(const QModelIndex& index, int role) const {
 
 
 int ArtistModel::rowCount(const QModelIndex&) const {
-    return myArtistRepository.maxCount();
+    return myArtistRepository->maxCount();
 }
 
 
@@ -105,7 +105,7 @@ void ArtistModel::abortDataRequests() {
 
 
 void ArtistModel::onReadyToExecute(RequestGroup requestGroup) {
-    myArtistRepository.load(requestGroup.getLower(), requestGroup.getSize());
+    myArtistRepository->load(requestGroup.getLower(), requestGroup.getSize());
 }
 
 

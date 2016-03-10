@@ -29,9 +29,9 @@
 #include "data/filters/artist_filter_for_tracks.h"
 #include "data/filters/album_filter_for_tracks.h"
 #include "data/filters/name_filter_for_tracks.h"
-#include "data/album_repository.h"
-#include "data/artist_repository.h"
-#include "data/track_repository.h"
+#include "data/repositories/album_repository.h"
+#include "data/repositories/artist_repository.h"
+#include "data/repositories/track_repository.h"
 #include "data/indices.h"
 #include "application/data_loader.h"
 #include "application/ampache_browser.h"
@@ -58,14 +58,14 @@ myUi(&ui) {
     myIndices = unique_ptr<Indices>{new Indices{}};
 
     myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpache, *myCache, *myIndices}};
-    myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpache, *myCache,
-      *myArtistRepository, *myIndices}};
-    myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpache, *myCache,
-      *myArtistRepository, *myAlbumRepository, *myIndices}};
+    myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpache, *myCache, *myIndices,
+        myArtistRepository.get()}};
+    myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpache, *myCache, *myIndices,
+        myArtistRepository.get(), myAlbumRepository.get()}};
 
-    myArtistModel = unique_ptr<ArtistModel>{new ArtistModel(*myArtistRepository)};
-    myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel(*myAlbumRepository)};
-    myTrackModel = unique_ptr<TrackModel>{new TrackModel(*myTrackRepository)};
+    myArtistModel = unique_ptr<ArtistModel>{new ArtistModel(myArtistRepository.get())};
+    myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel(myAlbumRepository.get())};
+    myTrackModel = unique_ptr<TrackModel>{new TrackModel(myTrackRepository.get())};
 
     myUi->artistsSelected += DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
     myUi->albumsSelected += DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
@@ -76,8 +76,8 @@ myUi(&ui) {
     myUi->setAlbumModel(*myAlbumModel);
     myUi->setTrackModel(*myTrackModel);
 
-    myDataLoader = unique_ptr<DataLoader>{new DataLoader{*myArtistRepository, *myAlbumRepository, *myTrackRepository,
-        *myAmpache, *myCache}};
+    myDataLoader = unique_ptr<DataLoader>{new DataLoader{myArtistRepository.get(), myAlbumRepository.get(),
+        myTrackRepository.get(), *myAmpache, *myCache}};
     myDataLoader->finished += DELEGATE1(&AmpacheBrowser::onDataLoaderFinished, LoadingResult);
     myDataLoader->load();
 }

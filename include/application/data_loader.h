@@ -43,8 +43,8 @@ enum class LoadingResult {
 class DataLoader {
 
 public:
-    explicit DataLoader(data::ArtistRepository& artistRepository, data::AlbumRepository& albumRepository,
-        data::TrackRepository& trackRepository, data::Ampache& ampache, data::Cache& cache);
+    explicit DataLoader(data::ArtistRepository* const artistRepository, data::AlbumRepository* const albumRepository,
+        data::TrackRepository* const trackRepository, data::Ampache& ampache, data::Cache& cache);
 
     infrastructure::Event<LoadingResult> finished{};
 
@@ -60,9 +60,9 @@ private:
     };
 
     // arguments from the constructor
-    data::ArtistRepository& myArtistRepository;
-    data::AlbumRepository& myAlbumRepository;
-    data::TrackRepository& myTrackRepository;
+    data::ArtistRepository* const myArtistRepository = nullptr;
+    data::AlbumRepository* const myAlbumRepository = nullptr;
+    data::TrackRepository* const myTrackRepository = nullptr;
     data::Ampache& myAmpache;
     data::Cache& myCache;
 

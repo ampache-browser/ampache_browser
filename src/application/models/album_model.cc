@@ -18,7 +18,7 @@
 
 #include "infrastructure/event/delegate.h"
 #include "domain/album.h"
-#include "data/album_repository.h"
+#include "data/repositories/album_repository.h"
 #include "requests.h"
 #include "application/models/album_model.h"
 
@@ -32,26 +32,26 @@ using namespace domain;
 
 namespace application {
 
-AlbumModel::AlbumModel(AlbumRepository& albumRepository, QObject* parent): QAbstractTableModel(parent),
+AlbumModel::AlbumModel(AlbumRepository* const albumRepository, QObject* parent): QAbstractTableModel(parent),
 myAlbumRepository(albumRepository) {
     myAlbumRequests->readyToExecute += DELEGATE1(&AlbumModel::onReadyToExecuteAlbums, RequestGroup);
-    myAlbumRepository.loaded += DELEGATE1(&AlbumModel::onLoaded, pair<int, int>);
+    myAlbumRepository->loaded += DELEGATE1(&AlbumModel::onLoaded, pair<int, int>);
     myArtRequests->readyToExecute += DELEGATE1(&AlbumModel::onReadyToExecuteArts, RequestGroup);
-    myAlbumRepository.artsLoaded += DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
-    myAlbumRepository.filterChanged += DELEGATE0(&AlbumModel::onFilterChanged);
-    myAlbumRepository.loadingDisabled += DELEGATE0(&AlbumModel::onLoadingDisabled);
-    myAlbumRepository.providerChanged += DELEGATE0(&AlbumModel::onProviderChanged);
+    myAlbumRepository->artsLoaded += DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
+    myAlbumRepository->filterChanged += DELEGATE0(&AlbumModel::onFilterChanged);
+    myAlbumRepository->loadingDisabled += DELEGATE0(&AlbumModel::onLoadingDisabled);
+    myAlbumRepository->providerChanged += DELEGATE0(&AlbumModel::onProviderChanged);
 }
 
 
 
 AlbumModel::~AlbumModel() {
-    myAlbumRepository.providerChanged -= DELEGATE0(&AlbumModel::onProviderChanged);
-    myAlbumRepository.loadingDisabled -= DELEGATE0(&AlbumModel::onLoadingDisabled);
-    myAlbumRepository.filterChanged -= DELEGATE0(&AlbumModel::onFilterChanged);
-    myAlbumRepository.artsLoaded -= DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
+    myAlbumRepository->providerChanged -= DELEGATE0(&AlbumModel::onProviderChanged);
+    myAlbumRepository->loadingDisabled -= DELEGATE0(&AlbumModel::onLoadingDisabled);
+    myAlbumRepository->filterChanged -= DELEGATE0(&AlbumModel::onFilterChanged);
+    myAlbumRepository->artsLoaded -= DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
     myArtRequests->readyToExecute -= DELEGATE1(&AlbumModel::onReadyToExecuteArts, RequestGroup);
-    myAlbumRepository.loaded -= DELEGATE1(&AlbumModel::onLoaded, pair<int, int>);
+    myAlbumRepository->loaded -= DELEGATE1(&AlbumModel::onLoaded, pair<int, int>);
     myAlbumRequests->readyToExecute -= DELEGATE1(&AlbumModel::onReadyToExecuteAlbums, RequestGroup);
 }
 
@@ -73,14 +73,14 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
     }
 
     int row = index.row();
-    if (!myAlbumRepository.isLoaded(row)) {
-        if (role == Qt::DisplayRole && !myAlbumRepository.isFiltered()) {
+    if (!myAlbumRepository->isLoaded(row)) {
+        if (role == Qt::DisplayRole && !myAlbumRepository->isFiltered()) {
             myAlbumRequests->add(row);
         }
         return notLoaded;
     }
 
-    auto& album = myAlbumRepository.get(row);
+    auto& album = myAlbumRepository->get(row);
     if (index.column() == 0) {
         if (role == Qt::DisplayRole) {
             return QString::fromStdString(album.getName());
@@ -104,7 +104,7 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
 
 
 int AlbumModel::rowCount(const QModelIndex&) const {
-    return myAlbumRepository.maxCount();
+    return myAlbumRepository->maxCount();
 }
 
 
@@ -136,7 +136,7 @@ void AlbumModel::abortDataRequests() {
 
 
 void AlbumModel::onReadyToExecuteAlbums(RequestGroup requestGroup) {
-    myAlbumRepository.load(requestGroup.getLower(), requestGroup.getSize());
+    myAlbumRepository->load(requestGroup.getLower(), requestGroup.getSize());
 }
 
 
@@ -145,7 +145,7 @@ void AlbumModel::onLoaded(pair<int, int>) {
     auto finishedRequestGroup = myAlbumRequests->setFinished();
 
     // TODO: Is this required?  Filter changed event should handle it.
-    if (myAlbumRepository.isFiltered()) {
+    if (myAlbumRepository->isFiltered()) {
         beginResetModel();
         endResetModel();
     } else {
@@ -160,7 +160,7 @@ void AlbumModel::onLoaded(pair<int, int>) {
 
 
 void AlbumModel::onReadyToExecuteArts(RequestGroup requestGroup) {
-    myAlbumRepository.loadArts(requestGroup.getLower(), requestGroup.getSize());
+    myAlbumRepository->loadArts(requestGroup.getLower(), requestGroup.getSize());
 }
 
 

@@ -23,7 +23,7 @@ namespace infrastructure {
 /**
  * @brief Simple event dispatcher.
  */
-template <class T>
+template <typename T>
 class Event {
 
 public:
@@ -33,7 +33,7 @@ public:
      *
      * @param arg Event argument.
      */
-    void operator()(T& arg) const;
+    void operator()(T& arg);
 
     /**
      * @brief Subscribes a subscriber (listener) to the event.
@@ -52,6 +52,11 @@ public:
 private:
     std::vector<Delegate<T>> mySubscribers;
 
+    bool myIsDispatching = false;
+    std::vector<Delegate<T>> myPendingAdditions;
+    std::vector<Delegate<T>> myPendingRemovals;
+
+    void removeSubscriber(Delegate<T>& subscriber);
 };
 
 
@@ -67,7 +72,7 @@ public:
     /**
      * @brief Fires the event.
      */
-    void operator()() const;
+    void operator()();
 
     /**
      * @brief Subscribes a subscriber (listener) to the event.
@@ -86,6 +91,11 @@ public:
 private:
     std::vector<Delegate<void>> mySubscribers;
 
+    bool myIsDispatching = false;
+    std::vector<Delegate<void>> myPendingAdditions;
+    std::vector<Delegate<void>> myPendingRemovals;
+
+    void removeSubscriber(Delegate<void>& subscriber);
 };
 
 }

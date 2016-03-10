@@ -23,7 +23,7 @@ namespace data {
 /**
  * @brief Base class for filters.
  */
-template <class T>
+template <typename T>
 class Filter {
 
 public:

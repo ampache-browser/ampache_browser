@@ -14,7 +14,7 @@
 
 #include "infrastructure/event/delegate.h"
 #include "domain/track.h"
-#include "data/track_repository.h"
+#include "data/repositories/track_repository.h"
 #include "requests.h"
 #include "application/models/track_model.h"
 
@@ -28,22 +28,22 @@ using namespace domain;
 
 namespace application {
 
-TrackModel::TrackModel(TrackRepository& trackRepository, QObject* parent): QAbstractTableModel(parent),
+TrackModel::TrackModel(data::TrackRepository* const trackRepository, QObject* parent): QAbstractTableModel(parent),
 myTrackRepository(trackRepository) {
     myRequests->readyToExecute += DELEGATE1(&TrackModel::onReadyToExecute, RequestGroup);
-    myTrackRepository.loaded += DELEGATE1(&TrackModel::onLoaded, pair<int, int>);
-    myTrackRepository.filterChanged += DELEGATE0(&TrackModel::onFilterChanged);
-    myTrackRepository.loadingDisabled += DELEGATE0(&TrackModel::onLoadingDisabled);
-    myTrackRepository.providerChanged += DELEGATE0(&TrackModel::onProviderChanged);
+    myTrackRepository->loaded += DELEGATE1(&TrackModel::onLoaded, pair<int, int>);
+    myTrackRepository->filterChanged += DELEGATE0(&TrackModel::onFilterChanged);
+    myTrackRepository->loadingDisabled += DELEGATE0(&TrackModel::onLoadingDisabled);
+    myTrackRepository->providerChanged += DELEGATE0(&TrackModel::onProviderChanged);
 }
 
 
 
 TrackModel::~TrackModel() {
-    myTrackRepository.providerChanged -= DELEGATE0(&TrackModel::onProviderChanged);
-    myTrackRepository.loadingDisabled -= DELEGATE0(&TrackModel::onLoadingDisabled);
-    myTrackRepository.filterChanged -= DELEGATE0(&TrackModel::onFilterChanged);
-    myTrackRepository.loaded -= DELEGATE1(&TrackModel::onLoaded, pair<int, int>);
+    myTrackRepository->providerChanged -= DELEGATE0(&TrackModel::onProviderChanged);
+    myTrackRepository->loadingDisabled -= DELEGATE0(&TrackModel::onLoadingDisabled);
+    myTrackRepository->filterChanged -= DELEGATE0(&TrackModel::onFilterChanged);
+    myTrackRepository->loaded -= DELEGATE1(&TrackModel::onLoaded, pair<int, int>);
     myRequests->readyToExecute -= DELEGATE1(&TrackModel::onReadyToExecute, RequestGroup);
 }
 
@@ -55,14 +55,14 @@ QVariant TrackModel::data(const QModelIndex& index, int role) const {
     }
 
     int row = index.row();
-    if (!myTrackRepository.isLoaded(row)) {
-        if (role == Qt::DisplayRole && !myTrackRepository.isFiltered()) {
+    if (!myTrackRepository->isLoaded(row)) {
+        if (role == Qt::DisplayRole && !myTrackRepository->isFiltered()) {
             myRequests->add(row);
         }
         return "...";
     }
 
-    auto& track = myTrackRepository.get(row);
+    auto& track = myTrackRepository->get(row);
     switch (index.column()) {
         case 0:
             return QString::fromStdString(track.getName());
@@ -100,7 +100,7 @@ QVariant TrackModel::headerData(int section, Qt::Orientation, int role) const {
 
 
 int TrackModel::rowCount(const QModelIndex&) const {
-    return myTrackRepository.maxCount();
+    return myTrackRepository->maxCount();
 }
 
 
@@ -131,7 +131,7 @@ void TrackModel::abortDataRequests() {
 
 
 void TrackModel::onReadyToExecute(RequestGroup requestGroup) {
-    myTrackRepository.load(requestGroup.getLower(), requestGroup.getSize());
+    myTrackRepository->load(requestGroup.getLower(), requestGroup.getSize());
 }
 
 

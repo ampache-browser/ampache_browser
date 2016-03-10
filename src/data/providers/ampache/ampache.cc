@@ -258,8 +258,6 @@ void Ampache::processAlbums(QXmlStreamReader& xmlStreamReader, bool error) {
         albumsData = createAlbums(xmlStreamReader);
     }
 
-    // application can be terminated after readyAlbums event therefore there should be no access to instance variables
-    // after it is fired
     readyAlbums(albumsData);
 }
 
@@ -372,8 +370,6 @@ void Ampache::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumA
         auto finishedAlbumArts = myFinishedAlbumArts;
         myFinishedAlbumArts.clear();
 
-        // application can be terminated after readyAlbumArts event therefore there should be no access to instance
-        // variables after it is fired
         readyAlbumArts(finishedAlbumArts);
     }
 }
@@ -386,8 +382,6 @@ void Ampache::processArtists(QXmlStreamReader& xmlStreamReader, bool error) {
         artistsData = createArtists(xmlStreamReader);
     }
 
-    // application can be terminated after readyArtists event therefore there should be no access to instance variables
-    // after it is fired
     readyArtists(artistsData);
 }
 
@@ -465,8 +459,6 @@ void Ampache::processTracks(QXmlStreamReader& xmlStreamReader, bool error) {
         tracksData = createTracks(xmlStreamReader);
     }
 
-    // application can be terminated after readyTracks event therefore there should be no access to instance variables
-    // after it is fired
     readyTracks(tracksData);
 }
 

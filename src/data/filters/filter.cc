@@ -14,33 +14,33 @@
 
 namespace data {
 
-template <class T>
+template <typename T>
 Filter<T>::Filter() {
 }
 
 
 
-template <class T>
+template <typename T>
 Filter<T>::~Filter() {
 }
 
 
 
-template <class T>
+template <typename T>
 void Filter<T>::setSourceData(const std::vector<std::unique_ptr<T>>& sourceData) {
     mySourceData = &sourceData;
 }
 
 
 
-template <class T>
+template <typename T>
 const std::vector<std::reference_wrapper<T>>& Filter<T>::getFilteredData() const {
     return myFilteredData;
 }
 
 
 
-template <class T>
+template <typename T>
 void Filter<T>::apply() {
     changed();
 }

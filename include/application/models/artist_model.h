@@ -18,9 +18,11 @@
 
 #include <QAbstractTableModel>
 
-#include "domain/artist.h"
-#include "data/artist_repository.h"
 #include "src/application/models/requests.h"
+
+namespace data {
+class ArtistRepository;
+}
 
 
 
@@ -39,7 +41,7 @@ public:
      * @param artistRepository Provides artists and means to trigger their loading from an external source.
      * @param parent
      */
-    explicit ArtistModel(data::ArtistRepository& artistRepository, QObject* parent = 0);
+    explicit ArtistModel(data::ArtistRepository* const artistRepository, QObject* parent = 0);
 
     virtual ~ArtistModel();
 
@@ -82,7 +84,7 @@ public:
 
 private:
     // stores artist repository provided in the constuctor
-    data::ArtistRepository& myArtistRepository;
+    data::ArtistRepository* const myArtistRepository = nullptr;
 
     // requests to load artists from an external source
     const std::unique_ptr<Requests> myRequests{new Requests{60}};

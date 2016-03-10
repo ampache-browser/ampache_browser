@@ -18,9 +18,11 @@
 
 #include <QtCore/QAbstractTableModel>
 
-#include "domain/track.h"
-#include "data/track_repository.h"
 #include "src/application/models/requests.h"
+
+namespace data {
+class TrackRepository;
+}
 
 
 
@@ -39,7 +41,7 @@ public:
      * @param trackRepository Provides tracks and means to trigger their loading from an external source.
      * @param parent
      */
-    explicit TrackModel(data::TrackRepository& trackRepository, QObject* parent = 0);
+    explicit TrackModel(data::TrackRepository* const trackRepository, QObject* parent = 0);
 
     virtual ~TrackModel();
 
@@ -86,7 +88,7 @@ public:
 
 private:
     // stores track repository provided in the constuctor
-    data::TrackRepository& myTrackRepository;
+    data::TrackRepository* const myTrackRepository = nullptr;
 
     // requests to load tracks from an external source
     const std::unique_ptr<Requests> myRequests{new Requests{60}};

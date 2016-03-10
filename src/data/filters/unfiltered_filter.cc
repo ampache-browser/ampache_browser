@@ -9,7 +9,7 @@
 
 namespace data {
 
-template <class T>
+template <typename T>
 void UnfilteredFilter<T>::setSourceData(const std::vector<std::unique_ptr<T>>& sourceData) {
     Filter<T>::setSourceData(sourceData);
     initializeFilteredData();
@@ -17,14 +17,14 @@ void UnfilteredFilter<T>::setSourceData(const std::vector<std::unique_ptr<T>>& s
 
 
 
-template <class T>
+template <typename T>
 void UnfilteredFilter<T>::apply() {
     // do not fire changed event
 }
 
 
 
-template <class T>
+template <typename T>
 void UnfilteredFilter<T>::processUpdatedSourceData(int offset, int length) {
     if (offset != -1) {
         // resize
@@ -45,7 +45,7 @@ void UnfilteredFilter<T>::processUpdatedSourceData(int offset, int length) {
 
 
 
-template <class T>
+template <typename T>
 void UnfilteredFilter<T>::initializeFilteredData() {
     this->myFilteredData.clear();
     for (auto& source: *this->mySourceData) {

@@ -89,8 +89,8 @@ public:
     void setTrackModel(QAbstractItemModel& model);
 
 private slots:
-    void onPlayActionTriggered() const;
-    void onActivated(const QModelIndex& index) const;
+    void onPlayActionTriggered();
+    void onActivated(const QModelIndex&);
     void onArtistsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void onAlbumsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void onSearchTextChanged(const QString& text);
@@ -100,7 +100,7 @@ private:
     // the main window widget
     AmpacheBrowserMainWindow* myMainWindow;
 
-    void raisePlayTriggeredForSelectedTracks() const;
+    void raisePlayTriggeredForSelectedTracks();
 };
 
 }
