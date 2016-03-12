@@ -70,7 +70,7 @@ private:
     data::AlbumRepository* const myAlbumRepository = nullptr;
 
     // requests to load albums from an external source
-    const std::unique_ptr<Requests> myAlbumRequests{new Requests};
+    const std::unique_ptr<Requests> myAlbumRequests{new Requests{60}};
 
     // requests to load album arts from an external source
     const std::unique_ptr<Requests> myArtRequests{new Requests{3}};

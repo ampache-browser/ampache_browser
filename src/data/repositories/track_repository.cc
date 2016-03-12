@@ -92,7 +92,9 @@ void TrackRepository::updateIndices(TrackData& dataItem) {
 
 void TrackRepository::clearIndices() {
     myIndices.clearAlbumsTracks();
-    myIndices.clearArtistsAlbums();
+    // SMELL: Assuming ArtistsAlbums were already cleared in AlbumRepository (besides, clearing it again here is causin
+    // filtered albums dissapear for a moment and then reappear as index is populated by TrackRepository)
+    //myIndices.clearArtistsAlbums();
     myIndices.clearArtistsTracks();
 }
 

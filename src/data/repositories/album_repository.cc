@@ -201,31 +201,31 @@ void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
         artsLoadingDisabled();
         return;
     }
-    if (raiseEmptyIfResultNotValid()) {
-        return;
-    }
 
     map<string, QPixmap> loadedIdsAndArts;
-    for (auto& idAndArt: arts) {
-        auto album = findFilteredAlbumById(idAndArt.first, myArtsLoadOffset, myArtsLoadCount);
-        if (album == nullptr) {
-            // SMELL: We still can search through all data for the album ID and set it.  We should raise artsLoaded
-            // event with empty offset and count in this case.  This will increase loading performance since there are
-            // number of ignored results due to filter chages during data loading.
-            continue;
+    if (myArtsLoadOffset != -1) {
+        for (auto& idAndArt: arts) {
+            auto album = findFilteredAlbumById(idAndArt.first, myArtsLoadOffset, myArtsLoadCount);
+            if (album == nullptr) {
+                continue;
+            }
+            album->setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
+            loadedIdsAndArts.emplace(idAndArt);
         }
-
-        album->setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
-        loadedIdsAndArts.emplace(idAndArt);
+    } else {
+        for (auto& idAndArt: arts) {
+            auto& album = getById(idAndArt.first);
+            album.setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
+            loadedIdsAndArts.emplace(idAndArt);
+        }
     }
 
     myCache.updateAlbumArts(loadedIdsAndArts);
     myArtsLoadProgress += loadedIdsAndArts.size();
     AUDDBG("Arts load progress: %d.\n", myArtsLoadProgress);
 
-    // application can be terminated after artsLoaded event therefore there should be no access to instance variables
-    // after it is fired
-    auto offsetAndLimit = pair<int, int>{myArtsLoadOffset, myArtsLoadCount};
+    auto offsetAndLimit = myArtsLoadOffset != -1 ?
+        pair<int, int>{myArtsLoadOffset, myArtsLoadCount} : pair<int, int>{0, 0};
     myArtsLoadOffset = -1;
     myArtsLoadCount = -1;
     artsLoaded(offsetAndLimit);
@@ -240,24 +240,20 @@ void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
 void AlbumRepository::onCacheReadyArts(const map<string, QPixmap>& arts) {
     AUDDBG("Ready %d art entries from offset %d; requested count was %d.\n", arts.size(), myArtsLoadOffset,
         myArtsLoadCount);
-    if (raiseEmptyIfResultNotValid()) {
-        return;
-    }
 
     vector<string> notLoadedArtIds;
     for (auto& idAndArt: arts) {
-        Album* album = nullptr;
         if (!idAndArt.second.isNull()) {
+            Album* album = nullptr;
             album = findFilteredAlbumById(idAndArt.first, myArtsLoadOffset, myArtsLoadCount);
+            if (album == nullptr) {
+                album = &getById(idAndArt.first);
+            }
+            album->setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
+            myArtsLoadProgress++;
         } else {
             notLoadedArtIds.push_back(idAndArt.first);
         }
-        if (album == nullptr) {
-            continue;
-        }
-
-        album->setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
-        myArtsLoadProgress++;
     }
 
     myAmpache.requestAlbumArts(notLoadedArtIds);
@@ -276,28 +272,6 @@ Album* AlbumRepository::findFilteredAlbumById(const string& id, int offset, int 
         return nullptr;
     }
     return &(*albumDataIter).get().getAlbum();
-}
-
-
-
-/**
- * @brief If myArtsLoadOffset is -1 raises that no arts are loaded.
- *
- * If myArtsLoadOffset is -1 it indicates that the result is invalid due to some change during arts loading
- * (e.g. filter was changed).
- *
- * @return true if result is invalid and the event was raised.
- */
-bool AlbumRepository::raiseEmptyIfResultNotValid() {
-    // there might be some change during loading (e.g. filter was changed) so ignore the result
-    if (myArtsLoadOffset == -1) {
-        // TODO: The {0, 0} result is not handled in model.  Check whether dataChanged(0, 0) does not trigger any
-        // refresh.  If it triggers refresh then add if (zero result)... to event handler to avoid it.
-        auto offsetAndLimit = pair<int, int>{0, 0};
-        artsLoaded(offsetAndLimit);
-        return true;
-    }
-    return false;
 }
 
 }

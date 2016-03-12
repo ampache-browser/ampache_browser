@@ -128,14 +128,7 @@ void AlbumModel::onReadyToExecuteAlbums(RequestGroup requestGroup) {
 
 void AlbumModel::onLoaded(pair<int, int>) {
     auto finishedRequestGroup = myAlbumRequests->setFinished();
-
-    // TODO: Is this required?  Filter changed event should handle it.
-    if (myAlbumRepository->isFiltered()) {
-        beginResetModel();
-        endResetModel();
-    } else {
-        dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
-    }
+    dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
 }
 
 
@@ -146,9 +139,12 @@ void AlbumModel::onReadyToExecuteArts(RequestGroup requestGroup) {
 
 
 
-void AlbumModel::onArtsLoaded(pair<int, int>) {
+void AlbumModel::onArtsLoaded(pair<int, int> offsetAndLimit) {
     auto finishedRequestGroup = myArtRequests->setFinished();
-    dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+    if (offsetAndLimit.second > 0)
+    {
+        dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+    }
 }
 
 

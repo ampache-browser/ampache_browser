@@ -45,6 +45,11 @@ public:
      */
     explicit Requests(int granularity);
 
+    /**
+     * @brief Parameterless constructor.
+     *
+     * Creates instance with unlimited granularity.
+     */
     explicit Requests();
 
     Requests(const Requests& other) = delete;
