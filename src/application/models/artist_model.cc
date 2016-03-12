@@ -10,7 +10,6 @@
 #include <libaudcore/runtime.h>
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
-#include <QAbstractTableModel>
 
 #include "infrastructure/event/delegate.h"
 #include "domain/artist.h"
@@ -48,7 +47,7 @@ ArtistModel::~ArtistModel() {
 
 
 QVariant ArtistModel::data(const QModelIndex& index, int role) const {
-    if (!index.isValid() || role != Qt::DisplayRole || myDataRequestsAborted) {
+    if (!index.isValid() || role != Qt::DisplayRole) {
         return QVariant{};
     }
 
@@ -92,16 +91,6 @@ void ArtistModel::requestAllData() {
 
 
 
-void ArtistModel::abortDataRequests() {
-    myDataRequestsAborted = true;
-    myRequests->removeAll();
-    if (!myRequests->isInProgress()) {
-        dataRequestsAborted();
-    }
-}
-
-
-
 void ArtistModel::onReadyToExecute(RequestGroup requestGroup) {
     myArtistRepository->load(requestGroup.getLower(), requestGroup.getSize());
 }
@@ -111,10 +100,6 @@ void ArtistModel::onReadyToExecute(RequestGroup requestGroup) {
 void ArtistModel::onLoaded(pair<int, int>) {
     auto finishedRequestGroup = myRequests->setFinished();
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
-
-    if (myDataRequestsAborted) {
-        dataRequestsAborted();
-    }
 }
 
 

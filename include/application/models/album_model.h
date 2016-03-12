@@ -12,11 +12,8 @@
 
 
 
-#include <vector>
 #include <memory>
-
 #include <QtCore/QAbstractListModel>
-
 #include "src/application/models/requests.h"
 
 namespace data {
@@ -49,13 +46,6 @@ public:
     virtual ~AlbumModel();
 
     /**
-     * @brief Fired when loading albums from an external source has been aborted.
-     *
-     * @sa abortDataRequests()
-     */
-    infrastructure::Event<void> dataRequestsAborted{};
-
-    /**
      * @sa QAbstractTableModel::data()
      */
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
@@ -75,15 +65,6 @@ public:
      */
     void requestAllData();
 
-    /**
-     * @brief Tell the model to abort all pending requests for loading albums from an external source.
-     *
-     * The ::dataRequestsAborted event is fired after the requests has been aborted.  After calling this method the
-     * model will not perform any further attempts to load albums.  The method is intended to support
-     * the graceful termination of the application.
-     */
-    void abortDataRequests();
-
 private:
     // stores album repository provided in the constuctor
     data::AlbumRepository* const myAlbumRepository = nullptr;
@@ -93,9 +74,6 @@ private:
 
     // requests to load album arts from an external source
     const std::unique_ptr<Requests> myArtRequests{new Requests{3}};
-
-    // true if abortDataRequests() was called
-    bool myDataRequestsAborted = false;
 
     void onReadyToExecuteAlbums(RequestGroup requestGroup);
     void onLoaded(std::pair<int, int> offsetAndLimit);

@@ -12,12 +12,8 @@
 
 
 
-#include <vector>
-#include <unordered_map>
 #include <memory>
-
 #include <QAbstractTableModel>
-
 #include "src/application/models/requests.h"
 
 namespace data {
@@ -46,13 +42,6 @@ public:
     virtual ~ArtistModel();
 
     /**
-     * @brief Fired when loading artists from an external source has been aborted.
-     *
-     * @sa abortDataRequests()
-     */
-    infrastructure::Event<void> dataRequestsAborted{};
-
-    /**
      * @sa QAbstractTableModel::data()
      */
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
@@ -72,25 +61,12 @@ public:
      */
     void requestAllData();
 
-    // TODO: Not needed?
-    /**
-     * @brief Tell the model to abort all pending requests for loading artists from an external source.
-     *
-     * The ::dataRequestsAborted event is fired after the requests has been aborted.  After calling this method the
-     * model will not perform any further attempts to load artists.  The method is intended to support
-     * the graceful termination of the application.
-     */
-    void abortDataRequests();
-
 private:
     // stores artist repository provided in the constuctor
     data::ArtistRepository* const myArtistRepository = nullptr;
 
     // requests to load artists from an external source
     const std::unique_ptr<Requests> myRequests{new Requests{60}};
-
-    // true if abortDataRequests() was called
-    bool myDataRequestsAborted = false;
 
     void onReadyToExecute(RequestGroup requestGroup);
     void onLoaded(std::pair<int, int> offsetAndLimit);

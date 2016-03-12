@@ -7,13 +7,11 @@
 
 
 
-#include <vector>
 #include <memory>
 
 #include <libaudcore/runtime.h>
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
-#include <QtCore/QAbstractListModel>
 #include <QtGui/QIcon>
 
 #include "infrastructure/event/delegate.h"
@@ -56,7 +54,7 @@ AlbumModel::~AlbumModel() {
 
 
 QVariant AlbumModel::data(const QModelIndex& index, int role) const {
-    if (!index.isValid() || (role != Qt::DisplayRole && role != Qt::DecorationRole) || myDataRequestsAborted) {
+    if (!index.isValid() || (role != Qt::DisplayRole && role != Qt::DecorationRole)) {
         return QVariant{};
     }
 
@@ -122,17 +120,6 @@ void AlbumModel::requestAllData() {
 
 
 
-void AlbumModel::abortDataRequests() {
-    myDataRequestsAborted = true;
-    myAlbumRequests->removeAll();
-    myArtRequests->removeAll();
-    if (!myAlbumRequests->isInProgress() && !myArtRequests->isInProgress()) {
-        dataRequestsAborted();
-    }
-}
-
-
-
 void AlbumModel::onReadyToExecuteAlbums(RequestGroup requestGroup) {
     myAlbumRepository->load(requestGroup.getLower(), requestGroup.getSize());
 }
@@ -149,10 +136,6 @@ void AlbumModel::onLoaded(pair<int, int>) {
     } else {
         dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
     }
-
-    if (myDataRequestsAborted && !myArtRequests->isInProgress()) {
-        dataRequestsAborted();
-    }
 }
 
 
@@ -166,10 +149,6 @@ void AlbumModel::onReadyToExecuteArts(RequestGroup requestGroup) {
 void AlbumModel::onArtsLoaded(pair<int, int>) {
     auto finishedRequestGroup = myArtRequests->setFinished();
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
-
-    if (myDataRequestsAborted && !myAlbumRequests->isInProgress()) {
-        dataRequestsAborted();
-    }
 }
 
 

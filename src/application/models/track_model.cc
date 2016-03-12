@@ -118,16 +118,6 @@ void TrackModel::requestAllData() {
 
 
 
-void TrackModel::abortDataRequests() {
-    myDataRequestsAborted = true;
-    myRequests->removeAll();
-    if (!myRequests->isInProgress()) {
-        dataRequestsAborted();
-    }
-}
-
-
-
 void TrackModel::onReadyToExecute(RequestGroup requestGroup) {
     myTrackRepository->load(requestGroup.getLower(), requestGroup.getSize());
 }
@@ -137,10 +127,6 @@ void TrackModel::onReadyToExecute(RequestGroup requestGroup) {
 void TrackModel::onLoaded(pair<int, int>) {
     auto finishedRequestGroup = myRequests->setFinished();
     dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
-
-    if (myDataRequestsAborted) {
-        dataRequestsAborted();
-    }
 }
 
 
