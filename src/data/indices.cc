@@ -17,16 +17,20 @@ using namespace domain;
 
 namespace data {
 
-void Indices::addArtist(const Artist& artist) {
-    myArtistAlbums[artist] = move(AlbumDataUnorderedSet{});
-    myArtistTracks[artist] = move(TrackDataUnorderedSet{});
+void Indices::addArtists(const vector<reference_wrapper<Artist>>& artists) {
+    for (auto& artist: artists) {
+        myArtistAlbums[artist.get()] = move(AlbumDataUnorderedSet{});
+        myArtistTracks[artist.get()] = move(TrackDataUnorderedSet{});
+    }
     changed();
 }
 
 
 
-void Indices::addAlbum(const Album& album) {
-    myAlbumTracks[album] = move(TrackDataUnorderedSet{});
+void Indices::addAlbums(const vector<reference_wrapper<Album>>& albums) {
+    for (auto& album: albums) {
+        myAlbumTracks[album.get()] = move(TrackDataUnorderedSet{});
+    }
     changed();
 }
 
@@ -38,8 +42,10 @@ AlbumDataUnorderedSet& Indices::getArtistAlbums(const Artist& artist) {
 
 
 
-void Indices::updateArtistAlbums(const Artist& artist, AlbumData& albumData) {
-    myArtistAlbums[artist].insert(albumData);
+void Indices::updateArtistAlbums(const ArtistAlbumsIndex& artistAlbums) {
+    for (auto& artistAndAlbums: artistAlbums) {
+        myArtistAlbums[artistAndAlbums.first].insert(artistAndAlbums.second.begin(), artistAndAlbums.second.end());
+    }
     changed();
 }
 
@@ -51,8 +57,10 @@ TrackDataUnorderedSet& Indices::getArtistTracks(const Artist& artist) {
 
 
 
-void Indices::updateArtistTracks(const Artist& artist, TrackData& trackData) {
-    myArtistTracks[artist].insert(trackData);
+void Indices::updateArtistTracks(const ArtistTracksIndex& artistTracks) {
+    for (auto& artistAndTracks: artistTracks) {
+        myArtistTracks[artistAndTracks.first].insert(artistAndTracks.second.begin(), artistAndTracks.second.end());
+    }
     changed();
 }
 
@@ -64,8 +72,10 @@ TrackDataUnorderedSet& Indices::getAlbumTracks(const Album& album) {
 
 
 
-void Indices::updateAlbumTracks(const Album& album, TrackData& trackData) {
-    myAlbumTracks[album].insert(trackData);
+void Indices::updateAlbumTracks(const AlbumTracksIndex& albumTracks) {
+    for (auto& albumAndTracks: albumTracks) {
+        myAlbumTracks[albumAndTracks.first].insert(albumAndTracks.second.begin(), albumAndTracks.second.end());
+    }
     changed();
 }
 

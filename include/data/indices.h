@@ -59,22 +59,22 @@ public:
     infrastructure::Event<void> changed{};
 
     /**
-     * @brief Adds the specified artist to all artist indices.
+     * @brief Adds specified artists to all artist indices.
      *
-     * Artist will be added with empty index data.
+     * Artists will be added with empty index data.
      *
-     * @param artist Artist that shall be added.
+     * @param artists Artists that shall be added.
      */
-    void addArtist(const domain::Artist& artist);
+    void addArtists(const std::vector<std::reference_wrapper<domain::Artist>>& artists);
 
     /**
-     * @brief Adds the specified album to all album indices.
+     * @brief Adds specified albums to all album indices.
      *
-     * Album will be added with empty index data.
+     * Albums will be added with empty index data.
      *
-     * @param album Album that shall be added.
+     * @param albums Albums that shall be added.
      */
-    void addAlbum(const domain::Album& album);
+    void addAlbums(const std::vector<std::reference_wrapper<domain::Album>>& albums);
 
     /**
      * @brief Gets albums data for the given @p artist.
@@ -85,12 +85,11 @@ public:
     AlbumDataUnorderedSet& getArtistAlbums(const domain::Artist& artist);
 
     /**
-     * @brief Updates artist-albums index by inserting the given album data.
+     * @brief Updates artist-albums index by inserting the given data.
      *
-     * @param artist The artist which the track data shall be inserted for.
-     * @param albumData The data that shall be inserted into the index.
+     * @param artistAlbums Artists with corresponding albums data which shall be inserted to the index.
      */
-    void updateArtistAlbums(const domain::Artist& artist, AlbumData& albumData);
+    void updateArtistAlbums(const ArtistAlbumsIndex& artistAlbums);
 
     /**
      * @brief Gets tracks data for the given @p artist.
@@ -101,12 +100,11 @@ public:
     TrackDataUnorderedSet& getArtistTracks(const domain::Artist& artist);
 
     /**
-     * @brief Updates artist-tracks index by inserting the given track data.
+     * @brief Updates artist-tracks index by inserting the given data.
      *
-     * @param artist The artist which the track data shall be inserted for.
-     * @param trackData The data that shall be inserted into the index.
+     * @param artistTracks Artists with corresponding tracks data which shall be inserted to the index.
      */
-    void updateArtistTracks(const domain::Artist& artist, TrackData& trackData);
+    void updateArtistTracks(const ArtistTracksIndex& artistTracks);
 
     /**
      * @brief Gets tracks data for the given @p album.
@@ -117,12 +115,11 @@ public:
     TrackDataUnorderedSet& getAlbumTracks(const domain::Album& album);
 
     /**
-     * @brief Updates album-tracks index by inserting the given track data.
+     * @brief Updates album-tracks index by inserting the given data.
      *
-     * @param album The album which the track data shall be inserted for.
-     * @param trackData The data that shall be inserted into the index.
+     * @param albumTracks Albums with corresponding tracks data which shall be inserted to the index.
      */
-    void updateAlbumTracks(const domain::Album& album, TrackData& trackData);
+    void updateAlbumTracks(const AlbumTracksIndex& albumTracks);
 
     /**
      * @brief Removes all artist indices.

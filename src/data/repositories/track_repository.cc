@@ -79,13 +79,22 @@ void TrackRepository::handleLoadedItem(const TrackData& dataItem) const {
 
 
 
-void TrackRepository::updateIndices(TrackData& dataItem) {
-    auto& artist = myArtistRepository->getById(dataItem.getArtistId());
-    auto& albumData = myAlbumRepository->getAlbumDataById(dataItem.getAlbumId());
-    myIndices.updateArtistAlbums(artist, albumData);
-    myIndices.updateArtistTracks(artist, dataItem);
-    auto& album = albumData.getAlbum();
-    myIndices.updateAlbumTracks(album, dataItem);
+void TrackRepository::updateIndices(const vector<unique_ptr<TrackData>>& data) {
+    ArtistAlbumsIndex artistAlbums;
+    ArtistTracksIndex artistTracks;
+    AlbumTracksIndex albumTracks;
+    for (auto& dataItem: data) {
+        auto& artist = myArtistRepository->getById(dataItem->getArtistId());
+        auto& albumData = myAlbumRepository->getAlbumDataById(dataItem->getAlbumId());
+        artistAlbums[artist].insert(albumData);
+        artistTracks[artist].insert(*dataItem);
+        auto& album = albumData.getAlbum();
+        albumTracks[album].insert(*dataItem);
+    }
+
+    myIndices.updateArtistAlbums(artistAlbums);
+    myIndices.updateArtistTracks(artistTracks);
+    myIndices.updateAlbumTracks(albumTracks);
 }
 
 

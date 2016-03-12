@@ -128,7 +128,7 @@ protected:
 
     void handleLoadedItem(const AlbumData& dataItem) const override;
 
-    void updateIndices(AlbumData& dataItem) override;
+    void updateIndices(const std::vector<std::unique_ptr<AlbumData>>& data) override;
 
     void clear() override;
 

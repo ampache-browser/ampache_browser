@@ -250,9 +250,9 @@ void Repository<T, U>::onDataLoadRequestFinished(std::vector<std::unique_ptr<T>>
         myData.resize(end);
     }
 
+    updateIndices(data);
     for (auto& dataItem: data) {
         handleLoadedItem(*dataItem);
-        updateIndices(*dataItem);
 
         myData[offset] = std::move(dataItem);
         offset++;
@@ -282,9 +282,9 @@ template <typename T, typename U>
 void Repository<T, U>::loadFromCache() {
     loadDataFromCache();
 
+    updateIndices(myData);
     for (auto& data: myData) {
         handleLoadedItem(*data);
-        updateIndices(*data);
     }
 
     myUnfilteredFilter->processUpdatedSourceData(0, myData.size());

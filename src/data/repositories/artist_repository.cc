@@ -63,8 +63,12 @@ void ArtistRepository::saveDataToCache() {
 
 
 
-void ArtistRepository::updateIndices(ArtistData& dataItem) {
-    myIndices.addArtist(dataItem.getArtist());
+void ArtistRepository::updateIndices(const vector<unique_ptr<ArtistData>>& data) {
+    vector<reference_wrapper<Artist>> artists;
+    for (auto& dataItem: data) {
+        artists.push_back(dataItem->getArtist());
+    }
+    myIndices.addArtists(artists);
 }
 
 

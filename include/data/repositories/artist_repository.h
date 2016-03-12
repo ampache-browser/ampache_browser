@@ -56,7 +56,7 @@ protected:
 
     void saveDataToCache() override;
 
-    void updateIndices(ArtistData& dataItem) override;
+    void updateIndices(const std::vector<std::unique_ptr<ArtistData>>& data) override;
 
     void clearIndices() override;
 

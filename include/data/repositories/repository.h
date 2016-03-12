@@ -271,7 +271,7 @@ protected:
      *
      * @sa ::myIndices
      */
-    virtual void updateIndices(T& dataItem) = 0;
+    virtual void updateIndices(const std::vector<std::unique_ptr<T>>& data) = 0;
 
     /**
      * @brief Clears the repository as if no data were loaded.

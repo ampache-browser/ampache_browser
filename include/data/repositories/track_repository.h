@@ -65,7 +65,7 @@ protected:
 
     void handleLoadedItem(const TrackData& dataItem) const override;
 
-    void updateIndices(TrackData& dataItem) override;
+    void updateIndices(const std::vector<std::unique_ptr<TrackData>>& data) override;
 
     void clearIndices() override;
 

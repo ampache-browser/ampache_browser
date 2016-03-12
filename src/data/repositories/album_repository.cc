@@ -152,16 +152,22 @@ void AlbumRepository::handleLoadedItem(const AlbumData& dataItem) const {
 
 
 
-void AlbumRepository::updateIndices(AlbumData& dataItem) {
-    myIndices.addAlbum(dataItem.getAlbum());
-    if (dataItem.hasArtist()) {
+void AlbumRepository::updateIndices(const vector<unique_ptr<AlbumData>>& data) {
+    vector<reference_wrapper<Album>> albums;
+    ArtistAlbumsIndex artistAlbums;
+    for (auto& dataItem: data) {
+        albums.push_back(dataItem->getAlbum());
+        if (dataItem->hasArtist()) {
 
-        // Ampache (3.7.0) seems to ignore Album Artist info.  Only single-artist albums have Artist ID set.  Albums
-        // with various artists does not (even if the Album Artist is set in the track's tags).  Therefore
-        // this code is redundand; it is kept however in case Ampache is fixed.
-        auto& artist = myArtistRepository->getById(dataItem.getArtistId());
-        myIndices.updateArtistAlbums(artist, dataItem);
+            // Ampache (3.7.0) seems to ignore Album Artist info.  Only single-artist albums have Artist ID set.  Albums
+            // with various artists does not (even if the Album Artist is set in the track's tags).  Therefore
+            // this code is redundand; it is kept however in case Ampache is fixed.
+            auto& artist = myArtistRepository->getById(dataItem->getArtistId());
+            artistAlbums[artist].insert(*dataItem);
+        }
     }
+    myIndices.addAlbums(albums);
+    myIndices.updateArtistAlbums(artistAlbums);
 }
 
 
