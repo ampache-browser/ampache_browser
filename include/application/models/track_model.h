@@ -99,7 +99,6 @@ private:
     void onReadyToExecute(RequestGroup requestGroup);
     void onLoaded(std::pair<int, int> offsetAndLimit);
     void onFilterChanged();
-    void onLoadingDisabled();
     void onProviderChanged();
 };
 

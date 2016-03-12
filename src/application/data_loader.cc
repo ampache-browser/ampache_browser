@@ -46,8 +46,11 @@ void DataLoader::load() {
     AUDINFO("Begin loading.\n");
     myState = Loading;
 
-    myDataLoaded = false;
-    myAlbumArtsLoaded = false;
+    myAmpacheInitializationFinished = false;
+    myArtistsLoadingFinished = false;
+    myAlbumsLoadingFinished = false;
+    myAlbumArtsLoadingFinished = false;
+    myTracksLoadingFinished = false;
 
     myTrackRepository->setProviderType(ProviderType::None);
     myAlbumRepository->setProviderType(ProviderType::None);
@@ -72,7 +75,11 @@ void DataLoader::abort() {
     AUDINFO("Begin aborting\n");
     myState = Aborting;
 
-    // disable loading on repositories so subsequent loading related events will be handled in regards of that
+    myArtistRepository->loadingDisabled += DELEGATE0(&DataLoader::onArtistRepositoryLoadingDisabled);
+    myAlbumRepository->loadingDisabled += DELEGATE0(&DataLoader::onAlbumRepositoryLoadingDisabled);
+    myAlbumRepository->artsLoadingDisabled += DELEGATE0(&DataLoader::onAlbumRepositoryArtsLoadingDisabled);
+    myTrackRepository->loadingDisabled += DELEGATE0(&DataLoader::onTrackRepositoryLoadingDisabled);
+
     myTrackRepository->disableLoading();
     myAlbumRepository->disableLoading();
     myArtistRepository->disableLoading();
@@ -80,17 +87,22 @@ void DataLoader::abort() {
 
 
 
-// TODO: Start timer if Ampache was not available.  Or do it in AmpacheBrowser?
 void DataLoader::onAmpacheInitialized(bool error) {
     AUDINFO("Ampache initialized with result %d.\n", error);
+    myAmpache.initialized -= DELEGATE1(&DataLoader::onAmpacheInitialized, bool);
+    myAmpacheInitializationFinished = true;
+
+    if (myState == Aborting)
+    {
+        possiblyFireFinished();
+        return;
+    }
 
     // finish with error if neither Ampache nor cache is available
     if (error && (myCache.getLastUpdate() == system_clock::time_point::min())) {
         fireFinished(LoadingResult::Error);
         return;
     }
-
-    myAmpache.initialized -= DELEGATE1(&DataLoader::onAmpacheInitialized, bool);
 
     if (error || (myCache.getLastUpdate() > myAmpache.getLastUpdate())) {
         AUDDBG("Setting data provider type to Cache (artists: %d, albums: %d, tracks: %d).\n",
@@ -111,6 +123,7 @@ void DataLoader::onAmpacheInitialized(bool error) {
 void DataLoader::onArtistsFullyLoaded(bool error) {
     AUDINFO("Artists fully loaded with result %d.\n", error);
     myArtistRepository->fullyLoaded -= DELEGATE1(&DataLoader::onArtistsFullyLoaded, bool);
+    myArtistsLoadingFinished = true;
     if (error) {
         fireFinished(LoadingResult::Error);
         return;
@@ -126,6 +139,7 @@ void DataLoader::onArtistsFullyLoaded(bool error) {
 void DataLoader::onAlbumsFullyLoaded(bool error) {
     AUDINFO("Albums fully loaded with result %d.\n", error);
     myAlbumRepository->fullyLoaded -= DELEGATE1(&DataLoader::onAlbumsFullyLoaded, bool);
+    myAlbumsLoadingFinished = true;
     if (error) {
         fireFinished(LoadingResult::Error);
         return;
@@ -140,12 +154,12 @@ void DataLoader::onAlbumsFullyLoaded(bool error) {
 void DataLoader::onTracksFullyLoaded(bool error) {
     AUDINFO("Tracks fully loaded with result %d.\n", error);
     myTrackRepository->fullyLoaded -= DELEGATE1(&DataLoader::onTracksFullyLoaded, bool);
+    myTracksLoadingFinished = true;
     if (error) {
         fireFinished(LoadingResult::Error);
         return;
     }
 
-    myDataLoaded = true;
     possiblyFireFinished();
 }
 
@@ -154,20 +168,57 @@ void DataLoader::onTracksFullyLoaded(bool error) {
 void DataLoader::onArtsFullyLoaded(bool error) {
     AUDINFO("Arts fully loaded with result %d.\n", error);
     myAlbumRepository->artsFullyLoaded -= DELEGATE1(&DataLoader::onArtsFullyLoaded, bool);
+    myAlbumArtsLoadingFinished = true;
     if (error) {
         fireFinished(LoadingResult::Error);
         return;
     }
 
-    myAlbumArtsLoaded = true;
+    possiblyFireFinished();
+}
+
+
+
+void DataLoader::onArtistRepositoryLoadingDisabled() {
+    AUDINFO("Artists loading disabled.\n");
+    myArtistsLoadingFinished = true;
+    possiblyFireFinished();
+}
+
+
+
+void DataLoader::onAlbumRepositoryLoadingDisabled() {
+    AUDINFO("Albums loading disabled.\n");
+    myAlbumsLoadingFinished = true;
+    possiblyFireFinished();
+}
+
+
+
+void DataLoader::onAlbumRepositoryArtsLoadingDisabled() {
+    AUDINFO("Album arts loading disabled.\n");
+    myAlbumArtsLoadingFinished = true;
+    possiblyFireFinished();
+}
+
+
+
+void DataLoader::onTrackRepositoryLoadingDisabled() {
+    AUDINFO("Tracks loading disabled.\n");
+    myTracksLoadingFinished = true;
     possiblyFireFinished();
 }
 
 
 
 void DataLoader::possiblyFireFinished() {
-    if (myDataLoaded && myAlbumArtsLoaded) {
+    if (myAmpacheInitializationFinished && myArtistsLoadingFinished && myAlbumsLoadingFinished &&
+        myAlbumArtsLoadingFinished && myTracksLoadingFinished) {
         if (myState == Aborting) {
+            myTrackRepository->loadingDisabled += DELEGATE0(&DataLoader::onTrackRepositoryLoadingDisabled);
+            myAlbumRepository->artsLoadingDisabled += DELEGATE0(&DataLoader::onAlbumRepositoryArtsLoadingDisabled);
+            myAlbumRepository->loadingDisabled += DELEGATE0(&DataLoader::onAlbumRepositoryLoadingDisabled);
+            myArtistRepository->loadingDisabled += DELEGATE0(&DataLoader::onArtistRepositoryLoadingDisabled);
             fireFinished(LoadingResult::Aborted);
         } else {
             fireFinished(LoadingResult::Success);
@@ -178,7 +229,7 @@ void DataLoader::possiblyFireFinished() {
 
 
 void DataLoader::fireFinished(LoadingResult loadingResult) {
-    AUDINFO("Data loading finished with result %d.\n", loadingResult);
+    AUDINFO("Data loader finished with result %d.\n", loadingResult);
     myState = Idle;
     finished(loadingResult);
 }

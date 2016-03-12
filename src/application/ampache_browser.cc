@@ -103,7 +103,6 @@ void AmpacheBrowser::requestTermination() {
 
 
 void AmpacheBrowser::onDataLoaderFinished(LoadingResult loadingResult) {
-    // TODO: Report errors (and start timer to retry here?).
     if (loadingResult == LoadingResult::Aborted) {
         terminated();
     }

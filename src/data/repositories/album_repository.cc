@@ -98,8 +98,7 @@ void AlbumRepository::disableLoading() {
     Repository<AlbumData, Album>::disableLoading();
 
     if (myArtsLoadOffset == -1) {
-        auto error = false;
-        artsFullyLoaded(error);
+        artsLoadingDisabled();
     }
 }
 
@@ -197,6 +196,11 @@ int AlbumRepository::getMaxDataSize() const {
 void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
     AUDDBG("Ready %d art entries from offset %d; requested count was %d.\n", arts.size(), myArtsLoadOffset,
         myArtsLoadCount);
+    if (!myLoadingEnabled)
+    {
+        artsLoadingDisabled();
+        return;
+    }
     if (raiseEmptyIfResultNotValid()) {
         return;
     }
@@ -225,7 +229,7 @@ void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
     myArtsLoadOffset = -1;
     myArtsLoadCount = -1;
     artsLoaded(offsetAndLimit);
-    if ((myArtsLoadProgress >= getMaxDataSize()) || !myLoadingEnabled) {
+    if (myArtsLoadProgress >= getMaxDataSize()) {
         auto error = false;
         artsFullyLoaded(error);
     }

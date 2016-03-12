@@ -102,7 +102,6 @@ private:
     void onReadyToExecuteArts(RequestGroup requestGroup);
     void onArtsLoaded(std::pair<int, int> offsetAndLimit);
     void onFilterChanged();
-    void onLoadingDisabled();
     void onProviderChanged();
 };
 

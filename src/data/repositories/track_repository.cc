@@ -100,10 +100,10 @@ void TrackRepository::clearIndices() {
 
 int TrackRepository::getMaxDataSize() const {
     if (myProviderType == ProviderType::Ampache) {
-        return myAmpache.numberOfArtists();
+        return myAmpache.numberOfTracks();
     };
     if (myProviderType == ProviderType::Cache) {
-        return myCache.numberOfArtists();
+        return myCache.numberOfTracks();
     };
     return 0;
 }

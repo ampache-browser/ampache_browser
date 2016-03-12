@@ -68,11 +68,12 @@ private:
 
     State myState = Idle;
 
-    // true if all all repositories are fully loaded (this does not include album arts)
-    bool myDataLoaded = false;
-
-    // true if album arts are fully loaded
-    bool myAlbumArtsLoaded = false;
+    // true if initialization or loading of particular data has finished
+    bool myAmpacheInitializationFinished = false;
+    bool myArtistsLoadingFinished = false;
+    bool myAlbumsLoadingFinished = false;
+    bool myAlbumArtsLoadingFinished = false;
+    bool myTracksLoadingFinished = false;
 
     data::ProviderType myProviderType = data::ProviderType::None;
 
@@ -83,9 +84,13 @@ private:
     void onTracksFullyLoaded(bool error);
     void onArtsFullyLoaded(bool error);
 
+    void onArtistRepositoryLoadingDisabled();
+    void onAlbumRepositoryLoadingDisabled();
+    void onAlbumRepositoryArtsLoadingDisabled();
+    void onTrackRepositoryLoadingDisabled();
+
     void possiblyFireFinished();
     void fireFinished(LoadingResult loadingResult);
-
 };
 
 }

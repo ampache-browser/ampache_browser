@@ -39,7 +39,6 @@ myAlbumRepository(albumRepository) {
     myArtRequests->readyToExecute += DELEGATE1(&AlbumModel::onReadyToExecuteArts, RequestGroup);
     myAlbumRepository->artsLoaded += DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
     myAlbumRepository->filterChanged += DELEGATE0(&AlbumModel::onFilterChanged);
-    myAlbumRepository->loadingDisabled += DELEGATE0(&AlbumModel::onLoadingDisabled);
     myAlbumRepository->providerChanged += DELEGATE0(&AlbumModel::onProviderChanged);
 }
 
@@ -47,7 +46,6 @@ myAlbumRepository(albumRepository) {
 
 AlbumModel::~AlbumModel() {
     myAlbumRepository->providerChanged -= DELEGATE0(&AlbumModel::onProviderChanged);
-    myAlbumRepository->loadingDisabled -= DELEGATE0(&AlbumModel::onLoadingDisabled);
     myAlbumRepository->filterChanged -= DELEGATE0(&AlbumModel::onFilterChanged);
     myAlbumRepository->artsLoaded -= DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
     myArtRequests->readyToExecute -= DELEGATE1(&AlbumModel::onReadyToExecuteArts, RequestGroup);
@@ -178,19 +176,6 @@ void AlbumModel::onArtsLoaded(pair<int, int>) {
 
 void AlbumModel::onFilterChanged() {
     myArtRequests->removeAll();
-    beginResetModel();
-    endResetModel();
-}
-
-
-
-void AlbumModel::onLoadingDisabled() {
-    myAlbumRequests->removeAll();
-    myAlbumRequests->cancelCurrent();
-    myArtRequests->removeAll();
-    myArtRequests->cancelCurrent();
-
-    // reset model to re-read number of rows
     beginResetModel();
     endResetModel();
 }

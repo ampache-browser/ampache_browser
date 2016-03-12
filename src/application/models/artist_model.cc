@@ -33,7 +33,6 @@ myArtistRepository(artistRepository) {
     myRequests->readyToExecute += DELEGATE1(&ArtistModel::onReadyToExecute, RequestGroup);
     myArtistRepository->loaded += DELEGATE1(&ArtistModel::onLoaded, pair<int, int>);
     myArtistRepository->filterChanged += DELEGATE0(&ArtistModel::onFilterChanged);
-    myArtistRepository->loadingDisabled += DELEGATE0(&ArtistModel::onLoadingDisabled);
     myArtistRepository->providerChanged += DELEGATE0(&ArtistModel::onProviderChanged);
 }
 
@@ -41,7 +40,6 @@ myArtistRepository(artistRepository) {
 
 ArtistModel::~ArtistModel() {
     myArtistRepository->providerChanged -= DELEGATE0(&ArtistModel::onProviderChanged);
-    myArtistRepository->loadingDisabled -= DELEGATE0(&ArtistModel::onLoadingDisabled);
     myArtistRepository->filterChanged -= DELEGATE0(&ArtistModel::onFilterChanged);
     myArtistRepository->loaded -= DELEGATE1(&ArtistModel::onLoaded, pair<int, int>);
     myRequests->readyToExecute -= DELEGATE1(&ArtistModel::onReadyToExecute, RequestGroup);
@@ -122,17 +120,6 @@ void ArtistModel::onLoaded(pair<int, int>) {
 
 
 void ArtistModel::onFilterChanged() {
-    beginResetModel();
-    endResetModel();
-}
-
-
-
-void ArtistModel::onLoadingDisabled() {
-    myRequests->removeAll();
-    myRequests->cancelCurrent();
-
-    // reset model to re-read number of rows
     beginResetModel();
     endResetModel();
 }

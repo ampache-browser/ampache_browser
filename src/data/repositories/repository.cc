@@ -129,10 +129,9 @@ template <typename T, typename U>
 void Repository<T, U>::disableLoading() {
     myLoadingEnabled = false;
     myCachedMaxCount = -1;
-    loadingDisabled();
-    if (myLoadOffset == -1) {
-        auto error = false;
-        fullyLoaded(error);
+    if (myLoadOffset == -1)
+    {
+        loadingDisabled();
     }
 }
 
@@ -218,6 +217,13 @@ void Repository<T, U>::onDataLoadRequestFinished(std::vector<std::unique_ptr<T>>
     AUDDBG("Ready %d entries from offset %d.\n", data.size(), myLoadOffset);
     getDataLoadRequestFinishedEvent() -= infrastructure::DELEGATE1((&Repository<T, U>::onDataLoadRequestFinished),
         std::vector<std::unique_ptr<T>>);
+
+    if (!myLoadingEnabled)
+    {
+        loadingDisabled();
+        return;
+    }
+
     bool error = false;
 
     // return an empty result if the loaded data are not valid anymore (e. g. due to a provider change)
@@ -265,7 +271,7 @@ void Repository<T, U>::onDataLoadRequestFinished(std::vector<std::unique_ptr<T>>
     }
 
     loaded(offsetAndLimit);
-    if (isFullyLoaded || !myLoadingEnabled) {
+    if (isFullyLoaded) {
         fullyLoaded(error);
     }
 }
@@ -296,7 +302,7 @@ void Repository<T, U>::loadFromCache() {
 
 template <typename T, typename U>
 int Repository<T, U>::computeMaxCount() const {
-    if (!myLoadingEnabled || (isFiltered() && myLoadProgress != 0)) {
+    if (isFiltered() && myLoadProgress != 0) {
         return myFilter->getFilteredData().size();
     }
     return getMaxDataSize();

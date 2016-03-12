@@ -72,6 +72,13 @@ public:
     infrastructure::Event<bool> artsFullyLoaded{};
 
     /**
+     * @brief Event fired when further loading of album arts was disabled.
+     *
+     * @sa disableLoading()
+     */
+    infrastructure::Event<void> artsLoadingDisabled{};
+
+    /**
      * @brief Sets the which provider should be used to load data.
      *
      * @note maxCount() can change when setting the provider type.
