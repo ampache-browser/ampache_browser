@@ -1,4 +1,4 @@
-# Makefile
+# Makefile (devel)
 #
 # Project: Ampache Browser
 # License: GNU GPLv3
@@ -28,7 +28,7 @@ SRCS = src/infrastructure/os_paths.cc \
        src/data/filters/artist_filter_for_tracks.cc \
        src/data/filters/album_filter_for_tracks.cc \
        src/data/filters/name_filter_for_tracks.cc \
-       src/data/repositories/track_repository.cc \
+       src/data/repositories/track_repository.cc\
        src/data/repositories/artist_repository.cc \
        src/data/repositories/album_repository.cc \
        src/data/indices.cc \
@@ -55,16 +55,64 @@ MOC_SRCS = include/ui/moc_ui.cc \
 
 SRCS += ${MOC_SRCS}
 
+
+
+CC = gcc
+CXX = g++
+AR = /usr/bin/ar
+LD = ${CC}
+CFLAGS = -g -ggdb -O0 -fno-inline-functions -std=gnu99 -pipe -Wall -Wextra -Wpedantic -Wtype-limits -fvisibility=hidden
+CXXFLAGS = -g -ggdb -O0 -fno-inline-functions -std=c++11 -pipe -Wall -Wextra -Wpedantic -Wtype-limits \
+  -Woverloaded-virtual -fvisibility=hidden -D PACKAGE=\"audacious-plugins\" \
+  -D EXPORT="__attribute__((visibility(\"default\")))"
+CPPFLAGS =  -I/home/hs/drawer/projects/audacious_plugins/AmpacheBrowser/elab/Audacious/audacious-test/install/include
+LDFLAGS =  -Wl,-z,defs
+LIBS = -lpthread -L/home/hs/drawer/projects/audacious_plugins/AmpacheBrowser/elab/Audacious/audacious-test/install/lib \
+  -laudcore
+PLUGIN_CFLAGS = -fPIC -DPIC
+PLUGIN_LDFLAGS = -shared
+PLUGIN_SUFFIX = .so
+
+QT_CFLAGS ?= -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore -I/usr/include/qt5 -fPIC
+QT_LIBS ?= -lQt5Widgets -lQt5Gui -lQt5Core
+QTMULTIMEDIA_CFLAGS ?= -I/usr/include/qt5/QtNetwork -I/usr/include/qt5/QtGui \
+  -I/usr/include/qt5/QtCore -I/usr/include/qt5  -fPIC
+QTMULTIMEDIA_LIBS ?= -lQt5Network -lQt5Gui -lQt5Core
+
+PLUGIN_OBJS = ${SRCS:.cc=.plugin.o}
+
+.SUFFIXES:
+.SUFFIXES: .cc .plugin.o
+.PHONY: all
+
+all:
+	${MAKE} ${PLUGIN}
+
 moc_%.cc:%.h
 	moc $(DEFINES) $(INCPATH) $< -o $@
 
-include ../../buildsys.mk
-include ../../extra.mk
+.cc.plugin.o:
+	${CXX} ${PLUGIN_CFLAGS} ${CXXFLAGS} ${CPPFLAGS} -c -o $@ $<
+
+${PLUGIN}: ${PLUGIN_OBJS}
+	objs=""; \
+	for i in ${PLUGIN_OBJS}; do \
+		objs="$$objs $$i"; \
+	done; \
+	${LD} -o $@ $$objs ${PLUGIN_LDFLAGS} ${LDFLAGS} ${LIBS}
+
+clean:
+	for i in ${MOC_SRCS} ${PLUGIN_OBJS} ${PLUGIN}; do \
+		if test -f $$i -o -d $$i; then \
+			rm -fr $$i; \
+		fi \
+	done
+
+
 
 plugindir := ${plugindir}/${GENERAL_PLUGIN_DIR}
 
 LD = ${CXX}
-CPPFLAGS += -I../.. -I./include -I. ${QT_CFLAGS} ${QTMULTIMEDIA_CFLAGS} -I/usr/include/qt5/QtConcurrent
+CPPFLAGS += -I./include -I. ${QT_CFLAGS} ${QTMULTIMEDIA_CFLAGS} -I/usr/include/qt5/QtConcurrent
 CFLAGS += ${PLUGIN_CFLAGS}
 LIBS += ${QT_LIBS} ${QTMULTIMEDIA_LIBS} -lQt5Concurrent -laudqt
-

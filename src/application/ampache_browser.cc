@@ -103,8 +103,19 @@ void AmpacheBrowser::requestTermination() {
 
 
 void AmpacheBrowser::onDataLoaderFinished(LoadingResult loadingResult) {
-    if (loadingResult == LoadingResult::Aborted) {
-        terminated();
+    switch (loadingResult) {
+        case LoadingResult::Error:
+            myUi->showNotification("Error while reading data!");
+            break;
+        case LoadingResult::NoConnectionNoCache:
+        case LoadingResult::SuccessNoConnection:
+            myUi->showNotification("Unable to connect to server.");
+            break;
+        case LoadingResult::Aborted:
+            terminated();
+            break;
+        default:
+            myUi->showNotification("Loaded.");
     }
 }
 

@@ -45,6 +45,7 @@ void DataLoader::load() {
 
     AUDINFO("Begin loading.\n");
     myState = Loading;
+    myIsConnectionSuccessful = false;
 
     myAmpacheInitializationFinished = false;
     myArtistsLoadingFinished = false;
@@ -92,15 +93,15 @@ void DataLoader::onAmpacheInitialized(bool error) {
     myAmpache.initialized -= DELEGATE1(&DataLoader::onAmpacheInitialized, bool);
     myAmpacheInitializationFinished = true;
 
-    if (myState == Aborting)
-    {
+    myIsConnectionSuccessful = !error;
+    if (myState == Aborting) {
         possiblyFireFinished();
         return;
     }
 
     // finish with error if neither Ampache nor cache is available
     if (error && (myCache.getLastUpdate() == system_clock::time_point::min())) {
-        fireFinished(LoadingResult::Error);
+        fireFinished(LoadingResult::NoConnectionNoCache);
         return;
     }
 
@@ -221,7 +222,11 @@ void DataLoader::possiblyFireFinished() {
             myArtistRepository->loadingDisabled += DELEGATE0(&DataLoader::onArtistRepositoryLoadingDisabled);
             fireFinished(LoadingResult::Aborted);
         } else {
-            fireFinished(LoadingResult::Success);
+            if (myIsConnectionSuccessful) {
+                fireFinished(LoadingResult::Success);
+            } else {
+                fireFinished(LoadingResult::SuccessNoConnection);
+            }
         }
     }
 }

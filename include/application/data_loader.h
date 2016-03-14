@@ -27,11 +27,34 @@ class Cache;
 
 namespace application {
 
+/**
+ * @brief Data loading result.
+ */
 enum class LoadingResult {
+    /**
+     * @brief Loading was successful.
+     */
     Success,
+
+    /**
+     * @brief Connection to the server failed however data were loaded from the cache.
+     */
     SuccessNoConnection,
+
+    /**
+     * @brief Conection to the server failed and cached data were not available.
+     *
+     */
     NoConnectionNoCache,
+
+    /**
+     * @brief Error occured while readind data.
+     */
     Error,
+
+    /**
+     * @brief Loading was aborted.
+     */
     Aborted
 };
 
@@ -46,13 +69,25 @@ public:
     explicit DataLoader(data::ArtistRepository* const artistRepository, data::AlbumRepository* const albumRepository,
         data::TrackRepository* const trackRepository, data::Ampache& ampache, data::Cache& cache);
 
+    /**
+     * @brief Fired when loading is finished.
+     */
     infrastructure::Event<LoadingResult> finished{};
 
+    /**
+     * @brief Load data.
+     *
+     * @note Previously loaded data are cleared.
+     */
     void load();
 
+    /**
+     * @brief Abort loading.
+     */
     void abort();
 
 private:
+    // loading state
     enum State {
         Idle,
         Loading,
@@ -66,7 +101,11 @@ private:
     data::Ampache& myAmpache;
     data::Cache& myCache;
 
+    // current loading state
     State myState = Idle;
+
+    // true if handshake with the server was successful
+    bool myIsConnectionSuccessful = false;
 
     // true if initialization or loading of particular data has finished
     bool myAmpacheInitializationFinished = false;
@@ -75,6 +114,7 @@ private:
     bool myAlbumArtsLoadingFinished = false;
     bool myTracksLoadingFinished = false;
 
+    // data provider which is currently used
     data::ProviderType myProviderType = data::ProviderType::None;
 
     void onAmpacheInitialized(bool error);
