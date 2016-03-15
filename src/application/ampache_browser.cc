@@ -97,6 +97,10 @@ AmpacheBrowser::~AmpacheBrowser() {
 
 void AmpacheBrowser::requestTermination() {
     AUDINFO("Termination request.\n");
+
+    // SMELL: Handshake with the server can be in progress.  Unsubscribing from event here is most likely not enough.
+    myAmpache->readySession -= DELEGATE1(&AmpacheBrowser::onPlayReadySession, bool);
+
     myDataLoader->abort();
 }
 
@@ -122,7 +126,22 @@ void AmpacheBrowser::onDataLoaderFinished(LoadingResult loadingResult) {
 
 
 void AmpacheBrowser::onPlayTriggered(const vector<string>& ids) {
-    auto actualIds = ids;
+    myPlayIds = ids;
+    myAmpache->readySession += DELEGATE1(&AmpacheBrowser::onPlayReadySession, bool);
+    myAmpache->refreshSession();
+}
+
+
+
+void AmpacheBrowser::onPlayReadySession(bool error) {
+    myAmpache->readySession -= DELEGATE1(&AmpacheBrowser::onPlayReadySession, bool);
+    if (error) {
+        myUi->showNotification("Unable to connect to server.");
+        // continue anyway
+    }
+
+    auto actualIds = myPlayIds;
+    myPlayIds.clear();
 
     // if nothing selected, take all
     if (actualIds.size() == 0) {
@@ -133,8 +152,8 @@ void AmpacheBrowser::onPlayTriggered(const vector<string>& ids) {
 
     Index<PlaylistAddItem> playlistAddItems;
     for (auto& id: actualIds) {
-        Tuple tuple;
         auto trackUrl = myAmpache->refreshUrl(myTrackRepository->getById(id).getUrl());
+        Tuple tuple;
         playlistAddItems.append(String{trackUrl.c_str()}, move(tuple), nullptr);
     }
     auto activePlaylist = aud_playlist_get_active();

@@ -95,8 +95,11 @@ private:
     bool myIsAlbumDataRequestAborted = false;
     bool myIsTrackDataRequestAborted = false;
 
+    std::vector<std::string> myPlayIds{};
+
     void onDataLoaderFinished(LoadingResult loadingResult);
     void onPlayTriggered(const std::vector<std::string>& ids);
+    void onPlayReadySession(bool error);
     void onArtistsSelected(const std::vector<std::string>& ids);
     void onAlbumsSelected(const std::vector<std::string>& ids);
     void onSearchTriggered(const std::string& searchText);

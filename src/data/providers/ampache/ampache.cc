@@ -132,12 +132,69 @@ void Ampache::requestAlbumArts(const vector<string>& ids) {
 
 
 
+void Ampache::refreshSession() {
+    myIsRefreshingSession = true;
+    callMethod(Method.Ping, {{"auth", myAuthToken}});
+}
+
+
+
 string Ampache::refreshUrl(const string& url) const {
     if (getIsInitialized()) {
         // SMELL: We are replacing session ID value with authentication token, which is different, however it works.
         return AmpacheUrl{url}.replaceSsidValue(myAuthToken).replaceAuthValue(myAuthToken).str();
     }
     return url;
+}
+
+
+
+void Ampache::onGetContents(const char* url, const Index<char>& contentBuffer) {
+    string content = string{contentBuffer.begin(), static_cast<size_t>(contentBuffer.len())};
+
+    QXmlStreamReader errorXmlStreamReader{QString::fromStdString(content)};
+    bool error = isError(errorXmlStreamReader);
+
+    QXmlStreamReader xmlStreamReader{QString::fromStdString(content)};
+    string methodName = AmpacheUrl{url}.parseActionValue();
+    AUDDBG("Server call of method '%s' has returned with content of length %d and error %d.\n",
+        methodName.c_str(), contentBuffer.len(), error);
+    dispatchToMethodHandler(methodName, xmlStreamReader, error);
+}
+
+
+
+void Ampache::onAlbumArtFinished(const char* artUrl, const Index<char>& contentBuffer) {
+    AUDDBG("Album art request has returned with content of length %d.\n", contentBuffer.len());
+    auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(AmpacheUrl{artUrl}.parseIdValue(),
+        QByteArray{contentBuffer.begin(), contentBuffer.len()});
+    scaleAlbumArtRunnable->setAutoDelete(false);
+    connect(scaleAlbumArtRunnable, SIGNAL(finished(ScaleAlbumArtRunnable*)), this,
+        SLOT(onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable*)));
+    QThreadPool::globalInstance()->start(scaleAlbumArtRunnable);
+}
+
+
+
+void Ampache::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable) {
+    AUDDBG("Scaling of album art with ID %s has returned.\n", scaleAlbumArtRunnable->getId().c_str());
+    // SMELL: It crashes when not found.  Either use condition or do not search for ID at all and use the one from
+    // scaleAlbumArtRunnable.
+    auto albumId = *(myPendingAlbumArts.find(scaleAlbumArtRunnable->getId()));
+    QPixmap art;
+    art.convertFromImage(scaleAlbumArtRunnable->getResult());
+
+    myFinishedAlbumArts.emplace(albumId, art);
+    myPendingAlbumArts.erase(albumId);
+
+    scaleAlbumArtRunnable->deleteLater();
+
+    if (myPendingAlbumArts.empty()) {
+        auto finishedAlbumArts = myFinishedAlbumArts;
+        myFinishedAlbumArts.clear();
+
+        readyAlbumArts(finishedAlbumArts);
+    }
 }
 
 
@@ -163,6 +220,7 @@ void Ampache::callMethod(const string& name, const map<string, string>& argument
     if (!getIsInitialized()) {
         QXmlStreamReader xmlStreamReader;
         dispatchToMethodHandler(name, xmlStreamReader, true);
+        return;
     }
 
     AUDDBG("Calling server method '%s'.\n", name.c_str());
@@ -177,14 +235,24 @@ void Ampache::callMethod(const string& name, const map<string, string>& argument
 
 
 
-void Ampache::onGetContents(const char* url, const Index<char>& contentBuffer) {
-    bool error = !contentBuffer.len();
-    string content = string{contentBuffer.begin(), static_cast<size_t>(contentBuffer.len())};
-    QXmlStreamReader xmlStreamReader{QString::fromStdString(content)};
-    string methodName = AmpacheUrl{url}.parseActionValue();
-    AUDDBG("Server call of method '%s' has returned with content of length %d.\n", methodName.c_str(),
-        contentBuffer.len());
-    dispatchToMethodHandler(methodName, xmlStreamReader, error);
+bool Ampache::isError(QXmlStreamReader& xmlStreamReader) {
+    bool error = false;
+    while (!xmlStreamReader.atEnd()) {
+        xmlStreamReader.readNext();
+        auto xmlElement = xmlStreamReader.name();
+        if (!xmlStreamReader.isStartElement() || xmlElement == "root") {
+            continue;
+        }
+
+        if (xmlElement == "error") {
+            error = true;
+            break;
+        }
+    }
+    if (xmlStreamReader.hasError()) {
+        error = true;
+    }
+    return error;
 }
 
 
@@ -194,10 +262,10 @@ void Ampache::dispatchToMethodHandler(const string& methodName, QXmlStreamReader
         myIsInitialized = false;
     }
 
-    if (methodName == Method.Handshake) {
+    if (methodName == Method.Handshake && !myIsRefreshingSession) {
         processHandshake(xmlStreamReader, error);
-    } else if (methodName == Method.Ping) {
-//         processPing(xmlStreamReader);
+    } else if (methodName == Method.Ping || (methodName == Method.Handshake && myIsRefreshingSession)) {
+        processPing(xmlStreamReader,  error, methodName == Method.Handshake);
     } else if (methodName == Method.Albums) {
         processAlbums(xmlStreamReader, error);
     } else if (methodName == Method.Artists) {
@@ -210,34 +278,56 @@ void Ampache::dispatchToMethodHandler(const string& methodName, QXmlStreamReader
 
 
 void Ampache::processHandshake(QXmlStreamReader& xmlStreamReader, bool error) {
-    if (error) {
-        initialized(error);
+    if (!error) {
+        myIsInitialized = true;
+        readHandshakeData(xmlStreamReader);
+    }
+
+    initialized(error);
+}
+
+
+
+void Ampache::processPing(QXmlStreamReader& xmlStreamReader, bool error, bool isRetry) {
+    if (error && !isRetry) {
+        connectToServer();
         return;
     }
 
-    myIsInitialized = true;
+    if (!error) {
+        myIsInitialized = true;
+        if (isRetry) {
+            readHandshakeData(xmlStreamReader);
+        }
+    }
+    myIsRefreshingSession = false;
+    readySession(error);
+}
 
+
+
+void Ampache::readHandshakeData(QXmlStreamReader& xmlStreamReader) {
     QDateTime update{};
     QDateTime add{};
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
-        auto name = xmlStreamReader.name();
-        if (!xmlStreamReader.isStartElement() || name == "root") {
+        auto xmlElement = xmlStreamReader.name();
+        if (!xmlStreamReader.isStartElement() || xmlElement == "root") {
             continue;
         }
 
         auto value = xmlStreamReader.readElementText().toStdString();
-        if (name == "auth") {
+        if (xmlElement == "auth") {
             myAuthToken = value;
-        } else if (name == "update") {
+        } else if (xmlElement == "update") {
             update = QDateTime::fromString(QString::fromStdString(value), Qt::ISODate);
-        } else if (name == "add") {
+        } else if (xmlElement == "add") {
             add = QDateTime::fromString(QString::fromStdString(value), Qt::ISODate);
-        } else if (name == "albums") {
+        } else if (xmlElement == "albums") {
             myNumberOfAlbums = stoi(value);
-        } else if (name ==  "artists") {
+        } else if (xmlElement ==  "artists") {
             myNumberOfArtists = stoi(value);
-        } else if (name ==  "songs") {
+        } else if (xmlElement ==  "songs") {
             myNumberOfTracks = stoi(value);
         }
     }
@@ -246,8 +336,6 @@ void Ampache::processHandshake(QXmlStreamReader& xmlStreamReader, bool error) {
     if (xmlStreamReader.hasError()) {
       // TODO: handle error
     }
-
-    initialized(error);
 }
 
 
@@ -337,41 +425,6 @@ vector<unique_ptr<AlbumData>> Ampache::createAlbums(QXmlStreamReader& xmlStreamR
     }
 
     return albumData;
-}
-
-
-
-void Ampache::onAlbumArtFinished(const char* artUrl, const Index<char>& contentBuffer) {
-    AUDDBG("Album art request has returned with content of length %d.\n", contentBuffer.len());
-    auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(AmpacheUrl{artUrl}.parseIdValue(),
-        QByteArray{contentBuffer.begin(), contentBuffer.len()});
-    scaleAlbumArtRunnable->setAutoDelete(false);
-    connect(scaleAlbumArtRunnable, SIGNAL(finished(ScaleAlbumArtRunnable*)), this,
-        SLOT(onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable*)));
-    QThreadPool::globalInstance()->start(scaleAlbumArtRunnable);
-}
-
-
-
-void Ampache::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable) {
-    AUDDBG("Scaling of album art with ID %s has returned.\n", scaleAlbumArtRunnable->getId().c_str());
-    // SMELL: It crashes when not found.  Either use condition or do not search for ID at all and use the one from
-    // scaleAlbumArtRunnable.
-    auto albumId = *(myPendingAlbumArts.find(scaleAlbumArtRunnable->getId()));
-    QPixmap art;
-    art.convertFromImage(scaleAlbumArtRunnable->getResult());
-
-    myFinishedAlbumArts.emplace(albumId, art);
-    myPendingAlbumArts.erase(albumId);
-
-    scaleAlbumArtRunnable->deleteLater();
-
-    if (myPendingAlbumArts.empty()) {
-        auto finishedAlbumArts = myFinishedAlbumArts;
-        myFinishedAlbumArts.clear();
-
-        readyAlbumArts(finishedAlbumArts);
-    }
 }
 
 

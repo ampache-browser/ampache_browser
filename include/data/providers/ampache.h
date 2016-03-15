@@ -104,6 +104,13 @@ public:
     infrastructure::Event<std::map<std::string, QPixmap>> readyAlbumArts{};
 
     /**
+     * @brief Event fired when the session was extended or new one created as as result of refreshSession() call.
+     *
+     * @sa refreshSession()
+     */
+    infrastructure::Event<bool> readySession{};
+
+    /**
      * @brief Return the initialization status of the instance.
      *
      * @note This method can be called even if the ::initialized event was not fired.
@@ -191,6 +198,15 @@ public:
     void requestAlbumArts(const std::vector<std::string>& ids);
 
     /**
+     * @brief Extends the session or makes a new one if alread expired.
+     *
+     * @return true it the session was successfully extended or created.
+     *
+     * @sa ::readySession
+     */
+    void refreshSession();
+
+    /**
      * @brief Update authentication parameters which may have expired.
      *
      * The values are replaced with those obtained upon server connection.  This method does not extends/refreshes
@@ -198,6 +214,8 @@ public:
      *
      * @param url The URL string.
      * @return URL string with authentication values possibly replaced.
+     *
+     * @sa refreshSession()
      */
     std::string refreshUrl(const std::string& url) const;
 
@@ -221,6 +239,9 @@ private:
 
     // true if handshake with the server was successful
     bool myIsInitialized = false;
+
+    // true if the session is currently being refreshed
+    bool myIsRefreshingSession = false;
 
     // authentication token as returned by the server
     std::string myAuthToken = "";
@@ -246,8 +267,11 @@ private:
 
     void connectToServer();
     void callMethod(const std::string& name, const std::map<std::string, std::string>& arguments);
+    bool isError(QXmlStreamReader& xmlStreamReader);
     void dispatchToMethodHandler(const std::string& methodName, QXmlStreamReader& xmlStreamReader, bool error);
     void processHandshake(QXmlStreamReader& xmlStreamReader, bool error);
+    void processPing(QXmlStreamReader& xmlStreamReader, bool error, bool isRetry);
+    void readHandshakeData(QXmlStreamReader& xmlStreamReader);
     void processAlbums(QXmlStreamReader& xmlStreamReader, bool error);
     std::vector<std::unique_ptr<AlbumData>> createAlbums(QXmlStreamReader& xmlStreamReader) const;
     void processArtists(QXmlStreamReader& xmlStreamReader, bool error);

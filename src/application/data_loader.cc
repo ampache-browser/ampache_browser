@@ -216,10 +216,10 @@ void DataLoader::possiblyFireFinished() {
     if (myAmpacheInitializationFinished && myArtistsLoadingFinished && myAlbumsLoadingFinished &&
         myAlbumArtsLoadingFinished && myTracksLoadingFinished) {
         if (myState == Aborting) {
-            myTrackRepository->loadingDisabled += DELEGATE0(&DataLoader::onTrackRepositoryLoadingDisabled);
-            myAlbumRepository->artsLoadingDisabled += DELEGATE0(&DataLoader::onAlbumRepositoryArtsLoadingDisabled);
-            myAlbumRepository->loadingDisabled += DELEGATE0(&DataLoader::onAlbumRepositoryLoadingDisabled);
-            myArtistRepository->loadingDisabled += DELEGATE0(&DataLoader::onArtistRepositoryLoadingDisabled);
+            myTrackRepository->loadingDisabled -= DELEGATE0(&DataLoader::onTrackRepositoryLoadingDisabled);
+            myAlbumRepository->artsLoadingDisabled -= DELEGATE0(&DataLoader::onAlbumRepositoryArtsLoadingDisabled);
+            myAlbumRepository->loadingDisabled -= DELEGATE0(&DataLoader::onAlbumRepositoryLoadingDisabled);
+            myArtistRepository->loadingDisabled -= DELEGATE0(&DataLoader::onArtistRepositoryLoadingDisabled);
             fireFinished(LoadingResult::Aborted);
         } else {
             if (myIsConnectionSuccessful) {
