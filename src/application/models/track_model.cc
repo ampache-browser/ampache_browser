@@ -51,17 +51,17 @@ QVariant TrackModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid() || role != Qt::DisplayRole) {
         return QVariant{};
     }
-
     int row = index.row();
+    int column = index.column();
     if (!myTrackRepository->isLoaded(row)) {
-        if (role == Qt::DisplayRole && !myTrackRepository->isFiltered()) {
+        if (role == Qt::DisplayRole && column == 0 && !myTrackRepository->isFiltered()) {
             myRequests->add(row);
         }
         return "...";
     }
 
     auto& track = myTrackRepository->get(row);
-    switch (index.column()) {
+    switch (column) {
         case 0:
             return QString::fromStdString(track.getName());
         case 1:

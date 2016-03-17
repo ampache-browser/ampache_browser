@@ -71,7 +71,7 @@ private:
     data::TrackRepository* const myTrackRepository = nullptr;
 
     // requests to load tracks from an external source
-    const std::unique_ptr<Requests> myRequests{new Requests{120}};
+    const std::unique_ptr<Requests> myRequests{new Requests{60}};
 
     void onReadyToExecute(RequestGroup requestGroup);
     void onLoaded(std::pair<int, int> offsetAndLimit);
