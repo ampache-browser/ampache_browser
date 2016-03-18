@@ -11,6 +11,7 @@
 #include <memory>
 
 #include <libaudcore/runtime.h>
+#include <libaudcore/i18n.h>
 #include <libaudcore/index.h>
 #include <libaudcore/tuple.h>
 #include <libaudcore/playlist.h>
@@ -109,17 +110,17 @@ void AmpacheBrowser::requestTermination() {
 void AmpacheBrowser::onDataLoaderFinished(LoadingResult loadingResult) {
     switch (loadingResult) {
         case LoadingResult::Error:
-            myUi->showNotification("Error while reading data!");
+            myUi->showNotification(_("Error while reading data!"));
             break;
         case LoadingResult::NoConnectionNoCache:
         case LoadingResult::SuccessNoConnection:
-            myUi->showNotification("Unable to connect to server.");
+            myUi->showNotification(_("Unable to connect to server."));
             break;
         case LoadingResult::Aborted:
             terminated();
             break;
         default:
-            myUi->showNotification("Loaded.");
+            myUi->showNotification(_("Loaded."));
     }
 }
 
@@ -136,7 +137,7 @@ void AmpacheBrowser::onPlayTriggered(const vector<string>& ids) {
 void AmpacheBrowser::onPlayReadySession(bool error) {
     myAmpache->readySession -= DELEGATE1(&AmpacheBrowser::onPlayReadySession, bool);
     if (error) {
-        myUi->showNotification("Unable to connect to server.");
+        myUi->showNotification(_("Unable to connect to server."));
         // continue anyway
     }
 

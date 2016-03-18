@@ -10,6 +10,7 @@
 #include <memory>
 
 #include <libaudcore/runtime.h>
+#include <libaudcore/i18n.h>
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
 #include <QtGui/QIcon>
@@ -60,7 +61,7 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
 
     QVariant notLoaded{};
     if (role == Qt::DisplayRole) {
-        notLoaded = QVariant{QString{"loading..."}};
+        notLoaded = QVariant{QString{_("loading...")}};
     } else {
         // SMELL: size specified on multiple places
         QPixmap notLoadedPixmap{100, 100};

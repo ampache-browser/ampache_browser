@@ -8,6 +8,7 @@
 
 
 #include <libaudcore/runtime.h>
+#include <libaudcore/i18n.h>
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
 #include <QtCore/QAbstractTableModel>
@@ -85,11 +86,11 @@ QVariant TrackModel::headerData(int section, Qt::Orientation, int role) const {
     // SMELL: Header names are not translatable.  Should they be pulled from data?
     switch (section) {
         case 0:
-            return "Track";
+            return _("Track");
         case 1:
-            return "Artist";
+            return _("Artist");
         case 2:
-            return "Album";
+            return _("Album");
         default:
             return QVariant{};
     }

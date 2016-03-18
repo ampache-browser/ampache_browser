@@ -7,6 +7,7 @@
 
 
 
+#include <libaudcore/i18n.h>
 #include <QToolBar>
 #include <QStatusBar>
 #include <QStyle>
@@ -26,16 +27,16 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     setWindowFlags(Qt::Widget);
 
     // tool bar
-    playAction = new QAction(style()->standardIcon(QStyle::SP_MediaPlay), tr("Play"), this);
-    auto enqueueAction = new QAction(style()->standardIcon(QStyle::SP_DialogApplyButton), tr("Enqueue"), this);
+    playAction = new QAction(style()->standardIcon(QStyle::SP_MediaPlay), _("Play"), this);
+    auto enqueueAction = new QAction(style()->standardIcon(QStyle::SP_DialogApplyButton), _("Enqueue"), this);
     searchLineEdit = new QLineEdit();
     auto spacerWidget = new QWidget();
     auto spacerWidget2 = new QWidget();
-    auto mainToolBar = addToolBar(tr("Main"));
-    auto aboutAction = new QAction(style()->standardIcon(QStyle::SP_ComputerIcon), tr("About"), this);
+    auto mainToolBar = addToolBar(_("Main"));
+    auto aboutAction = new QAction(style()->standardIcon(QStyle::SP_ComputerIcon), _("About"), this);
 
-    searchLineEdit->setPlaceholderText(tr("Search..."));
-    searchLineEdit->setToolTip(tr("Search for artists, albums and tracks."));
+    searchLineEdit->setPlaceholderText(_("Search..."));
+    searchLineEdit->setToolTip(_("Search for artists, albums and tracks."));
 
     spacerWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     spacerWidget2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -65,8 +66,8 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     setCentralWidget(centralWidget);
 
     // docks
-    auto artistsDockWidget = new QDockWidget(tr("Artists"));
-    auto tracksDockWidget = new QDockWidget(tr("Tracks"));
+    auto artistsDockWidget = new QDockWidget(_("Artists"));
+    auto tracksDockWidget = new QDockWidget(_("Tracks"));
     artistsListView = new QListView{};
     artistsListView->setResizeMode(QListView::ResizeMode::Adjust);
     artistsListView->setUniformItemSizes(true);
