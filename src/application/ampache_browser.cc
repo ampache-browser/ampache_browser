@@ -72,6 +72,8 @@ myUi(&ui) {
     myUi->albumsSelected += DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
     myUi->searchTriggered += DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
     myUi->playTriggered += DELEGATE1(&AmpacheBrowser::onPlayTriggered, vector<string>);
+    myUi->createPlaylistTriggered += DELEGATE1(&AmpacheBrowser::onCreatePlaylistTriggered, vector<string>);
+    myUi->addToPlaylistTriggered += DELEGATE1(&AmpacheBrowser::onAddToPlaylistTriggered, vector<string>);
 
     myUi->setArtistModel(*myArtistModel);
     myUi->setAlbumModel(*myAlbumModel);
@@ -88,6 +90,8 @@ myUi(&ui) {
 AmpacheBrowser::~AmpacheBrowser() {
     myDataLoader->finished -= DELEGATE1(&AmpacheBrowser::onDataLoaderFinished, LoadingResult);
 
+    myUi->addToPlaylistTriggered -= DELEGATE1(&AmpacheBrowser::onAddToPlaylistTriggered, vector<string>);
+    myUi->createPlaylistTriggered -= DELEGATE1(&AmpacheBrowser::onCreatePlaylistTriggered, vector<string>);
     myUi->playTriggered -= DELEGATE1(&AmpacheBrowser::onPlayTriggered, vector<string>);
     myUi->searchTriggered -= DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
     myUi->albumsSelected -= DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
@@ -100,7 +104,7 @@ void AmpacheBrowser::requestTermination() {
     AUDINFO("Termination request.\n");
 
     // SMELL: Handshake with the server can be in progress.  Unsubscribing from event here is most likely not enough.
-    myAmpache->readySession -= DELEGATE1(&AmpacheBrowser::onPlayReadySession, bool);
+    myAmpache->readySession -= DELEGATE1(&AmpacheBrowser::onPlayOrCreateReadySession, bool);
 
     myDataLoader->abort();
 }
@@ -128,37 +132,46 @@ void AmpacheBrowser::onDataLoaderFinished(LoadingResult loadingResult) {
 
 void AmpacheBrowser::onPlayTriggered(const vector<string>& ids) {
     myPlayIds = ids;
-    myAmpache->readySession += DELEGATE1(&AmpacheBrowser::onPlayReadySession, bool);
+    myAmpache->readySession += DELEGATE1(&AmpacheBrowser::onPlayOrCreateReadySession, bool);
     myAmpache->refreshSession();
 }
 
 
 
-void AmpacheBrowser::onPlayReadySession(bool error) {
-    myAmpache->readySession -= DELEGATE1(&AmpacheBrowser::onPlayReadySession, bool);
-    if (error) {
-        myUi->showNotification(_("Unable to connect to server."));
-        // continue anyway
-    }
+void AmpacheBrowser::onCreatePlaylistTriggered(const vector<string>& ids) {
+    aud_playlist_new();
 
-    auto actualIds = myPlayIds;
-    myPlayIds.clear();
+    myPlayIds = ids;
+    myAmpache->readySession += DELEGATE1(&AmpacheBrowser::onPlayOrCreateReadySession, bool);
+    myAmpache->refreshSession();
+}
 
-    // if nothing selected, take all
-    if (actualIds.size() == 0) {
-        for (int row = 0; row < myTrackModel->rowCount(); ++row) {
-            actualIds.push_back(myTrackModel->data(myTrackModel->index(row, 3)).toString().toStdString());
-        }
-    }
 
-    Index<PlaylistAddItem> playlistAddItems;
-    for (auto& id: actualIds) {
-        auto trackUrl = myAmpache->refreshUrl(myTrackRepository->getById(id).getUrl());
-        Tuple tuple;
-        playlistAddItems.append(String{trackUrl.c_str()}, move(tuple), nullptr);
-    }
+
+void AmpacheBrowser::onAddToPlaylistTriggered(const vector<string>& ids) {
+    myPlayIds = ids;
+    myAmpache->readySession += DELEGATE1(&AmpacheBrowser::onAddReadySession, bool);
+    myAmpache->refreshSession();
+}
+
+
+
+void AmpacheBrowser::onPlayOrCreateReadySession(bool error) {
+    myAmpache->readySession -= DELEGATE1(&AmpacheBrowser::onPlayOrCreateReadySession, bool);
+
+    auto playlistItems = createPlaylistItems(error);
     auto activePlaylist = aud_playlist_get_active();
-    aud_playlist_entry_insert_batch(activePlaylist, -1, move(playlistAddItems), true);
+    aud_playlist_entry_insert_batch(activePlaylist, -1, move(playlistItems), true);
+}
+
+
+
+void AmpacheBrowser::onAddReadySession(bool error) {
+    myAmpache->readySession -= DELEGATE1(&AmpacheBrowser::onAddReadySession, bool);
+
+    auto playlistItems = createPlaylistItems(error);
+    auto activePlaylist = aud_playlist_get_active();
+    aud_playlist_entry_insert_batch(activePlaylist, -1, move(playlistItems), false);
 }
 
 
@@ -205,6 +218,34 @@ void AmpacheBrowser::onSearchTriggered(const string& searchText) {
         myAlbumRepository->setFilter(unique_ptr<Filter<AlbumData>>{new NameFilterForAlbums{searchText}});
         myTrackRepository->setFilter(unique_ptr<Filter<TrackData>>{new NameFilterForTracks{searchText}});
     }
+}
+
+
+
+Index<PlaylistAddItem> AmpacheBrowser::createPlaylistItems(bool error) {
+    if (error) {
+        myUi->showNotification(_("Unable to connect to server."));
+        // continue anyway
+    }
+
+    auto actualIds = myPlayIds;
+    myPlayIds.clear();
+
+    // if nothing selected, take all
+    if (actualIds.size() == 0) {
+        for (int row = 0; row < myTrackModel->rowCount(); ++row) {
+            actualIds.push_back(myTrackModel->data(myTrackModel->index(row, 3)).toString().toStdString());
+        }
+    }
+
+    Index<PlaylistAddItem> playlistAddItems;
+    for (auto& id: actualIds) {
+        auto trackUrl = myAmpache->refreshUrl(myTrackRepository->getById(id).getUrl());
+        Tuple tuple;
+        playlistAddItems.append(String{trackUrl.c_str()}, move(tuple), nullptr);
+    }
+
+    return playlistAddItems;
 }
 
 }

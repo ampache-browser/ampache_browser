@@ -40,6 +40,8 @@ public:
 
     QLineEdit* searchLineEdit = nullptr;
     QAction* playAction = nullptr;
+    QAction* createPlaylistAction = nullptr;
+    QAction* addToPlaylistAction = nullptr;
 };
 
 }

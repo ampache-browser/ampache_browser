@@ -29,6 +29,8 @@ namespace ui {
 Ui::Ui():
 myMainWindow{new AmpacheBrowserMainWindow{}} {
     connect(myMainWindow->playAction, SIGNAL(triggered()), this, SLOT(onPlayActionTriggered()));
+    connect(myMainWindow->createPlaylistAction, SIGNAL(triggered()), this, SLOT(onCreatePlaylistActionTriggered()));
+    connect(myMainWindow->addToPlaylistAction, SIGNAL(triggered()), this, SLOT(onAddToPlaylistActionTriggered()));
     connect(myMainWindow->artistsListView, SIGNAL(activated(QModelIndex)), this, SLOT(onActivated(QModelIndex)));
     connect(myMainWindow->albumsListView, SIGNAL(activated(QModelIndex)), this, SLOT(onActivated(QModelIndex)));
     connect(myMainWindow->tracksTreeView, SIGNAL(activated(QModelIndex)), this, SLOT(onActivated(QModelIndex)));
@@ -47,7 +49,7 @@ QWidget* Ui::getMainWidget() const {
 
 
 
-void Ui::showNotification(string message) {
+void Ui::showNotification(const string& message) {
     myMainWindow->statusBar()->showMessage(QString::fromStdString(message));
 }
 
@@ -77,13 +79,29 @@ void Ui::setTrackModel(QAbstractItemModel& model) {
 
 
 void Ui::onPlayActionTriggered() {
-    raisePlayTriggeredForSelectedTracks();
+    auto trackIds = getSelectedTracks();
+    playTriggered(trackIds);
+}
+
+
+
+void Ui::onCreatePlaylistActionTriggered() {
+    auto trackIds = getSelectedTracks();
+    createPlaylistTriggered(trackIds);
+}
+
+
+
+void Ui::onAddToPlaylistActionTriggered() {
+    auto trackIds = getSelectedTracks();
+    addToPlaylistTriggered(trackIds);
 }
 
 
 
 void Ui::onActivated(const QModelIndex&) {
-    raisePlayTriggeredForSelectedTracks();
+    auto trackIds = getSelectedTracks();
+    playTriggered(trackIds);
 }
 
 
@@ -124,13 +142,13 @@ void Ui::onSearchReturnPressed() {
 
 
 
-void Ui::raisePlayTriggeredForSelectedTracks() {
+vector<string> Ui::getSelectedTracks() const {
     auto selectedRows = myMainWindow->tracksTreeView->selectionModel()->selectedRows(3);
     vector<string> trackIds;
     for (auto hiddenColumnIndex: selectedRows) {
         trackIds.push_back(hiddenColumnIndex.data().toString().toStdString());
     }
-    playTriggered(trackIds);
+    return trackIds;
 }
 
 }

@@ -28,7 +28,9 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
 
     // tool bar
     playAction = new QAction(style()->standardIcon(QStyle::SP_MediaPlay), _("Play"), this);
-    auto enqueueAction = new QAction(style()->standardIcon(QStyle::SP_DialogApplyButton), _("Enqueue"), this);
+    createPlaylistAction = new QAction(style()->standardIcon(QStyle::SP_FileIcon), _("Create Playlist"), this);
+    addToPlaylistAction = new QAction(style()->standardIcon(QStyle::SP_MediaSeekForward), _("Add to Playlist"),
+        this);
     searchLineEdit = new QLineEdit();
     auto spacerWidget = new QWidget();
     auto spacerWidget2 = new QWidget();
@@ -42,7 +44,8 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     spacerWidget2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     mainToolBar->setMovable(false);
     mainToolBar->addAction(playAction);
-    mainToolBar->addAction(enqueueAction);
+    mainToolBar->addAction(createPlaylistAction);
+    mainToolBar->addAction(addToPlaylistAction);
     mainToolBar->addWidget(spacerWidget);
     mainToolBar->addWidget(spacerWidget2);
     mainToolBar->addWidget(searchLineEdit);
@@ -95,6 +98,8 @@ AmpacheBrowserMainWindow::~AmpacheBrowserMainWindow() {
     delete(artistsListView);
     delete(albumsListView);
     delete(searchLineEdit);
+    delete(addToPlaylistAction);
+    delete(createPlaylistAction);
     delete(playAction);
 }
 

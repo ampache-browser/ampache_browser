@@ -39,9 +39,19 @@ public:
     Ui& operator=(const Ui& other) = delete;
 
     /**
-     * @brief Event fired after user triggered play function.
+     * @brief Event fired after user triggered Play function.
      */
     infrastructure::Event<std::vector<std::string>> playTriggered{};
+
+    /**
+     * @brief Event fired after user triggered Create Playlist function.
+     */
+    infrastructure::Event<std::vector<std::string>> createPlaylistTriggered{};
+
+    /**
+     * @brief Event fired after user triggered Add To Playlist function.
+     */
+    infrastructure::Event<std::vector<std::string>> addToPlaylistTriggered{};
 
     /**
      * @brief Event fired after user selected or unselected artists.
@@ -65,7 +75,12 @@ public:
      */
     QWidget* getMainWidget() const;
 
-    void showNotification(std::string message);
+    /**
+     * @brief Display a notification message to the user in non-intrusive way.
+     *
+     * @param message The message that shall be displayed.
+     */
+    void showNotification(const std::string& message);
 
     /**
      * @brief Sets artist model to the corresponding UI view.
@@ -90,6 +105,8 @@ public:
 
 private slots:
     void onPlayActionTriggered();
+    void onCreatePlaylistActionTriggered();
+    void onAddToPlaylistActionTriggered();
     void onActivated(const QModelIndex&);
     void onArtistsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void onAlbumsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
@@ -100,7 +117,7 @@ private:
     // the main window widget
     AmpacheBrowserMainWindow* myMainWindow;
 
-    void raisePlayTriggeredForSelectedTracks();
+    std::vector<std::string> getSelectedTracks() const;
 };
 
 }
