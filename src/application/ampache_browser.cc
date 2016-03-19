@@ -17,6 +17,7 @@
 #include <libaudcore/playlist.h>
 
 #include "infrastructure/event/delegate.h"
+#include "ui/selected_items.h"
 #include "ui/ui.h"
 #include "domain/artist.h"
 #include "application/models/album_model.h"
@@ -71,9 +72,9 @@ myUi(&ui) {
     myUi->artistsSelected += DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
     myUi->albumsSelected += DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
     myUi->searchTriggered += DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
-    myUi->playTriggered += DELEGATE1(&AmpacheBrowser::onPlayTriggered, vector<string>);
-    myUi->createPlaylistTriggered += DELEGATE1(&AmpacheBrowser::onCreatePlaylistTriggered, vector<string>);
-    myUi->addToPlaylistTriggered += DELEGATE1(&AmpacheBrowser::onAddToPlaylistTriggered, vector<string>);
+    myUi->playTriggered += DELEGATE1(&AmpacheBrowser::onPlayTriggered, SelectedItems);
+    myUi->createPlaylistTriggered += DELEGATE1(&AmpacheBrowser::onCreatePlaylistTriggered, SelectedItems);
+    myUi->addToPlaylistTriggered += DELEGATE1(&AmpacheBrowser::onAddToPlaylistTriggered, SelectedItems);
 
     myUi->setArtistModel(*myArtistModel);
     myUi->setAlbumModel(*myAlbumModel);
@@ -90,9 +91,9 @@ myUi(&ui) {
 AmpacheBrowser::~AmpacheBrowser() {
     myDataLoader->finished -= DELEGATE1(&AmpacheBrowser::onDataLoaderFinished, LoadingResult);
 
-    myUi->addToPlaylistTriggered -= DELEGATE1(&AmpacheBrowser::onAddToPlaylistTriggered, vector<string>);
-    myUi->createPlaylistTriggered -= DELEGATE1(&AmpacheBrowser::onCreatePlaylistTriggered, vector<string>);
-    myUi->playTriggered -= DELEGATE1(&AmpacheBrowser::onPlayTriggered, vector<string>);
+    myUi->addToPlaylistTriggered -= DELEGATE1(&AmpacheBrowser::onAddToPlaylistTriggered, SelectedItems);
+    myUi->createPlaylistTriggered -= DELEGATE1(&AmpacheBrowser::onCreatePlaylistTriggered, SelectedItems);
+    myUi->playTriggered -= DELEGATE1(&AmpacheBrowser::onPlayTriggered, SelectedItems);
     myUi->searchTriggered -= DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
     myUi->albumsSelected -= DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
     myUi->artistsSelected -= DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
@@ -130,26 +131,26 @@ void AmpacheBrowser::onDataLoaderFinished(LoadingResult loadingResult) {
 
 
 
-void AmpacheBrowser::onPlayTriggered(const vector<string>& ids) {
-    myPlayIds = ids;
+void AmpacheBrowser::onPlayTriggered(SelectedItems& selectedItems) {
+    myPlayIds = move(selectedItems);
     myAmpache->readySession += DELEGATE1(&AmpacheBrowser::onPlayOrCreateReadySession, bool);
     myAmpache->refreshSession();
 }
 
 
 
-void AmpacheBrowser::onCreatePlaylistTriggered(const vector<string>& ids) {
+void AmpacheBrowser::onCreatePlaylistTriggered(SelectedItems& selectedItems) {
     aud_playlist_new();
 
-    myPlayIds = ids;
+    myPlayIds = move(selectedItems);
     myAmpache->readySession += DELEGATE1(&AmpacheBrowser::onPlayOrCreateReadySession, bool);
     myAmpache->refreshSession();
 }
 
 
 
-void AmpacheBrowser::onAddToPlaylistTriggered(const vector<string>& ids) {
-    myPlayIds = ids;
+void AmpacheBrowser::onAddToPlaylistTriggered(SelectedItems& selectedItems) {
+    myPlayIds = move(selectedItems);
     myAmpache->readySession += DELEGATE1(&AmpacheBrowser::onAddReadySession, bool);
     myAmpache->refreshSession();
 }
@@ -228,23 +229,23 @@ Index<PlaylistAddItem> AmpacheBrowser::createPlaylistItems(bool error) {
         // continue anyway
     }
 
-    auto actualIds = myPlayIds;
-    myPlayIds.clear();
+    auto selectedTracks = myPlayIds.getTracks();
 
-    // if nothing selected, take all
-    if (actualIds.size() == 0) {
+    // if no track selected, take all
+    if (selectedTracks.size() == 0 && (myPlayIds.getArtists().size() != 0 || myPlayIds.getAlbums().size() != 0)) {
         for (int row = 0; row < myTrackModel->rowCount(); ++row) {
-            actualIds.push_back(myTrackModel->data(myTrackModel->index(row, 3)).toString().toStdString());
+            selectedTracks.push_back(myTrackModel->data(myTrackModel->index(row, 3)).toString().toStdString());
         }
     }
 
     Index<PlaylistAddItem> playlistAddItems;
-    for (auto& id: actualIds) {
+    for (auto& id: selectedTracks) {
         auto trackUrl = myAmpache->refreshUrl(myTrackRepository->getById(id).getUrl());
         Tuple tuple;
         playlistAddItems.append(String{trackUrl.c_str()}, move(tuple), nullptr);
     }
 
+    myPlayIds = SelectedItems{};
     return playlistAddItems;
 }
 

@@ -18,6 +18,7 @@
 #include <QLineEdit>
 #include <QCompleter>
 #include "ampache_browser_main_window.h"
+#include "ui/selected_items.h"
 #include "ui/ui.h"
 
 using namespace std;
@@ -79,29 +80,29 @@ void Ui::setTrackModel(QAbstractItemModel& model) {
 
 
 void Ui::onPlayActionTriggered() {
-    auto trackIds = getSelectedTracks();
-    playTriggered(trackIds);
+    auto selectedItems = getSelectedItems();
+    playTriggered(selectedItems);
 }
 
 
 
 void Ui::onCreatePlaylistActionTriggered() {
-    auto trackIds = getSelectedTracks();
-    createPlaylistTriggered(trackIds);
+    auto selectedItems = getSelectedItems();
+    createPlaylistTriggered(selectedItems);
 }
 
 
 
 void Ui::onAddToPlaylistActionTriggered() {
-    auto trackIds = getSelectedTracks();
-    addToPlaylistTriggered(trackIds);
+    auto selectedItems = getSelectedItems();
+    addToPlaylistTriggered(selectedItems);
 }
 
 
 
 void Ui::onActivated(const QModelIndex&) {
-    auto trackIds = getSelectedTracks();
-    playTriggered(trackIds);
+    auto selectedItems = getSelectedItems();
+    playTriggered(selectedItems);
 }
 
 
@@ -142,13 +143,26 @@ void Ui::onSearchReturnPressed() {
 
 
 
-vector<string> Ui::getSelectedTracks() const {
-    auto selectedRows = myMainWindow->tracksTreeView->selectionModel()->selectedRows(3);
-    vector<string> trackIds;
-    for (auto hiddenColumnIndex: selectedRows) {
-        trackIds.push_back(hiddenColumnIndex.data().toString().toStdString());
+SelectedItems Ui::getSelectedItems() const {
+    auto selectedArtistRows = myMainWindow->artistsListView->selectionModel()->selectedRows(1);
+    vector<string> artistIds;
+    for (auto hiddenArtistColumnIndex: selectedArtistRows) {
+        artistIds.push_back(hiddenArtistColumnIndex.data().toString().toStdString());
     }
-    return trackIds;
+
+    auto selectedAlbumRows = myMainWindow->albumsListView->selectionModel()->selectedRows(1);
+    vector<string> albumIds;
+    for (auto hiddenAlbumColumnIndex: selectedAlbumRows) {
+        albumIds.push_back(hiddenAlbumColumnIndex.data().toString().toStdString());
+    }
+
+    auto selectedTrackRows = myMainWindow->tracksTreeView->selectionModel()->selectedRows(3);
+    vector<string> trackIds;
+    for (auto hiddenTrackColumnIndex: selectedTrackRows) {
+        trackIds.push_back(hiddenTrackColumnIndex.data().toString().toStdString());
+    }
+
+    return SelectedItems{artistIds, albumIds, trackIds};
 }
 
 }

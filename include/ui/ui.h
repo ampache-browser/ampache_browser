@@ -17,6 +17,7 @@
 #include <QObject>
 #include "src/ui/ampache_browser_main_window.h"
 #include "infrastructure/event/event.h"
+#include "ui/selected_items.h"
 
 class QAbstractItemModel;
 class QItemSelection;
@@ -41,17 +42,17 @@ public:
     /**
      * @brief Event fired after user triggered Play function.
      */
-    infrastructure::Event<std::vector<std::string>> playTriggered{};
+    infrastructure::Event<SelectedItems> playTriggered{};
 
     /**
      * @brief Event fired after user triggered Create Playlist function.
      */
-    infrastructure::Event<std::vector<std::string>> createPlaylistTriggered{};
+    infrastructure::Event<SelectedItems> createPlaylistTriggered{};
 
     /**
      * @brief Event fired after user triggered Add To Playlist function.
      */
-    infrastructure::Event<std::vector<std::string>> addToPlaylistTriggered{};
+    infrastructure::Event<SelectedItems> addToPlaylistTriggered{};
 
     /**
      * @brief Event fired after user selected or unselected artists.
@@ -117,7 +118,7 @@ private:
     // the main window widget
     AmpacheBrowserMainWindow* myMainWindow;
 
-    std::vector<std::string> getSelectedTracks() const;
+    SelectedItems getSelectedItems() const;
 };
 
 }

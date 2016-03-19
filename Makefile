@@ -41,6 +41,7 @@ SRCS = src/infrastructure/os_paths.cc \
        src/application/data_loader.cc \
        src/application/ampache_browser.cc \
        src/ui/ui.cc \
+       src/ui/selected_items.cc \
        src/ui/ampache_browser_main_window.cc \
        src/ampache_browser_plugin.cc
 

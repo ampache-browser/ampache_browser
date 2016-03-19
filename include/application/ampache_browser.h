@@ -21,9 +21,12 @@
 #include "data/repositories/artist_repository.h"
 #include "data/repositories/track_repository.h"
 #include "data/indices.h"
-#include "ui/ui.h"
+#include "ui/selected_items.h"
 #include "application/data_loader.h"
 
+namespace ui {
+class Ui;
+}
 
 
 namespace application {
@@ -95,12 +98,12 @@ private:
     bool myIsAlbumDataRequestAborted = false;
     bool myIsTrackDataRequestAborted = false;
 
-    std::vector<std::string> myPlayIds{};
+    ui::SelectedItems myPlayIds{};
 
     void onDataLoaderFinished(LoadingResult loadingResult);
-    void onPlayTriggered(const std::vector<std::string>& ids);
-    void onCreatePlaylistTriggered(const std::vector<std::string>& ids);
-    void onAddToPlaylistTriggered(const std::vector<std::string>& ids);
+    void onPlayTriggered(ui::SelectedItems& selectedItems);
+    void onCreatePlaylistTriggered(ui::SelectedItems& selectedItems);
+    void onAddToPlaylistTriggered(ui::SelectedItems& selectedItems);
     void onPlayOrCreateReadySession(bool error);
     void onAddReadySession(bool error);
     void onArtistsSelected(const std::vector<std::string>& ids);

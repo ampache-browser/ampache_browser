@@ -16,6 +16,7 @@
 #include <libaudcore/plugin.h>
 
 #include "infrastructure/event/delegate.h"
+#include "ui/ui.h"
 #include "application/ampache_browser.h"
 
 
