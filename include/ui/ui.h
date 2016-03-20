@@ -15,6 +15,7 @@
 #include <memory>
 #include <vector>
 #include <QObject>
+#include <QModelIndex>
 #include "src/ui/ampache_browser_main_window.h"
 #include "infrastructure/event/event.h"
 #include "ui/selected_items.h"
@@ -111,6 +112,7 @@ private slots:
     void onActivated(const QModelIndex&);
     void onArtistsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void onAlbumsSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+    void onTracksSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void onSearchTextChanged(const QString& text);
     void onSearchReturnPressed();
 
@@ -118,7 +120,11 @@ private:
     // the main window widget
     AmpacheBrowserMainWindow* myMainWindow;
 
+    void enableOrDisablePlayActions();
     SelectedItems getSelectedItems() const;
+    QModelIndexList getAristSelectedRows() const;
+    QModelIndexList getAlbumsSelectedRows() const;
+    QModelIndexList getTracksSelectedRows() const;
 };
 
 }

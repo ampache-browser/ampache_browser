@@ -28,9 +28,12 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
 
     // tool bar
     playAction = new QAction(style()->standardIcon(QStyle::SP_MediaPlay), _("Play"), this);
+    playAction->setEnabled(false);
     createPlaylistAction = new QAction(style()->standardIcon(QStyle::SP_FileIcon), _("Create Playlist"), this);
+    createPlaylistAction->setEnabled(false);
     addToPlaylistAction = new QAction(style()->standardIcon(QStyle::SP_MediaSeekForward), _("Add to Playlist"),
         this);
+    addToPlaylistAction->setEnabled(false);
     searchLineEdit = new QLineEdit();
     auto spacerWidget = new QWidget();
     auto spacerWidget2 = new QWidget();

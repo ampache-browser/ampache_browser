@@ -75,6 +75,8 @@ void Ui::setAlbumModel(QAbstractItemModel& model) {
 void Ui::setTrackModel(QAbstractItemModel& model) {
     myMainWindow->tracksTreeView->setModel(&model);
     myMainWindow->tracksTreeView->hideColumn(3);
+    connect(myMainWindow->tracksTreeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+        this, SLOT(onTracksSelectionModelSelectionChanged(QItemSelection, QItemSelection)));
 }
 
 
@@ -108,23 +110,29 @@ void Ui::onActivated(const QModelIndex&) {
 
 
 void Ui::onArtistsSelectionModelSelectionChanged(const QItemSelection&, const QItemSelection&) {
-    auto selectedRows = myMainWindow->artistsListView->selectionModel()->selectedRows(1);
     vector<string> artistIds;
-    for (auto hiddenColumnIndex: selectedRows) {
+    for (auto hiddenColumnIndex: getAristSelectedRows()) {
         artistIds.push_back(hiddenColumnIndex.data().toString().toStdString());
     }
     artistsSelected(artistIds);
+    enableOrDisablePlayActions();
 }
 
 
 
 void Ui::onAlbumsSelectionModelSelectionChanged(const QItemSelection&, const QItemSelection&) {
-    auto selectedRows = myMainWindow->albumsListView->selectionModel()->selectedRows(1);
     vector<string> albumIds;
-    for (auto hiddenColumnIndex: selectedRows) {
+    for (auto hiddenColumnIndex: getAlbumsSelectedRows()) {
         albumIds.push_back(hiddenColumnIndex.data().toString().toStdString());
     }
     albumsSelected(albumIds);
+    enableOrDisablePlayActions();
+}
+
+
+
+void Ui::onTracksSelectionModelSelectionChanged(const QItemSelection&, const QItemSelection&) {
+    enableOrDisablePlayActions();
 }
 
 
@@ -132,6 +140,7 @@ void Ui::onAlbumsSelectionModelSelectionChanged(const QItemSelection&, const QIt
 void Ui::onSearchTextChanged(const QString& searchText) {
     auto stdSearchText = searchText.toStdString();
     searchTriggered(stdSearchText);
+    enableOrDisablePlayActions();
 }
 
 
@@ -139,30 +148,53 @@ void Ui::onSearchTextChanged(const QString& searchText) {
 void Ui::onSearchReturnPressed() {
     auto searchText = myMainWindow->searchLineEdit->text().toStdString();
     searchTriggered(searchText);
+    enableOrDisablePlayActions();
 }
 
 
 
 SelectedItems Ui::getSelectedItems() const {
-    auto selectedArtistRows = myMainWindow->artistsListView->selectionModel()->selectedRows(1);
     vector<string> artistIds;
-    for (auto hiddenArtistColumnIndex: selectedArtistRows) {
+    for (auto hiddenArtistColumnIndex: getAristSelectedRows()) {
         artistIds.push_back(hiddenArtistColumnIndex.data().toString().toStdString());
     }
-
-    auto selectedAlbumRows = myMainWindow->albumsListView->selectionModel()->selectedRows(1);
     vector<string> albumIds;
-    for (auto hiddenAlbumColumnIndex: selectedAlbumRows) {
+    for (auto hiddenAlbumColumnIndex: getAlbumsSelectedRows()) {
         albumIds.push_back(hiddenAlbumColumnIndex.data().toString().toStdString());
     }
-
-    auto selectedTrackRows = myMainWindow->tracksTreeView->selectionModel()->selectedRows(3);
     vector<string> trackIds;
-    for (auto hiddenTrackColumnIndex: selectedTrackRows) {
+    for (auto hiddenTrackColumnIndex: getTracksSelectedRows()) {
         trackIds.push_back(hiddenTrackColumnIndex.data().toString().toStdString());
     }
 
     return SelectedItems{artistIds, albumIds, trackIds};
+}
+
+
+
+void Ui::enableOrDisablePlayActions() {
+    bool enabled = getAristSelectedRows().size() + getAlbumsSelectedRows().size() + getTracksSelectedRows().size() != 0;
+    myMainWindow->playAction->setEnabled(enabled);
+    myMainWindow->createPlaylistAction->setEnabled(enabled);
+    myMainWindow->addToPlaylistAction->setEnabled(enabled);
+}
+
+
+
+QModelIndexList Ui::getAristSelectedRows() const {
+    return myMainWindow->artistsListView->selectionModel()->selectedRows(1);
+}
+
+
+
+QModelIndexList Ui::getAlbumsSelectedRows() const {
+    return myMainWindow->albumsListView->selectionModel()->selectedRows(1);
+}
+
+
+
+QModelIndexList Ui::getTracksSelectedRows() const {
+    return myMainWindow->tracksTreeView->selectionModel()->selectedRows(3);
 }
 
 }
