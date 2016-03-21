@@ -70,7 +70,7 @@ myUi(&ui) {
     myTrackModel = unique_ptr<TrackModel>{new TrackModel(myTrackRepository.get())};
 
     myUi->artistsSelected += DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
-    myUi->albumsSelected += DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
+    myUi->albumsSelected += DELEGATE1(&AmpacheBrowser::onAlbumsSelected, pair<vector<string>, vector<string>>);
     myUi->searchTriggered += DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
     myUi->playTriggered += DELEGATE1(&AmpacheBrowser::onPlayTriggered, SelectedItems);
     myUi->createPlaylistTriggered += DELEGATE1(&AmpacheBrowser::onCreatePlaylistTriggered, SelectedItems);
@@ -95,7 +95,7 @@ AmpacheBrowser::~AmpacheBrowser() {
     myUi->createPlaylistTriggered -= DELEGATE1(&AmpacheBrowser::onCreatePlaylistTriggered, SelectedItems);
     myUi->playTriggered -= DELEGATE1(&AmpacheBrowser::onPlayTriggered, SelectedItems);
     myUi->searchTriggered -= DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
-    myUi->albumsSelected -= DELEGATE1(&AmpacheBrowser::onAlbumsSelected, vector<string>);
+    myUi->albumsSelected -= DELEGATE1(&AmpacheBrowser::onAlbumsSelected, pair<vector<string>, vector<string>>);
     myUi->artistsSelected -= DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
 }
 
@@ -182,24 +182,22 @@ void AmpacheBrowser::onArtistsSelected(const vector<string>& ids) {
         myAlbumRepository->unsetFilter();
         myTrackRepository->unsetFilter();
     } else {
-        vector<reference_wrapper<const Artist>> artists;
-        for (auto& id: ids) {
-            auto& artist = myArtistRepository->getById(id);
-            artists.push_back(artist);
-        }
-        myAlbumRepository->setFilter(unique_ptr<Filter<AlbumData>>{new ArtistFilterForAlbums{artists, *myIndices}});
-        myTrackRepository->setFilter(unique_ptr<Filter<TrackData>>{new ArtistFilterForTracks{artists, *myIndices}});
+        setArtistFilters(ids);
     }
 }
 
 
 
-void AmpacheBrowser::onAlbumsSelected(const vector<string>& ids) {
-    if (ids.empty()) {
-        myTrackRepository->unsetFilter();
+void AmpacheBrowser::onAlbumsSelected(const pair<vector<string>, vector<string>>& albumAndArtistIds) {
+    if (albumAndArtistIds.first.empty()) {
+        if (albumAndArtistIds.second.empty()) {
+            myTrackRepository->unsetFilter();
+        } else {
+            setArtistFilters(albumAndArtistIds.second);
+        }
     } else {
         vector<reference_wrapper<const Album>> albums;
-        for (auto& id: ids) {
+        for (auto& id: albumAndArtistIds.first) {
             auto& album = myAlbumRepository->getById(id);
             albums.push_back(album);
         }
@@ -247,6 +245,18 @@ Index<PlaylistAddItem> AmpacheBrowser::createPlaylistItems(bool error) {
 
     myPlayIds = SelectedItems{};
     return playlistAddItems;
+}
+
+
+
+void AmpacheBrowser::setArtistFilters(const vector<string>& ids) {
+    vector<reference_wrapper<const Artist>> artists;
+    for (auto& id: ids) {
+        auto& artist = myArtistRepository->getById(id);
+        artists.push_back(artist);
+    }
+    myAlbumRepository->setFilter(unique_ptr<Filter<AlbumData>>{new ArtistFilterForAlbums{artists, *myIndices}});
+    myTrackRepository->setFilter(unique_ptr<Filter<TrackData>>{new ArtistFilterForTracks{artists, *myIndices}});
 }
 
 }

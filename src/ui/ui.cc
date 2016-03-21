@@ -122,10 +122,16 @@ void Ui::onArtistsSelectionModelSelectionChanged(const QItemSelection&, const QI
 
 void Ui::onAlbumsSelectionModelSelectionChanged(const QItemSelection&, const QItemSelection&) {
     vector<string> albumIds;
-    for (auto hiddenColumnIndex: getAlbumsSelectedRows()) {
-        albumIds.push_back(hiddenColumnIndex.data().toString().toStdString());
+    for (auto albumHiddenColumnIndex: getAlbumsSelectedRows()) {
+        albumIds.push_back(albumHiddenColumnIndex.data().toString().toStdString());
     }
-    albumsSelected(albumIds);
+    vector<string> artistIds;
+    for (auto artistHiddenColumnIndex: getAristSelectedRows()) {
+        artistIds.push_back(artistHiddenColumnIndex.data().toString().toStdString());
+    }
+    auto albumAndArtistIds = make_pair(albumIds, artistIds);
+
+    albumsSelected(albumAndArtistIds);
     enableOrDisablePlayActions();
 }
 

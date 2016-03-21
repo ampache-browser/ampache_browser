@@ -62,8 +62,10 @@ public:
 
     /**
      * @brief Event fired after user selected or unselected albums.
+     *
+     * @param albumAndArtistIds Pair of selected album IDs and artist IDs.
      */
-    infrastructure::Event<std::vector<std::string>> albumsSelected{};
+    infrastructure::Event<std::pair<std::vector<std::string>, std::vector<std::string>>> albumsSelected{};
 
     /**
      * @brief Event fired after user triggered search function.

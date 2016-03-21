@@ -107,10 +107,11 @@ private:
     void onPlayOrCreateReadySession(bool error);
     void onAddReadySession(bool error);
     void onArtistsSelected(const std::vector<std::string>& ids);
-    void onAlbumsSelected(const std::vector<std::string>& ids);
+    void onAlbumsSelected(const std::pair<std::vector<std::string>, std::vector<std::string>>& albumAndArtistIds);
     void onSearchTriggered(const std::string& searchText);
 
     Index<PlaylistAddItem> createPlaylistItems(bool error);
+    void setArtistFilters(const std::vector<std::string>& ids);
 };
 
 }
