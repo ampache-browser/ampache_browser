@@ -99,7 +99,7 @@ U& Repository<T, U>::get(int filteredOffset) const {
 template <typename T, typename U>
 U& Repository<T, U>::getById(const std::string& id) const {
     auto dataIter = find_if(myData.begin(), myData.end(),
-        [&id](const std::unique_ptr<T>& td) {return td->getId() == id;});
+        [&id](const std::unique_ptr<T>& d) {return d->getId() == id;});
     return getDomainObject(**dataIter);
 }
 
@@ -110,7 +110,7 @@ bool Repository<T, U>::isLoaded(int filteredOffset, int count) const {
     uint end = filteredOffset + count;
     auto filteredData = myFilter->getFilteredData();
     return (filteredData.size() >= end) && all_of(filteredData.begin() + filteredOffset,
-        filteredData.begin() + filteredOffset + count, [](const T& td) {return &td != nullptr;});
+        filteredData.begin() + filteredOffset + count, [](const T& fd) {return &fd != nullptr;});
 }
 
 

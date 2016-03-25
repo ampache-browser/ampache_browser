@@ -82,15 +82,6 @@ int ArtistModel::columnCount(const QModelIndex&) const {
 
 
 
-void ArtistModel::requestAllData() {
-    AUDDBG("Requesting all data (%d).\n", rowCount());
-    for (int row = 0; row < rowCount(); row++) {
-        myRequests->add(row);
-    }
-}
-
-
-
 void ArtistModel::onReadyToExecute(RequestGroup requestGroup) {
     myArtistRepository->load(requestGroup.getLower(), requestGroup.getSize());
 }
@@ -112,11 +103,19 @@ void ArtistModel::onFilterChanged() {
 
 
 void ArtistModel::onProviderChanged() {
-    myRequests->removeAll();
-    myRequests->cancelCurrent();
-    requestAllData();
     beginResetModel();
+    myRequests->removeAll();
+    requestAllData();
     endResetModel();
+}
+
+
+
+void ArtistModel::requestAllData() {
+    AUDDBG("Requesting all data (%d).\n", rowCount());
+    for (int row = 0; row < rowCount(); row++) {
+        myRequests->add(row);
+    }
 }
 
 }

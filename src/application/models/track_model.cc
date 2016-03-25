@@ -83,7 +83,6 @@ QVariant TrackModel::headerData(int section, Qt::Orientation, int role) const {
         return QVariant{};
     }
 
-    // SMELL: Header names are not translatable.  Should they be pulled from data?
     switch (section) {
         case 0:
             return _("Track");
@@ -110,15 +109,6 @@ int TrackModel::columnCount(const QModelIndex&) const {
 
 
 
-void TrackModel::requestAllData() {
-    AUDDBG("Requesting all data (%d).\n", rowCount());
-    for (int row = 0; row < rowCount(); row++) {
-        myRequests->add(row);
-    }
-}
-
-
-
 void TrackModel::onReadyToExecute(RequestGroup requestGroup) {
     myTrackRepository->load(requestGroup.getLower(), requestGroup.getSize());
 }
@@ -140,11 +130,19 @@ void TrackModel::onFilterChanged() {
 
 
 void TrackModel::onProviderChanged() {
-    myRequests->removeAll();
-    myRequests->cancelCurrent();
-    requestAllData();
     beginResetModel();
+    myRequests->removeAll();
+    requestAllData();
     endResetModel();
+}
+
+
+
+void TrackModel::requestAllData() {
+    AUDDBG("Requesting all data (%d).\n", rowCount());
+    for (int row = 0; row < rowCount(); row++) {
+        myRequests->add(row);
+    }
 }
 
 }

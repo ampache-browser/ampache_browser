@@ -157,26 +157,6 @@ void AmpacheBrowser::onAddToPlaylistTriggered(SelectedItems& selectedItems) {
 
 
 
-void AmpacheBrowser::onPlayOrCreateReadySession(bool error) {
-    myAmpache->readySession -= DELEGATE1(&AmpacheBrowser::onPlayOrCreateReadySession, bool);
-
-    auto playlistItems = createPlaylistItems(error);
-    auto activePlaylist = aud_playlist_get_active();
-    aud_playlist_entry_insert_batch(activePlaylist, -1, move(playlistItems), true);
-}
-
-
-
-void AmpacheBrowser::onAddReadySession(bool error) {
-    myAmpache->readySession -= DELEGATE1(&AmpacheBrowser::onAddReadySession, bool);
-
-    auto playlistItems = createPlaylistItems(error);
-    auto activePlaylist = aud_playlist_get_active();
-    aud_playlist_entry_insert_batch(activePlaylist, -1, move(playlistItems), false);
-}
-
-
-
 void AmpacheBrowser::onArtistsSelected(const vector<string>& ids) {
     if (ids.empty()) {
         myAlbumRepository->unsetFilter();
@@ -217,6 +197,26 @@ void AmpacheBrowser::onSearchTriggered(const string& searchText) {
         myAlbumRepository->setFilter(unique_ptr<Filter<AlbumData>>{new NameFilterForAlbums{searchText}});
         myTrackRepository->setFilter(unique_ptr<Filter<TrackData>>{new NameFilterForTracks{searchText}});
     }
+}
+
+
+
+void AmpacheBrowser::onPlayOrCreateReadySession(bool error) {
+    myAmpache->readySession -= DELEGATE1(&AmpacheBrowser::onPlayOrCreateReadySession, bool);
+
+    auto playlistItems = createPlaylistItems(error);
+    auto activePlaylist = aud_playlist_get_active();
+    aud_playlist_entry_insert_batch(activePlaylist, -1, move(playlistItems), true);
+}
+
+
+
+void AmpacheBrowser::onAddReadySession(bool error) {
+    myAmpache->readySession -= DELEGATE1(&AmpacheBrowser::onAddReadySession, bool);
+
+    auto playlistItems = createPlaylistItems(error);
+    auto activePlaylist = aud_playlist_get_active();
+    aud_playlist_entry_insert_batch(activePlaylist, -1, move(playlistItems), false);
 }
 
 

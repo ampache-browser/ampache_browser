@@ -56,11 +56,6 @@ public:
      */
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    /**
-     * @brief Tell the model to request load of all artists from an external source.
-     */
-    void requestAllData();
-
 private:
     // stores artist repository provided in the constuctor
     data::ArtistRepository* const myArtistRepository = nullptr;
@@ -72,6 +67,8 @@ private:
     void onLoaded(std::pair<int, int> offsetAndLimit);
     void onFilterChanged();
     void onProviderChanged();
+
+    void requestAllData();
 };
 
 }

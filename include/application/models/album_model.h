@@ -60,11 +60,6 @@ public:
      */
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    /**
-     * @brief Tell the model to request load of all albums from an external source.
-     */
-    void requestAllData();
-
 private:
     // stores album repository provided in the constuctor
     data::AlbumRepository* const myAlbumRepository = nullptr;
@@ -75,12 +70,22 @@ private:
     // requests to load album arts from an external source
     const std::unique_ptr<Requests> myArtRequests{new Requests{3}};
 
+    int myUnfilteredCount = 0;
+
+    // normally arts are being loaded using filtered offsets; when a filter is set and all arts which were requested
+    // via data() method were loaded the loading is switched to "unfiltered mode" where all remaining arts are
+    // requested using unfiltered offsets
+    mutable bool myIsInUnfilteredArtsLoadMode = false;
+
     void onReadyToExecuteAlbums(RequestGroup requestGroup);
     void onLoaded(std::pair<int, int> offsetAndLimit);
     void onReadyToExecuteArts(RequestGroup requestGroup);
-    void onArtsLoaded(std::pair<int, int> offsetAndLimit);
+    void onArtsLoaded(std::pair<int, int> offsetAndCount);
     void onFilterChanged();
     void onProviderChanged();
+
+    void requestAllData();
+    void requestUnloadedArts();
 };
 
 }

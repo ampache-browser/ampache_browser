@@ -49,12 +49,6 @@ void Requests::add(int offset) {
 
 
 
-void Requests::cancelCurrent() {
-    myCurrentRequestGroup = RequestGroup{};
-}
-
-
-
 void Requests::removeAll() {
     myRequestGroups->clear();
 }

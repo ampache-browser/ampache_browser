@@ -61,11 +61,6 @@ public:
      */
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    /**
-     * @brief Tell the model to request load of all tracks from an external source.
-     */
-    void requestAllData();
-
 private:
     // stores track repository provided in the constuctor
     data::TrackRepository* const myTrackRepository = nullptr;
@@ -77,6 +72,8 @@ private:
     void onLoaded(std::pair<int, int> offsetAndLimit);
     void onFilterChanged();
     void onProviderChanged();
+
+    void requestAllData();
 };
 
 }

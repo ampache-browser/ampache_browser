@@ -83,6 +83,11 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
             return QString::fromStdString(album.getName());
         } else {
             if (!album.hasArt()) {
+                if (myIsInUnfilteredArtsLoadMode) {
+                    AUDDBG("Removing all art requests and setting unfiltered mode to false.\n");
+                    myArtRequests->removeAll();
+                    myIsInUnfilteredArtsLoadMode = false;
+                }
                 myArtRequests->add(row);
                 return notLoaded;
             } else {
@@ -112,15 +117,6 @@ int AlbumModel::columnCount(const QModelIndex&) const {
 
 
 
-void AlbumModel::requestAllData() {
-    AUDDBG("Requesting all data (%d).\n", rowCount());
-    for (int row = 0; row < rowCount(); row++) {
-        myAlbumRequests->add(row);
-    }
-}
-
-
-
 void AlbumModel::onReadyToExecuteAlbums(RequestGroup requestGroup) {
     myAlbumRepository->load(requestGroup.getLower(), requestGroup.getSize());
 }
@@ -135,37 +131,85 @@ void AlbumModel::onLoaded(pair<int, int>) {
 
 
 void AlbumModel::onReadyToExecuteArts(RequestGroup requestGroup) {
-    myAlbumRepository->loadArts(requestGroup.getLower(), requestGroup.getSize());
+    if (myIsInUnfilteredArtsLoadMode) {
+        myAlbumRepository->loadArtsUnfiltered(requestGroup.getLower(), requestGroup.getSize());
+    } else {
+        myAlbumRepository->loadArts(requestGroup.getLower(), requestGroup.getSize());
+    }
 }
 
 
 
-void AlbumModel::onArtsLoaded(pair<int, int> offsetAndLimit) {
+void AlbumModel::onArtsLoaded(pair<int, int> offsetAndCount) {
     auto finishedRequestGroup = myArtRequests->setFinished();
-    if (offsetAndLimit.second > 0)
-    {
+    if (myIsInUnfilteredArtsLoadMode) {
+        return;
+    }
+
+    if (offsetAndCount.second != 0) {
         dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+    }
+
+    if (!myArtRequests->isInProgress()) {
+
+        // there is no more requests from views (via data()) so request here all remaining arts (which were
+        // not shown by the view) in an unfiltered manner
+        myIsInUnfilteredArtsLoadMode = true;
+        requestUnloadedArts();
     }
 }
 
 
 
 void AlbumModel::onFilterChanged() {
-    myArtRequests->removeAll();
     beginResetModel();
+
+    AUDDBG("Removing all art requests.\n");
+    myArtRequests->removeAll();
+
+    // filterChanged event is fired even if it does not results to an actual change of filtered data; it that case
+    // if all requests from views (via data()) were already executed, no futher request will be added; therefore the
+    // loading of all remaining arts is re-initiated here because all requests were removed above
+    if (myIsInUnfilteredArtsLoadMode) {
+        requestUnloadedArts();
+    }
+
     endResetModel();
 }
 
 
 
 void AlbumModel::onProviderChanged() {
-    myAlbumRequests->removeAll();
-    myAlbumRequests->cancelCurrent();
-    myArtRequests->removeAll();
-    myArtRequests->cancelCurrent();
-    requestAllData();
     beginResetModel();
+    myAlbumRequests->removeAll();
+    myArtRequests->removeAll();
+    // SMELL: Change of provider keeps the filter set so calling rowCount() here does not guarantees unfiltered count.
+    myUnfilteredCount = rowCount();
+    requestAllData();
     endResetModel();
+}
+
+
+
+void AlbumModel::requestAllData() {
+    AUDDBG("Requesting all data (%d).\n", myUnfilteredCount);
+    for (int row = 0; row < myUnfilteredCount; row++) {
+        myAlbumRequests->add(row);
+    }
+}
+
+
+
+void AlbumModel::requestUnloadedArts() {
+    AUDDBG("Requesting all unloaded arts.\n");
+    for (int row = 0; row < myUnfilteredCount; row++) {
+        if (myAlbumRepository->isLoadedUnfiltered(row)) {
+            auto& album = myAlbumRepository->getUnfiltered(row);
+            if (!album.hasArt()) {
+                myArtRequests->add(row);
+            }
+        }
+    }
 }
 
 }

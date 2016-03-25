@@ -112,9 +112,9 @@ public:
     /**
      * @brief Get a domain object of the data item at the given offset.
      *
-     * @param filteredOffset Offset of the data item that shall be returned.  It takes filtering into account.
-     *        If no filter is set then it is the same as @p offset in the load() function.
-     * @return The domain object of the  data item at the given @p filteredOffset.
+     * @param filteredOffset Offset of the data item that shall queried for the domain object.  It takes
+     *        filtering into account. If no filter is set then it is the same as @p offset in the load() function.
+     * @return The domain object of the data item at the given @p filteredOffset.
      */
     U& get(int filteredOffset) const;
 
@@ -129,8 +129,8 @@ public:
     /**
      * @brief Gets the load status of the given data items.
      *
-     * @param filteredOffset Offset of the data item which load status shall be checked.  It takes filtering into
-     *        account.  If no filter is set then it is the same as @p offset in the load() function.
+     * @param filteredOffset Starting offset of the data items which load status shall be checked.  It takes filtering
+     *        into account.  If no filter is set then it is the same as @p offset in the load() function.
      * @param count Number of data items to check.
      * @return true if each specified data item is already loaded.
      */

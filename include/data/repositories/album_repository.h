@@ -60,6 +60,9 @@ public:
     /**
      * @brief Event fired when some album arts were loaded.
      *
+     * @param offsetAndCount Pair of offset and count which were requested to load by loadArts().  count is 0 if the
+     * offset is no longer valid (e. g. in case the filter was changed in the meantime).
+     *
      * @sa loadArts()
      */
     infrastructure::Event<std::pair<int, int>> artsLoaded{};
@@ -78,16 +81,16 @@ public:
      */
     infrastructure::Event<void> artsLoadingDisabled{};
 
-    /**
-     * @brief Sets the which provider should be used to load data.
-     *
-     * @note maxCount() can change when setting the provider type.
-     *
-     * @param providerType The type of provider that shall be used to load data.
-     *
-     * @sa ::providerChanged
-     */
     void setProviderType(ProviderType providerType) override;
+
+    /**
+     * @brief Get a Album from AlbumData at the given offset.
+     *
+     * @param offset Offset of AlbumData that shall be queried for Album.
+     * @return Album from AlbumData at the given @p offset.
+     * @sa Repository<AlbumData, domain::Album>::get()
+     */
+    domain::Album& getUnfiltered(int offset) const;
 
     /**
      * @brief Get album data with the given ID.
@@ -100,6 +103,15 @@ public:
     AlbumData& getAlbumDataById(const std::string& id) const;
 
     /**
+     * @brief Gets the load status of the given data items.
+     *
+     * @param offset Starting offset of the album data which load status shall be checked.
+     * @param count Number of album data to check.
+     * @return true if each specified album data is already loaded.
+     */
+    bool isLoadedUnfiltered(int offset, int count = 1) const;
+
+    /**
      * @brief Trigger load of album arts from Ampache server or the cache.
      *
      * @param filteredOffset Starting offset.  It takes filtering into account.  If no filter is set then it is the
@@ -110,6 +122,17 @@ public:
      * @sa ::artsLoaded
      */
     bool loadArts(int filteredOffset, int count);
+
+    /**
+     * @brief Trigger load of album arts from Ampache server or the cache using unfiltered offset.
+     *
+     * @param offset Starting offset.
+     * @param count Number of album arts to load.
+     * @return true if loading was triggered, false otherwise.
+     *
+     * @sa ::artsLoaded
+     */
+    bool loadArtsUnfiltered(int offset, int count);
 
     void disableLoading() override;
 
@@ -145,13 +168,16 @@ private:
     // starting offset and number of album arts that are being currently loaded; -1 if no arts loading
     // is in progress
     int myArtsLoadOffset = -1;
+    int myArtsLoadOffsetUnfiltered = -1;
     int myArtsLoadCount = -1;
 
     void onAmpacheReadyArts(const std::map<std::string, QPixmap>& arts);
     void onCacheReadyArts(const std::map<std::string, QPixmap>& arts);
 
-    domain::Album* findFilteredAlbumById(const std::string& id, int offset, int count) const;
-    bool raiseEmptyIfResultNotValid();
+    std::pair<std::map<std::string, QPixmap>, std::vector<std::string>> setArts(
+        const std::map<std::string, QPixmap>& arts);
+    domain::Album* findById(const std::string& id, int filteredOffset, int count) const;
+    domain::Album* findByIdUnfiltered(const std::string& id, int offset, int count) const;
 };
 
 }

@@ -73,16 +73,9 @@ public:
     void add(int offset);
 
     /**
-     * @brief Cancel current request.
-     *
-     * @sa removeAll()
-     */
-    void cancelCurrent();
-
-    /**
      * @brief Remove all requests.
      *
-     * @sa add(), cancelCurrent()
+     * @sa add()
      */
     void removeAll();
 
