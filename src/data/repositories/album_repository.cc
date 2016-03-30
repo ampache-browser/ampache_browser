@@ -134,20 +134,24 @@ bool AlbumRepository::loadArtsUnfiltered(int offset, int count) {
 
 
 
+int AlbumRepository::maxCount() const {
+    if (myProviderType == ProviderType::Ampache) {
+        return myAmpache.numberOfAlbums();
+    };
+    if (myProviderType == ProviderType::Cache) {
+        return myCache.numberOfAlbums();
+    };
+    return 0;
+}
+
+
+
 void AlbumRepository::disableLoading() {
     Repository<AlbumData, Album>::disableLoading();
 
     if (myArtsLoadOffset == -1 && myArtsLoadOffsetUnfiltered == -1) {
         artsLoadingDisabled();
     }
-}
-
-
-
-void AlbumRepository::onFilterChanged() {
-    Repository<AlbumData, Album>::onFilterChanged();
-
-    myArtsLoadOffset = -1;
 }
 
 
@@ -228,14 +232,11 @@ void AlbumRepository::clearIndices() {
 
 
 
-int AlbumRepository::getMaxDataSize() const {
-    if (myProviderType == ProviderType::Ampache) {
-        return myAmpache.numberOfAlbums();
-    };
-    if (myProviderType == ProviderType::Cache) {
-        return myCache.numberOfAlbums();
-    };
-    return 0;
+void AlbumRepository::handleFilterSetUnsetOrChanged() {
+    Repository<AlbumData, Album>::handleFilterSetUnsetOrChanged();
+
+    // SMELL: Not necessary if unfiltered filter has changed.
+    myArtsLoadOffset = -1;
 }
 
 
@@ -261,7 +262,7 @@ void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
     myArtsLoadOffsetUnfiltered = -1;
     myArtsLoadCount = -1;
     artsLoaded(offsetAndCount);
-    if (myArtsLoadProgress >= getMaxDataSize()) {
+    if (myArtsLoadProgress >= maxCount()) {
         auto error = false;
         artsFullyLoaded(error);
     }

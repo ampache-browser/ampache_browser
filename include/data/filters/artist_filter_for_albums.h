@@ -48,17 +48,18 @@ public:
 
     ~ArtistFilterForAlbums() override;
 
-    /**
-     * @sa Filter::apply()
-     */
-    void apply() override;
+    void setSourceData(const std::vector<std::unique_ptr<AlbumData>>& sourceData) override;
+
+    void processUpdatedSourceData(int offset = -1, int length = -1) override;
 
 private:
     // arguments from the constructor
     const std::vector<std::reference_wrapper<const domain::Artist>> myArtists;
     Indices& myIndices;
 
-    void onIndexChanged();
+    void onArtistAlbumsUpdated(const std::vector<std::reference_wrapper<const domain::Artist>>& updatedArtists);
+
+    void processUpdatedIndices();
 };
 
 }

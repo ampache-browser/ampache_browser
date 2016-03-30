@@ -33,6 +33,18 @@ Repository<ArtistData, Artist>(ampache, cache, indices) {
 
 
 
+int ArtistRepository::maxCount() const {
+    if (myProviderType == ProviderType::Ampache) {
+        return myAmpache.numberOfArtists();
+    };
+    if (myProviderType == ProviderType::Cache) {
+        return myCache.numberOfArtists();
+    };
+    return 0;
+}
+
+
+
 void ArtistRepository::requestDataLoad(int offset, int limit) {
     myAmpache.requestArtists(offset, limit);
 }
@@ -75,18 +87,6 @@ void ArtistRepository::updateIndices(const vector<unique_ptr<ArtistData>>& data)
 
 void ArtistRepository::clearIndices() {
     myIndices.clearArtists();
-}
-
-
-
-int ArtistRepository::getMaxDataSize() const {
-    if (myProviderType == ProviderType::Ampache) {
-        return myAmpache.numberOfArtists();
-    };
-    if (myProviderType == ProviderType::Cache) {
-        return myCache.numberOfArtists();
-    };
-    return 0;
 }
 
 }

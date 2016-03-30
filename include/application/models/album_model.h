@@ -70,8 +70,6 @@ private:
     // requests to load album arts from an external source
     const std::unique_ptr<Requests> myArtRequests{new Requests{3}};
 
-    int myUnfilteredCount = 0;
-
     // normally arts are being loaded using filtered offsets; when a filter is set and all arts which were requested
     // via data() method were loaded the loading is switched to "unfiltered mode" where all remaining arts are
     // requested using unfiltered offsets

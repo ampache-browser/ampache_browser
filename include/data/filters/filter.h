@@ -38,7 +38,6 @@ public:
      */
     infrastructure::Event<void> changed{};
 
-    // SMELL: Remove from this class because it is not commonality.
     /**
      * @brief Sets the data that shall be filtered.
      *
@@ -47,16 +46,19 @@ public:
     virtual void setSourceData(const std::vector<std::unique_ptr<T>>& sourceData);
 
     /**
+     * @brief Notifies the instance that source data at the given offset and length has changed.
+     *
+     * @param offset The starting offset of the changed data. -1 if all source data has changed.
+     * @param length The number of changed records.
+     */
+    virtual void processUpdatedSourceData(int offset = -1, int length = -1);
+
+    /**
      * @brief Gets the result of the filter.
      *
      * @return Filtered data.
      */
     const std::vector<std::reference_wrapper<T>>& getFilteredData() const;
-
-    /**
-     * @brief Execute the filter.
-     */
-    virtual void apply();
 
 protected:
     // stores source data

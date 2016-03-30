@@ -137,14 +137,23 @@ public:
     bool isLoaded(int filteredOffset, int count = 1) const;
 
     /**
-     * @brief Gets maximal number of data items.
+     * @brief Gets number of data items (loaded and not loaded).
      *
-     * If no filter is set it represents the number of data items that exists on the Ampache server or cache.  Otherwise
-     * it is the number of data items after applying the filter.
+     * If no filter is set it is the same as maxCount().  Otherwise it is the number of data items after applying
+     * the filter.
      *
-     * @return int
+     * @sa maxCount()
      */
-    int maxCount();
+    int count();
+
+    /**
+     * @brief Gets maximal number of data items as reported by data provider.
+     *
+     * The number does not depend on filter.
+     *
+     * @sa count();
+     */
+    virtual int maxCount() const = 0;
 
     /**
      * @brief Disables furher loading.
@@ -215,13 +224,6 @@ protected:
     std::shared_ptr<Filter<T>> myFilter = nullptr;
 
     /**
-     * @brief Called when current filter has changed.
-     *
-     * @sa Filter<T>::changed
-     */
-    virtual void onFilterChanged();
-
-    /**
      * @brief Requests data loading from Ampache.
      *
      * @param offset Starting offset.
@@ -286,11 +288,11 @@ protected:
     virtual void clearIndices() = 0;
 
     /**
-     * @brief Returns maximal number of data items that can be loaded.
+     * @brief Called when filter has been set, unset or has changed.
      *
-     * @return Number of data items from server or cache.  0 if ProviderType::None is set.
+     * @sa Filter<T>::changed, setFilter(), unsetFilter(), filterChanged
      */
-    virtual int getMaxDataSize() const = 0;
+    virtual void handleFilterSetUnsetOrChanged();
 
 private:
     // number of loaded data items so far
@@ -307,12 +309,13 @@ private:
     bool myIsFilterSet = false;
 
     // cached value for maxCount() method
-    int myCachedMaxCount = -1;
+    int myCachedCount = -1;
 
+    void onFilterChanged();
     void onDataLoadRequestFinished(std::vector<std::unique_ptr<T>>& data);
 
     void loadFromCache();
-    int computeMaxCount() const;
+    int computeCount() const;
 };
 
 }

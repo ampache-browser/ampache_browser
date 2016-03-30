@@ -39,10 +39,7 @@ public:
      */
     explicit NameFilterForAlbums(const std::string& namePattern);
 
-    /**
-     * @sa Filter::apply()
-     */
-    void apply() override;
+    void processUpdatedSourceData(int offset = -1, int length = -1) override;
 
 private:
     const std::string myNamePattern;

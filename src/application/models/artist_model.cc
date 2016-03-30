@@ -71,7 +71,7 @@ QVariant ArtistModel::data(const QModelIndex& index, int role) const {
 
 
 int ArtistModel::rowCount(const QModelIndex&) const {
-    return myArtistRepository->maxCount();
+    return myArtistRepository->count();
 }
 
 
@@ -112,8 +112,8 @@ void ArtistModel::onProviderChanged() {
 
 
 void ArtistModel::requestAllData() {
-    AUDDBG("Requesting all data (%d).\n", rowCount());
-    for (int row = 0; row < rowCount(); row++) {
+    AUDDBG("Requesting all data.\n");
+    for (int row = 0; row < myArtistRepository->maxCount(); row++) {
         myRequests->add(row);
     }
 }

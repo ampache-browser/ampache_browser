@@ -22,7 +22,7 @@ myNamePattern(namePattern) {
 
 
 
-void NameFilterForArtists::apply() {
+void NameFilterForArtists::processUpdatedSourceData(int offset, int length) {
     myFilteredData.clear();
 
     for (auto& artistData: *mySourceData) {
@@ -37,7 +37,7 @@ void NameFilterForArtists::apply() {
         }
     }
 
-    Filter<ArtistData>::apply();
+    Filter<ArtistData>::processUpdatedSourceData(offset, length);
 }
 
 }

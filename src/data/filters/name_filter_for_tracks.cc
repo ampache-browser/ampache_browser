@@ -24,7 +24,7 @@ myNamePattern(namePattern) {
 
 
 
-void NameFilterForTracks::apply() {
+void NameFilterForTracks::processUpdatedSourceData(int offset, int length) {
     myFilteredData.clear();
 
     for (auto& trackData: *mySourceData) {
@@ -39,7 +39,7 @@ void NameFilterForTracks::apply() {
         }
     }
 
-    Filter<TrackData>::apply();
+    Filter<TrackData>::processUpdatedSourceData(offset, length);
 }
 
 }

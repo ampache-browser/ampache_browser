@@ -29,18 +29,43 @@ ArtistFilterForTracks::ArtistFilterForTracks(const vector<reference_wrapper<cons
     Indices& indices): Filter<TrackData>(),
 myArtists(artists),
 myIndices(indices) {
-    myIndices.changed += DELEGATE0(&ArtistFilterForTracks::onIndexChanged);
+    processUpdatedIndices();
+    myIndices.artistTracksUpdated += DELEGATE1(&ArtistFilterForTracks::onArtistTracksUpdated,
+        vector<reference_wrapper<const Artist>>);
 }
 
 
 
 ArtistFilterForTracks::~ArtistFilterForTracks() {
-    myIndices.changed -= DELEGATE0(&ArtistFilterForTracks::onIndexChanged);
+    myIndices.artistTracksUpdated -= DELEGATE1(&ArtistFilterForTracks::onArtistTracksUpdated,
+        vector<reference_wrapper<const Artist>>);
 }
 
 
 
-void ArtistFilterForTracks::apply() {
+void ArtistFilterForTracks::setSourceData(const vector<unique_ptr<TrackData>>&) {
+    // do not call base since this filter does not use source data, it uses indices instead
+}
+
+
+
+void ArtistFilterForTracks::processUpdatedSourceData(int, int) {
+    // do not call base since this filter does not use source data, it uses indices instead
+}
+
+
+
+void ArtistFilterForTracks::onArtistTracksUpdated(const vector<reference_wrapper<const Artist>>& updatedArtists) {
+    auto artistsIter = find_first_of(myArtists.begin(), myArtists.end(), updatedArtists.begin(), updatedArtists.end());
+    if (artistsIter != myArtists.end()) {
+        processUpdatedIndices();
+        changed();
+    }
+}
+
+
+
+void ArtistFilterForTracks::processUpdatedIndices() {
     myFilteredData.clear();
     set<reference_wrapper<TrackData>, TrackData::NameCompare> filteredUniqueTrackData;
     for (auto& artist: myArtists) {
@@ -49,14 +74,6 @@ void ArtistFilterForTracks::apply() {
     }
     myFilteredData = vector<reference_wrapper<TrackData>>{
         filteredUniqueTrackData.begin(), filteredUniqueTrackData.end()};
-
-    Filter<TrackData>::apply();
-}
-
-
-
-void ArtistFilterForTracks::onIndexChanged() {
-    apply();
 }
 
 }

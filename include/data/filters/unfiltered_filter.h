@@ -27,23 +27,7 @@ template <typename T>
 class UnfilteredFilter: public Filter<T> {
 
 public:
-    /**
-     * @sa Filter::apply()
-     */
-    void setSourceData(const std::vector<std::unique_ptr<T>>& sourceData) override;
-
-    /**
-     * @sa Filter::apply()
-     */
-    void apply() override;
-
-    /**
-     * @brief Notifies the instance that source data at the given offset and length has changed.
-     *
-     * @param offset The starting offset of the changed data. -1 if all source data has changed.
-     * @param length The number of changed records.
-     */
-    void processUpdatedSourceData(int offset, int length);
+    void processUpdatedSourceData(int offset = -1, int length = -1) override;
 
 private:
     void initializeFilteredData();

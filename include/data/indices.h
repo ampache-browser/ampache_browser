@@ -50,13 +50,32 @@ using AlbumTracksIndex = std::unordered_map<
 class Indices {
 
 public:
-    // SMELL: Could be suboptimal to have only one event for all index types.
     /**
-     * @brief Event fired when some of the indices has been changed.
+     * @brief Event fired when artist-albums index has been updated.
      *
-     * @sa updateArtistAlbum(), updateArtistTrack(), updateAlbumTrack()
+     * @param updatedArtists Artists which have been updated. Empty if all artists were updated.
+     *
+     * @sa getArtistAlbums(), updateArtistAlbums()
      */
-    infrastructure::Event<void> changed{};
+    infrastructure::Event<std::vector<std::reference_wrapper<const domain::Artist>>> artistAlbumsUpdated{};
+
+    /**
+     * @brief Event fired when artist-tracks index has been updated.
+     *
+     * @param updatedArtists Artists which have been updated. Empty if all artists were updated.
+     *
+     * @sa getArtistTracks(), updateArtistTracks()
+     */
+    infrastructure::Event<std::vector<std::reference_wrapper<const domain::Artist>>> artistTracksUpdated{};
+
+    /**
+     * @brief Event fired when album-tracks index has been updated.
+     *
+     * @param updatedAlbums Albums which have been updated. Empty if all albums were updated.
+     *
+     * @sa getAlbumTracks(), updateAlbumTracks()
+     */
+    infrastructure::Event<std::vector<std::reference_wrapper<const domain::Album>>> albumTracksUpdated{};
 
     /**
      * @brief Adds specified artists to all artist indices.
@@ -81,6 +100,8 @@ public:
      *
      * @param artist The artist which albums data shall be returned.
      * @return Albums data.
+     *
+     * @sa updateArtistAlbums(), artistAlbumsUpdated
      */
     AlbumDataUnorderedSet& getArtistAlbums(const domain::Artist& artist);
 
@@ -88,6 +109,8 @@ public:
      * @brief Updates artist-albums index by inserting the given data.
      *
      * @param artistAlbums Artists with corresponding albums data which shall be inserted to the index.
+     *
+     * @sa getArtistAlbums(), artistAlbumsUpdated
      */
     void updateArtistAlbums(const ArtistAlbumsIndex& artistAlbums);
 
@@ -96,6 +119,8 @@ public:
      *
      * @param artist The artist which tracks data shall be returned.
      * @return Tracks data.
+     *
+     * @sa updateArtistTracks(), artistTracksUpdated
      */
     TrackDataUnorderedSet& getArtistTracks(const domain::Artist& artist);
 
@@ -103,6 +128,8 @@ public:
      * @brief Updates artist-tracks index by inserting the given data.
      *
      * @param artistTracks Artists with corresponding tracks data which shall be inserted to the index.
+     *
+     * @sa getArtistTracks(), artistTracksUpdated
      */
     void updateArtistTracks(const ArtistTracksIndex& artistTracks);
 
@@ -111,6 +138,8 @@ public:
      *
      * @param album The album which tracks data shall be returned.
      * @return Tracks data.
+     *
+     * @sa updateAlbumTracks(), albumTracksUpdated
      */
     TrackDataUnorderedSet& getAlbumTracks(const domain::Album& album);
 
@@ -118,6 +147,8 @@ public:
      * @brief Updates album-tracks index by inserting the given data.
      *
      * @param albumTracks Albums with corresponding tracks data which shall be inserted to the index.
+     *
+     * @sa updateAlbumTracks(), albumTracksUpdated
      */
     void updateAlbumTracks(const AlbumTracksIndex& albumTracks);
 

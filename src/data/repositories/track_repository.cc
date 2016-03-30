@@ -37,6 +37,18 @@ myAlbumRepository(albumRepository) {
 
 
 
+int TrackRepository::maxCount() const {
+    if (myProviderType == ProviderType::Ampache) {
+        return myAmpache.numberOfTracks();
+    };
+    if (myProviderType == ProviderType::Cache) {
+        return myCache.numberOfTracks();
+    };
+    return 0;
+}
+
+
+
 void TrackRepository::requestDataLoad(int offset, int limit) {
     myAmpache.requestTracks(offset, limit);
 }
@@ -105,18 +117,6 @@ void TrackRepository::clearIndices() {
     // filtered albums dissapear for a moment and then reappear as index is populated by TrackRepository)
     //myIndices.clearArtistsAlbums();
     myIndices.clearArtistsTracks();
-}
-
-
-
-int TrackRepository::getMaxDataSize() const {
-    if (myProviderType == ProviderType::Ampache) {
-        return myAmpache.numberOfTracks();
-    };
-    if (myProviderType == ProviderType::Cache) {
-        return myCache.numberOfTracks();
-    };
-    return 0;
 }
 
 }

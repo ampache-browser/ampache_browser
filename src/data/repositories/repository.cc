@@ -116,11 +116,11 @@ bool Repository<T, U>::isLoaded(int filteredOffset, int count) const {
 
 
 template <typename T, typename U>
-int Repository<T, U>::maxCount() {
-    if (myCachedMaxCount == -1) {
-        myCachedMaxCount = computeMaxCount();
+int Repository<T, U>::count() {
+    if (myCachedCount == -1) {
+        myCachedCount = computeCount();
     }
-    return myCachedMaxCount;
+    return myCachedCount;
 }
 
 
@@ -128,7 +128,7 @@ int Repository<T, U>::maxCount() {
 template <typename T, typename U>
 void Repository<T, U>::disableLoading() {
     myLoadingEnabled = false;
-    myCachedMaxCount = -1;
+    myCachedCount = -1;
     if (myLoadOffset == -1)
     {
         loadingDisabled();
@@ -147,7 +147,8 @@ void Repository<T, U>::setFilter(std::unique_ptr<Filter<T>> filter) {
     filter->setSourceData(myData);
     filter->changed += infrastructure::DELEGATE0((&Repository<T, U>::onFilterChanged));
     myFilter = move(filter);
-    myFilter->apply();
+
+    handleFilterSetUnsetOrChanged();
 }
 
 
@@ -164,8 +165,8 @@ void Repository<T, U>::unsetFilter() {
 
     myUnfilteredFilter->changed += infrastructure::DELEGATE0((&Repository<T, U>::onFilterChanged));
     myFilter = myUnfilteredFilter;
-    myCachedMaxCount = -1;
 
+    handleFilterSetUnsetOrChanged();
     filterChanged();
 }
 
@@ -174,19 +175,6 @@ void Repository<T, U>::unsetFilter() {
 template <typename T, typename U>
 bool Repository<T, U>::isFiltered() const {
     return myIsFilterSet;
-}
-
-
-
-template <typename T, typename U>
-void Repository<T, U>::onFilterChanged() {
-    AUDDBG("Processing filter changed event.\n");
-    myCachedMaxCount = -1;
-
-    // to the outside world there is no filter to change if not filtered
-    if (isFiltered()) {
-        filterChanged();
-    }
 }
 
 
@@ -203,11 +191,30 @@ void Repository<T, U>::clear() {
     myData.clear();
     myLoadProgress = 0;
     myLoadOffset = -1;
-    myCachedMaxCount = -1;
 
-    myUnfilteredFilter->processUpdatedSourceData(-1, 0);
-    myFilter->apply();
     clearIndices();
+    myUnfilteredFilter->processUpdatedSourceData();
+    myFilter->processUpdatedSourceData();
+}
+
+
+
+template <typename T, typename U>
+void Repository<T, U>::handleFilterSetUnsetOrChanged() {
+    myCachedCount = -1;
+
+    // to the outside world there is no filter to change if not filtered
+    if (isFiltered()) {
+        filterChanged();
+    }
+}
+
+
+
+template <typename T, typename U>
+void Repository<T, U>::onFilterChanged() {
+    AUDDBG("Processing filter changed event.\n");
+    handleFilterSetUnsetOrChanged();
 }
 
 
@@ -260,12 +267,12 @@ void Repository<T, U>::onDataLoadRequestFinished(std::vector<std::unique_ptr<T>>
 
     auto offsetAndLimit = std::pair<int, int>{myLoadOffset, data.size()};
     myUnfilteredFilter->processUpdatedSourceData(myLoadOffset, data.size());
-    myFilter->apply();
+    myFilter->processUpdatedSourceData(myLoadOffset, data.size());
     myLoadOffset = -1;
     myLoadProgress += data.size();
     AUDDBG("Load progress: %d.\n", myLoadProgress);
 
-    bool isFullyLoaded = myLoadProgress >= getMaxDataSize();
+    bool isFullyLoaded = myLoadProgress >= maxCount();
     if (isFullyLoaded) {
         saveDataToCache();
     }
@@ -287,8 +294,8 @@ void Repository<T, U>::loadFromCache() {
         handleLoadedItem(*data);
     }
 
-    myUnfilteredFilter->processUpdatedSourceData(0, myData.size());
-    myFilter->apply();
+    myUnfilteredFilter->processUpdatedSourceData();
+    myFilter->processUpdatedSourceData();
     myLoadOffset = -1;
     myLoadProgress += myData.size();
 
@@ -301,11 +308,11 @@ void Repository<T, U>::loadFromCache() {
 
 
 template <typename T, typename U>
-int Repository<T, U>::computeMaxCount() const {
+int Repository<T, U>::computeCount() const {
     if (isFiltered() && myLoadProgress != 0) {
         return myFilter->getFilteredData().size();
     }
-    return getMaxDataSize();
+    return maxCount();
 }
 
 }

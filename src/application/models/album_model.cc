@@ -106,7 +106,7 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
 
 
 int AlbumModel::rowCount(const QModelIndex&) const {
-    return myAlbumRepository->maxCount();
+    return myAlbumRepository->count();
 }
 
 
@@ -183,8 +183,6 @@ void AlbumModel::onProviderChanged() {
     beginResetModel();
     myAlbumRequests->removeAll();
     myArtRequests->removeAll();
-    // SMELL: Change of provider keeps the filter set so calling rowCount() here does not guarantees unfiltered count.
-    myUnfilteredCount = rowCount();
     requestAllData();
     endResetModel();
 }
@@ -192,8 +190,8 @@ void AlbumModel::onProviderChanged() {
 
 
 void AlbumModel::requestAllData() {
-    AUDDBG("Requesting all data (%d).\n", myUnfilteredCount);
-    for (int row = 0; row < myUnfilteredCount; row++) {
+    AUDDBG("Requesting all data.\n");
+    for (int row = 0; row < myAlbumRepository->maxCount(); row++) {
         myAlbumRequests->add(row);
     }
 }
@@ -202,7 +200,7 @@ void AlbumModel::requestAllData() {
 
 void AlbumModel::requestUnloadedArts() {
     AUDDBG("Requesting all unloaded arts.\n");
-    for (int row = 0; row < myUnfilteredCount; row++) {
+    for (int row = 0; row < myAlbumRepository->maxCount(); row++) {
         if (myAlbumRepository->isLoadedUnfiltered(row)) {
             auto& album = myAlbumRepository->getUnfiltered(row);
             if (!album.hasArt()) {

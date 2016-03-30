@@ -134,11 +134,11 @@ public:
      */
     bool loadArtsUnfiltered(int offset, int count);
 
+    int maxCount() const override;
+
     void disableLoading() override;
 
 protected:
-    void onFilterChanged() override;
-
     void requestDataLoad(int offset, int limit) override;
 
     domain::Album& getDomainObject(const AlbumData& dataItem) const override;
@@ -157,7 +157,7 @@ protected:
 
     void clearIndices() override;
 
-    int getMaxDataSize() const override;
+    void handleFilterSetUnsetOrChanged() override;
 
 private:
     const ArtistRepository* const myArtistRepository = nullptr;

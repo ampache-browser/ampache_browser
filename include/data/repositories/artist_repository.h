@@ -45,6 +45,8 @@ public:
 
     ArtistRepository& operator=(const ArtistRepository& other) = delete;
 
+    int maxCount() const override;
+
 protected:
     void requestDataLoad(int offset, int limit) override;
 
@@ -59,8 +61,6 @@ protected:
     void updateIndices(const std::vector<std::unique_ptr<ArtistData>>& data) override;
 
     void clearIndices() override;
-
-    int getMaxDataSize() const override;
 };
 
 }

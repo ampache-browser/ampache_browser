@@ -29,18 +29,42 @@ ArtistFilterForAlbums::ArtistFilterForAlbums(const vector<reference_wrapper<cons
     Indices& indices): Filter<AlbumData>(),
 myArtists(artists),
 myIndices(indices) {
-    myIndices.changed += DELEGATE0(&ArtistFilterForAlbums::onIndexChanged);
+    processUpdatedIndices();
+    myIndices.artistAlbumsUpdated += DELEGATE1(&ArtistFilterForAlbums::onArtistAlbumsUpdated,
+        vector<reference_wrapper<const Artist>>);
 }
 
 
 
 ArtistFilterForAlbums::~ArtistFilterForAlbums() {
-    myIndices.changed -= DELEGATE0(&ArtistFilterForAlbums::onIndexChanged);
+    myIndices.artistAlbumsUpdated -= DELEGATE1(&ArtistFilterForAlbums::onArtistAlbumsUpdated,
+        vector<reference_wrapper<const Artist>>);
 }
 
 
 
-void ArtistFilterForAlbums::apply() {
+void ArtistFilterForAlbums::setSourceData(const vector<unique_ptr<AlbumData>>&) {
+    // do not call base since this filter does not use source data, it uses indices instead
+}
+
+
+void ArtistFilterForAlbums::processUpdatedSourceData(int, int) {
+    // do not call base since this filter does not use source data, it uses indices instead
+}
+
+
+
+void ArtistFilterForAlbums::onArtistAlbumsUpdated(const vector<reference_wrapper<const Artist>>& updatedArtists) {
+    auto artistsIter = find_first_of(myArtists.begin(), myArtists.end(), updatedArtists.begin(), updatedArtists.end());
+    if (artistsIter != myArtists.end()) {
+        processUpdatedIndices();
+        changed();
+    }
+}
+
+
+
+void ArtistFilterForAlbums::processUpdatedIndices() {
     myFilteredData.clear();
     set<reference_wrapper<AlbumData>> filteredUniqueAlbumData;
 
@@ -50,14 +74,6 @@ void ArtistFilterForAlbums::apply() {
     }
     myFilteredData =
         vector<reference_wrapper<AlbumData>>{filteredUniqueAlbumData.begin(), filteredUniqueAlbumData.end()};
-
-    Filter<AlbumData>::apply();
-}
-
-
-
-void ArtistFilterForAlbums::onIndexChanged() {
-    apply();
 }
 
 }

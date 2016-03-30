@@ -52,6 +52,8 @@ public:
 
     TrackRepository& operator=(const TrackRepository& other) = delete;
 
+    int maxCount() const override;
+
 protected:
     void requestDataLoad(int offset, int limit) override;
 
@@ -68,8 +70,6 @@ protected:
     void updateIndices(const std::vector<std::unique_ptr<TrackData>>& data) override;
 
     void clearIndices() override;
-
-    int getMaxDataSize() const override;
 
 private:
     // arguments from the constructor

@@ -98,7 +98,7 @@ QVariant TrackModel::headerData(int section, Qt::Orientation, int role) const {
 
 
 int TrackModel::rowCount(const QModelIndex&) const {
-    return myTrackRepository->maxCount();
+    return myTrackRepository->count();
 }
 
 
@@ -139,8 +139,8 @@ void TrackModel::onProviderChanged() {
 
 
 void TrackModel::requestAllData() {
-    AUDDBG("Requesting all data (%d).\n", rowCount());
-    for (int row = 0; row < rowCount(); row++) {
+    AUDDBG("Requesting all data.\n");
+    for (int row = 0; row < myTrackRepository->maxCount(); row++) {
         myRequests->add(row);
     }
 }
