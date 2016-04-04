@@ -41,7 +41,9 @@ namespace data {
 /**
  * @warning Class expects that all save* methods will be called subsequently.
  */
-Cache::Cache() {
+Cache::Cache(const string& serverUrl, const string& user):
+myServerUrl{serverUrl},
+myUser{user} {
     ifstream metaStream{META_PATH};
     if (!metaStream) {
         // TODO: Handle errors.
@@ -70,6 +72,18 @@ Cache::Cache() {
 
 system_clock::time_point Cache::getLastUpdate() const {
     return myLastUpdate;
+}
+
+
+
+string Cache::getServerUrl() const {
+    return myServerUrl;
+}
+
+
+
+string Cache::getUser() const {
+    return myUser;
 }
 
 
@@ -290,6 +304,8 @@ void Cache::onArtsLoadFinished() {
 void Cache::loadMeta(ifstream& metaStream) {
     int version = 0;
     metaStream.read(reinterpret_cast<char*>(&version), sizeof version);
+    myServerUrl = readString(metaStream);
+    myUser = readString(metaStream);
     metaStream.read(reinterpret_cast<char*>(&myLastUpdate), sizeof myLastUpdate);
     metaStream.read(reinterpret_cast<char*>(&myNumberOfArtists), sizeof myNumberOfArtists);
     metaStream.read(reinterpret_cast<char*>(&myNumberOfAlbums), sizeof myNumberOfAlbums);
@@ -302,6 +318,8 @@ void Cache::saveMeta(system_clock::time_point lastUpdate) {
     ofstream metaStream{META_PATH, ofstream::binary | ofstream::trunc};
     int version = CACHE_VERSION;
     metaStream.write(reinterpret_cast<char*>(&version), sizeof version);
+    writeString(metaStream, myServerUrl);
+    writeString(metaStream, myUser);
     myLastUpdate = lastUpdate;
     metaStream.write(reinterpret_cast<char*>(&myLastUpdate), sizeof myLastUpdate);
     metaStream.write(reinterpret_cast<char*>(&myNumberOfArtists), sizeof myNumberOfArtists);

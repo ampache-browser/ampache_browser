@@ -39,7 +39,13 @@ class Cache: public QObject {
     Q_OBJECT
 
 public:
-    explicit Cache();
+    /**
+     * @brief Constructor
+     *
+     * @param serverUrl URL of the Ampache server which data shall be cached.
+     * @param user Ampache server user whose data shall be cached.
+     */
+    explicit Cache(const std::string& serverUrl, const std::string& user);
 
     /**
      * @brief Event fired when some album arts has been retrieved from disk.
@@ -47,6 +53,16 @@ public:
      * @sa requestAlbumArts()
      */
     infrastructure::Event<std::map<std::string, QPixmap>> readyAlbumArts{};
+
+    /**
+     * @brief Gets URL of the Ampache server which data are cached.
+     */
+    std::string getServerUrl() const;
+
+    /**
+     * @brief Gets the Ampache server user whose data are cached.
+     */
+    std::string getUser() const;
 
     /**
      * @brief Gets time point of the latest cache update.
@@ -169,6 +185,9 @@ private:
 
     // suffix of cached album art file
     const std::string ART_SUFFIX = ".art";
+
+    std::string myServerUrl = "";
+    std::string myUser = "";
 
     // time point of the latest cache update
     std::chrono::system_clock::time_point myLastUpdate = std::chrono::system_clock::time_point::min();

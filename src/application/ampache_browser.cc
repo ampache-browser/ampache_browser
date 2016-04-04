@@ -56,7 +56,7 @@ myUi(&ui) {
     auto passwordHash = string{aud_get_str("ampache_browser", "password_hash")};
 
     myAmpache = unique_ptr<Ampache>{new Ampache{url, username, passwordHash}};
-    myCache = unique_ptr<Cache>{new Cache{}};
+    myCache = unique_ptr<Cache>{new Cache{url, username}};
     myIndices = unique_ptr<Indices>{new Indices{}};
 
     myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpache, *myCache, *myIndices}};

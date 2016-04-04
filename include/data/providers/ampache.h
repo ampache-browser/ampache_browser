@@ -121,6 +121,16 @@ public:
     bool getIsInitialized() const;
 
     /**
+     * @brief Gets the server URL.
+     */
+    std::string getUrl() const;
+
+    /**
+     * @brief Gets the user used to log in to the server.
+     */
+    std::string getUser() const;
+
+    /**
      * @brief Gets time point of the latest database update as reported by the server during handshake.
      *
      * @return std::chrono::system_clock::time_point

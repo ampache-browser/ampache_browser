@@ -67,6 +67,18 @@ bool Ampache::getIsInitialized() const {
 
 
 
+string Ampache::getUrl() const {
+    return myUrl;
+}
+
+
+
+string Ampache::getUser() const {
+    return myUser;
+}
+
+
+
 system_clock::time_point Ampache::getLastUpdate() const {
     return myLastUpdate;
 }

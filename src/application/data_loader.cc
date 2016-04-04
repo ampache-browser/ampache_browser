@@ -100,12 +100,14 @@ void DataLoader::onAmpacheInitialized(bool error) {
     }
 
     // finish with error if neither Ampache nor cache is available
-    if (error && (myCache.getLastUpdate() == system_clock::time_point::min())) {
+    if (error && (myCache.getServerUrl() != myAmpache.getUrl() || myCache.getUser() != myAmpache.getUser() ||
+            myCache.getLastUpdate() == system_clock::time_point::min())) {
         fireFinished(LoadingResult::NoConnectionNoCache);
         return;
     }
 
-    if (error || (myCache.getLastUpdate() > myAmpache.getLastUpdate())) {
+    if (error || (myCache.getServerUrl() != myAmpache.getUrl() || myCache.getUser() != myAmpache.getUser() ||
+            myCache.getLastUpdate() > myAmpache.getLastUpdate())) {
         AUDDBG("Setting data provider type to Cache (artists: %d, albums: %d, tracks: %d).\n",
             myCache.numberOfArtists(), myCache.numberOfAlbums(), myCache.numberOfTracks());
         myProviderType = ProviderType::Cache;
