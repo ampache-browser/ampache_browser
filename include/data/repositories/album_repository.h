@@ -174,10 +174,10 @@ private:
     void onAmpacheReadyArts(const std::map<std::string, QPixmap>& arts);
     void onCacheReadyArts(const std::map<std::string, QPixmap>& arts);
 
-    std::pair<std::map<std::string, QPixmap>, std::vector<std::string>> setArts(
+    std::pair<std::map<std::string, QPixmap>, std::map<std::string, std::string>> setArts(
         const std::map<std::string, QPixmap>& arts);
-    domain::Album* findById(const std::string& id, int filteredOffset, int count) const;
-    domain::Album* findByIdUnfiltered(const std::string& id, int offset, int count) const;
+    AlbumData* findAlbumDataById(const std::string& id, int filteredOffset, int count) const;
+    AlbumData* findAlbumDataByIdUnfiltered(const std::string& id, int offset, int count) const;
 };
 
 }

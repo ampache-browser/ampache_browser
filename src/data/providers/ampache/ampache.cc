@@ -127,18 +127,18 @@ void Ampache::requestTracks(int offset, int limit) {
 
 
 
-void Ampache::requestAlbumArts(const vector<string>& ids) {
-    if (ids.empty() || !getIsInitialized()) {
+void Ampache::requestAlbumArts(const map<string, string>& idsAndUrls) {
+    if (idsAndUrls.empty() || !getIsInitialized()) {
         auto emptyAlbumArts = map<string, QPixmap>{};
         readyAlbumArts(emptyAlbumArts);
         return;
     }
 
-    AUDDBG("Getting %d album arts.\n", ids.size());
-    for (auto id: ids) {
-        myPendingAlbumArts.insert(id);
-        vfs_async_file_get_contents(AmpacheUrl::createAlbumArtUrl(id, myUrl, myAuthToken).str().c_str(),
-            onGetContentsCStyleWrapper, &myOnAlbumArtFinishedFunc);
+    AUDDBG("Getting %d album arts.\n", idsAndUrls.size());
+    for (auto& idAndUrl: idsAndUrls) {
+        myPendingAlbumArts.insert(idAndUrl.first);
+        vfs_async_file_get_contents(refreshUrl(idAndUrl.second).c_str(), onGetContentsCStyleWrapper,
+            &myOnAlbumArtFinishedFunc);
     }
 }
 
@@ -379,6 +379,7 @@ vector<unique_ptr<AlbumData>> Ampache::createAlbums(QXmlStreamReader& xmlStreamR
     int year = 0;
     int disk = 0;
     int tracks = 0;
+    string artUrl = "";
     string artistId = "";
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
@@ -386,7 +387,7 @@ vector<unique_ptr<AlbumData>> Ampache::createAlbums(QXmlStreamReader& xmlStreamR
 
         if (xmlStreamReader.isEndElement()) {
             if (xmlElement == "album") {albumData.emplace_back(
-                new AlbumData{id, artistId, tracks, unique_ptr<Album>{new Album{id, albumName, year, disk}}});
+                new AlbumData{id, artUrl, artistId, tracks, unique_ptr<Album>{new Album{id, albumName, year, disk}}});
             }
         }
 
@@ -428,6 +429,8 @@ vector<unique_ptr<AlbumData>> Ampache::createAlbums(QXmlStreamReader& xmlStreamR
                     tracks = stoi(value);
                 } catch (const invalid_argument& ex) {}
                 catch (const out_of_range& ex) {}
+            } else if (xmlElement == "art") {
+                artUrl = value;
             }
         }
     }

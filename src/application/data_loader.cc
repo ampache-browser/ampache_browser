@@ -106,7 +106,7 @@ void DataLoader::onAmpacheInitialized(bool error) {
         return;
     }
 
-    if (error || (myCache.getServerUrl() != myAmpache.getUrl() || myCache.getUser() != myAmpache.getUser() ||
+    if (error || (myCache.getServerUrl() == myAmpache.getUrl() && myCache.getUser() == myAmpache.getUser() &&
             myCache.getLastUpdate() > myAmpache.getLastUpdate())) {
         AUDDBG("Setting data provider type to Cache (artists: %d, albums: %d, tracks: %d).\n",
             myCache.numberOfArtists(), myCache.numberOfAlbums(), myCache.numberOfTracks());

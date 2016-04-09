@@ -138,6 +138,7 @@ vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() const {
     albumsDataStream.read(reinterpret_cast<char*>(&count), sizeof count);
     for (int idx = 0; idx < count; idx++) {
         auto id = readString(albumsDataStream);
+        auto artUrl = readString(albumsDataStream);
         auto artistId = readString(albumsDataStream);
         int numberOfTracks = 0;
         albumsDataStream.read(reinterpret_cast<char*>(&numberOfTracks), sizeof numberOfTracks);
@@ -149,7 +150,7 @@ vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() const {
         albumsDataStream.read(reinterpret_cast<char*>(&mediaNumber), sizeof mediaNumber);
 
         albumsData.emplace_back(
-            new AlbumData{id, artistId, numberOfTracks, unique_ptr<Album>{
+            new AlbumData{id, artUrl, artistId, numberOfTracks, unique_ptr<Album>{
                 new Album{id, name, releaseYear, mediaNumber}}});
     }
 
@@ -224,6 +225,7 @@ void Cache::saveAlbumsData(vector<unique_ptr<AlbumData>>& albumsData) {
     albumsDataStream.write(reinterpret_cast<char*>(&count), sizeof count);
     for (auto& albumData: albumsData) {
         string id = albumData->getId();
+        string artUrl = albumData->getArtUrl();
         string artistId = albumData->getArtistId();
         int numberOfTracks = albumData->getNumberOfTracks();
 
@@ -233,6 +235,7 @@ void Cache::saveAlbumsData(vector<unique_ptr<AlbumData>>& albumsData) {
         int mediaNumber = album.getMediaNumber();
 
         writeString(albumsDataStream, id);
+        writeString(albumsDataStream, artUrl);
         writeString(albumsDataStream, artistId);
         albumsDataStream.write(reinterpret_cast<char*>(&numberOfTracks), sizeof numberOfTracks);
         writeString(albumsDataStream, name);

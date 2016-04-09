@@ -201,11 +201,12 @@ public:
      * @note If this method is called before the the ::initialized event it immediately raises ::readyAlbumArts with
      * zero loaded arts.
      *
-     * @param ids Identifiers of the album art images that shall be requested.  These IDs are equal to album IDs.
+     * @param idsAndUrls Identifiers of the album art images that shall be requested paired with their URLs.  IDs are
+     *        equal to album IDs.
      *
      * @sa ::readyAlbumArts
      */
-    void requestAlbumArts(const std::vector<std::string>& ids);
+    void requestAlbumArts(const std::map<std::string, std::string>& idsAndUrls);
 
     /**
      * @brief Extends the session or makes a new one if alread expired.

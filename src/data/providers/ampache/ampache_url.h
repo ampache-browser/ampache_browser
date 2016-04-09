@@ -33,17 +33,6 @@ public:
     explicit AmpacheUrl(const std::string& url);
 
     /**
-     * @brief Creates instance od AmpacheUrl representing URL od an album art.
-     *
-     * @param albumId ID of the album which art URL shall be created.
-     * @param urlBase URL of Ampache server.
-     * @param authToken Authentication token for communication with Ampache server.
-     * @return data::AmpacheUrl
-     */
-    static AmpacheUrl createAlbumArtUrl(const std::string& albumId, const std::string& urlBase,
-        const std::string& authToken);
-
-    /**
      * @brief Gets value of parameter 'id'.
      *
      * @return std::string

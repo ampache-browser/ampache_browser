@@ -23,14 +23,6 @@ myUrl{url} {
 
 
 
-AmpacheUrl AmpacheUrl::createAlbumArtUrl(const string& albumId, const string& urlBase, const string& authToken) {
-    ostringstream urlStream;
-    urlStream << urlBase << "image.php?id=" << albumId << "&" << PARAM_AUTH << "=" << authToken;
-    return AmpacheUrl(urlStream.str());
-}
-
-
-
 string AmpacheUrl::parseIdValue() const {
     return parseValue(PARAM_ID);
 }

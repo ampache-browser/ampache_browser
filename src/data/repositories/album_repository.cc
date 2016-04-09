@@ -65,8 +65,7 @@ Album& AlbumRepository::getUnfiltered(int offset) const {
 
 
 AlbumData& AlbumRepository::getAlbumDataById(const string& id) const {
-    // SMELL: ad can be nullptr.
-    // SMELL: in case album data is not found, return null?
+    // SMELL: ad can be nullptr; in case album data is not found, return null?
     auto albumsDataIter = find_if(myData.begin(), myData.end(),
         [&id](const unique_ptr<AlbumData>& ad) {return ad->getId() == id;});
     return **albumsDataIter;
@@ -93,14 +92,19 @@ bool AlbumRepository::loadArts(int filteredOffset, int count) {
     AUDDBG("Load arts from filtered offset %d, count %d.\n", filteredOffset, count);
     myArtsLoadOffset = filteredOffset;
     myArtsLoadCount = count;
-    vector<string> albumIds;
-    for (auto idx = filteredOffset; idx < filteredOffset + count; idx++) {
-        AlbumData& albumData = myFilter->getFilteredData()[idx];
-        albumIds.push_back(albumData.getId());
-    }
     if (myProviderType == ProviderType::Ampache) {
-        myAmpache.requestAlbumArts(albumIds);
+        map<string, string> albumIdsAndUrls;
+        for (auto idx = filteredOffset; idx < filteredOffset + count; idx++) {
+            AlbumData& albumData = myFilter->getFilteredData()[idx];
+            albumIdsAndUrls[albumData.getId()] = albumData.getArtUrl();
+        }
+        myAmpache.requestAlbumArts(albumIdsAndUrls);
     } else if (myProviderType == ProviderType::Cache) {
+        vector<string> albumIds;
+        for (auto idx = filteredOffset; idx < filteredOffset + count; idx++) {
+            AlbumData& albumData = myFilter->getFilteredData()[idx];
+            albumIds.push_back(albumData.getId());
+        }
         myCache.requestAlbumArts(albumIds);
     }
     return true;
@@ -119,14 +123,19 @@ bool AlbumRepository::loadArtsUnfiltered(int offset, int count) {
     AUDDBG("Load arts from offset %d, count %d.\n", offset, count);
     myArtsLoadOffsetUnfiltered = offset;
     myArtsLoadCount = count;
-    vector<string> albumIds;
-    for (auto idx = offset; idx < offset + count; idx++) {
-        auto& albumData = myData[idx];
-        albumIds.push_back(albumData->getId());
-    }
     if (myProviderType == ProviderType::Ampache) {
-        myAmpache.requestAlbumArts(albumIds);
+        map<string, string> albumIdsAndUrls;
+        for (auto idx = offset; idx < offset + count; idx++) {
+            auto& albumData = myData[idx];
+            albumIdsAndUrls[albumData->getId()] = albumData->getArtUrl();
+        }
+        myAmpache.requestAlbumArts(albumIdsAndUrls);
     } else if (myProviderType == ProviderType::Cache) {
+        vector<string> albumIds;
+        for (auto idx = offset; idx < offset + count; idx++) {
+            auto& albumData = myData[idx];
+            albumIds.push_back(albumData->getId());
+        }
         myCache.requestAlbumArts(albumIds);
     }
     return true;
@@ -276,58 +285,61 @@ void AlbumRepository::onCacheReadyArts(const map<string, QPixmap>& arts) {
 
     auto loadedAndNotLoadedIds = setArts(arts);
     auto loadedIdsAndArts = loadedAndNotLoadedIds.first;
-    auto notLoadedArtIds = loadedAndNotLoadedIds.second;
+    auto notLoadedIdsAndUrls = loadedAndNotLoadedIds.second;
 
-    // increase progress by number of loaded IDs which are not in not loaded IDs
+    // increase progress by number of 'loaded IDs' which are not in 'not loaded IDs'
     for (auto& loadedIdAndArt: loadedIdsAndArts) {
-        auto notLoadedIdsIter = find_if(notLoadedArtIds.begin(), notLoadedArtIds.end(),
-            [&loadedIdAndArt](const string& nli) {return nli == loadedIdAndArt.first;});
-        if (notLoadedIdsIter == notLoadedArtIds.end()) {
+        auto notLoadedIdsIter = find_if(notLoadedIdsAndUrls.begin(), notLoadedIdsAndUrls.end(),
+            [&loadedIdAndArt](const pair<string, string>& nliu) {return nliu.first == loadedIdAndArt.first;});
+        if (notLoadedIdsIter == notLoadedIdsAndUrls.end()) {
             myArtsLoadProgress++;
         }
     }
 
-    myAmpache.requestAlbumArts(notLoadedArtIds);
+    myAmpache.requestAlbumArts(notLoadedIdsAndUrls);
 }
 
 
 
-pair<map<string, QPixmap>, vector<string>> AlbumRepository::setArts(const map<string, QPixmap>& arts) {
+pair<map<string, QPixmap>, map<string, string>> AlbumRepository::setArts(const map<string, QPixmap>& arts) {
     map<string, QPixmap> loadedIdsAndArts;
-    vector<string> notLoadedArtIds;
+    map<string, string> notLoadedArtIds;
     if (myArtsLoadOffset != -1) {
         for (auto& idAndArt: arts) {
-            if (idAndArt.second.isNull()) {
-                notLoadedArtIds.push_back(idAndArt.first);
-                // go on and set the art, otherwise the server would be queried again and again next time
-            }
-            auto album = findById(idAndArt.first, myArtsLoadOffset, myArtsLoadCount);
-            if (album != nullptr) {
-                album->setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
+            auto albumData = findAlbumDataById(idAndArt.first, myArtsLoadOffset, myArtsLoadCount);
+            if (albumData != nullptr) {
+                // set the art even if the loaded image is empty (isNull()), otherwise the server would be queried
+                // again and again next time
+                albumData->getAlbum().setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
                 loadedIdsAndArts.emplace(idAndArt);
+                if (idAndArt.second.isNull()) {
+                    notLoadedArtIds[idAndArt.first] = albumData->getArtUrl();
+                }
             }
         }
     } else if (myArtsLoadOffsetUnfiltered != -1) {
         for (auto& idAndArt: arts) {
-            if (idAndArt.second.isNull()) {
-                notLoadedArtIds.push_back(idAndArt.first);
-                // go on and set the art, otherwise the server would be queried again and again next time
-            }
-            auto album = findByIdUnfiltered(idAndArt.first, myArtsLoadOffsetUnfiltered, myArtsLoadCount);
-            if (album != nullptr) {
-                album->setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
+            auto albumData = findAlbumDataByIdUnfiltered(idAndArt.first, myArtsLoadOffsetUnfiltered, myArtsLoadCount);
+            if (albumData != nullptr) {
+                // set the art even if the loaded image is empty (isNull()), otherwise the server would be queried
+                // again and again next time
+                albumData->getAlbum().setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
                 loadedIdsAndArts.emplace(idAndArt);
+                if (idAndArt.second.isNull()) {
+                    notLoadedArtIds[idAndArt.first] = albumData->getArtUrl();
+                }
             }
         }
     } else {
         for (auto& idAndArt: arts) {
-            if (idAndArt.second.isNull()) {
-                notLoadedArtIds.push_back(idAndArt.first);
-                // go on and set the art, otherwise the server would be queried again and again next time
-            }
-            auto& album = getById(idAndArt.first);
-            album.setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
+            auto& albumData = getAlbumDataById(idAndArt.first);
+            // set the art even if the loaded image is empty (isNull()), otherwise the server would be queried
+            // again and again next time
+            albumData.getAlbum().setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
             loadedIdsAndArts.emplace(idAndArt);
+            if (idAndArt.second.isNull()) {
+                notLoadedArtIds[idAndArt.first] = albumData.getArtUrl();
+            }
         }
     }
 
@@ -336,7 +348,7 @@ pair<map<string, QPixmap>, vector<string>> AlbumRepository::setArts(const map<st
 
 
 
-Album* AlbumRepository::findById(const string& id, int filteredOffset, int count) const {
+AlbumData* AlbumRepository::findAlbumDataById(const string& id, int filteredOffset, int count) const {
     auto filteredAlbumsData = myFilter->getFilteredData();
     auto albumDataIter = find_if(filteredAlbumsData.begin() + filteredOffset,
         filteredAlbumsData.begin() + filteredOffset + count,
@@ -344,18 +356,18 @@ Album* AlbumRepository::findById(const string& id, int filteredOffset, int count
     if (albumDataIter == filteredAlbumsData.begin() + filteredOffset + count) {
         return nullptr;
     }
-    return &(*albumDataIter).get().getAlbum();
+    return &albumDataIter->get();
 }
 
 
 
-Album* AlbumRepository::findByIdUnfiltered(const string& id, int offset, int count) const {
+AlbumData* AlbumRepository::findAlbumDataByIdUnfiltered(const string& id, int offset, int count) const {
     auto albumDataIter = find_if(myData.begin() + offset, myData.begin() + offset + count,
         [&id](const unique_ptr<AlbumData>& ad) {return ad->getId() == id;});
     if (albumDataIter == myData.begin() + offset + count) {
         return nullptr;
     }
-    return &(*albumDataIter).get()->getAlbum();
+    return albumDataIter->get();
 }
 
 }
