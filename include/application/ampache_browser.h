@@ -79,6 +79,12 @@ public:
     void requestTermination();
 
 private:
+    const std::string SETTINGS_SECTION = "ampache_browser";
+    const std::string SETTINGS_USE_DEMO_SERVER = "use_demo_server";
+    const std::string SETTINGS_SERVER_URL = "server_url";
+    const std::string SETTINGS_USER_NAME = "user_name";
+    const std::string SETTINGS_PASSWORD_HASH = "password_hash";
+
     std::unique_ptr<DataLoader> myDataLoader = nullptr;
 
     std::unique_ptr<data::Ampache> myAmpache = nullptr;
@@ -94,9 +100,7 @@ private:
 
     ui::Ui* const myUi = nullptr;
 
-    bool myIsArtistDataRequestAborted = false;
-    bool myIsAlbumDataRequestAborted = false;
-    bool myIsTrackDataRequestAborted = false;
+    bool mySettingsUpdated = false;
 
     ui::SelectedItems myPlayIds{};
 
@@ -110,6 +114,12 @@ private:
 
     void onPlayOrCreateReadySession(bool error);
     void onAddReadySession(bool error);
+
+    void onSettingsUpdated(std::tuple<bool, std::string, std::string, std::string> settings);
+
+    void initializeAndLoad();
+    void initializeDependencies();
+    void uninitializeDependencies();
 
     Index<PlaylistAddItem> createPlaylistItems(bool error);
     void setArtistFilters(const std::vector<std::string>& ids);

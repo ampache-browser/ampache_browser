@@ -7,8 +7,8 @@
 
 
 
-#ifndef ampache_browser_main_window_H
-#define ampache_browser_main_window_H
+#ifndef AMPACHEBROWSERMAINWINDOW_H
+#define AMPACHEBROWSERMAINWINDOW_H
 
 
 
@@ -18,6 +18,7 @@ class QListView;
 class QTreeView;
 class QLineEdit;
 class QAction;
+class SettingsDialog;
 
 
 
@@ -42,10 +43,12 @@ public:
     QAction* playAction = nullptr;
     QAction* createPlaylistAction = nullptr;
     QAction* addToPlaylistAction = nullptr;
+
+    SettingsDialog* settingsDialog = nullptr;
 };
 
 }
 
 
 
-#endif // ampache_browser_main_window_H
+#endif // AMPACHEBROWSERMAINWINDOW_H

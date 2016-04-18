@@ -42,8 +42,8 @@ namespace data {
  * @warning Class expects that all save* methods will be called subsequently.
  */
 Cache::Cache(const string& serverUrl, const string& user):
-myServerUrl{serverUrl},
-myUser{user} {
+myCurrentServerUrl{serverUrl},
+myCurrentUser{user} {
     ifstream metaStream{META_PATH};
     if (!metaStream) {
         // TODO: Handle errors.
@@ -344,6 +344,9 @@ void Cache::invalidate() {
     }
     closedir(albumArtsDir);
 
+    myServerUrl = myCurrentServerUrl;
+    myUser = myCurrentUser;
+
     saveMeta(system_clock::time_point::min());
 }
 
@@ -379,6 +382,7 @@ void Cache::writeString(ofstream& stream, const string& str) const {
 
 void Cache::updateLastUpdateInfo() {
     if (myArtistsSaved + myAlbumsSaved + myTracksSaved == 1) {
+        invalidate();
         myUpdateBegin = system_clock::now();
     } else if (myArtistsSaved + myAlbumsSaved + myTracksSaved == 3) {
         myArtistsSaved = false;

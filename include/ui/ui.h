@@ -73,6 +73,13 @@ public:
     infrastructure::Event<std::string> searchTriggered{};
 
     /**
+     * @brief Event fired after user updated settings.
+     *
+     * @param Tuple of settings values: Use Demo Server, Server URL, User Name, Password.
+     */
+    infrastructure::Event<std::tuple<bool, std::string, std::string, std::string>> settingsUpdated{};
+
+    /**
      * @brief Gets main window widged of the application (plugin).
      *
      * @return QWidget*
@@ -85,6 +92,13 @@ public:
      * @param message The message that shall be displayed.
      */
     void showNotification(const std::string& message);
+
+    /**
+     * @brief Populate settings dialog.
+     *
+     * @note Dialog does not have to be opened.
+     */
+    void populateSettings(bool useDemoServer, std::string serverUrl, std::string userName);
 
     /**
      * @brief Sets artist model to the corresponding UI view.
@@ -117,6 +131,7 @@ private slots:
     void onTracksSelectionModelSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void onSearchTextChanged(const QString& text);
     void onSearchReturnPressed();
+    void onSettingsAccepted();
 
 private:
     // the main window widget

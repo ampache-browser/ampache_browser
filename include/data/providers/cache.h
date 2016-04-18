@@ -186,6 +186,11 @@ private:
     // suffix of cached album art file
     const std::string ART_SUFFIX = ".art";
 
+    // server URL and user name that is currently used to connect to the actual server
+    std::string myCurrentServerUrl = "";
+    std::string myCurrentUser = "";
+
+    // server URL and user name of the cached data
     std::string myServerUrl = "";
     std::string myUser = "";
 

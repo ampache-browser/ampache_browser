@@ -16,6 +16,8 @@
 #include <libaudcore/tuple.h>
 #include <libaudcore/playlist.h>
 
+#include <QCryptographicHash>
+
 #include "infrastructure/event/delegate.h"
 #include "ui/selected_items.h"
 #include "ui/ui.h"
@@ -51,52 +53,13 @@ namespace application {
 
 AmpacheBrowser::AmpacheBrowser(Ui& ui):
 myUi(&ui) {
-    auto url = string{aud_get_str("ampache_browser", "url")};
-    auto username = string{aud_get_str("ampache_browser", "username")};
-    auto passwordHash = string{aud_get_str("ampache_browser", "password_hash")};
-
-    myAmpache = unique_ptr<Ampache>{new Ampache{url, username, passwordHash}};
-    myCache = unique_ptr<Cache>{new Cache{url, username}};
-    myIndices = unique_ptr<Indices>{new Indices{}};
-
-    myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpache, *myCache, *myIndices}};
-    myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpache, *myCache, *myIndices,
-        myArtistRepository.get()}};
-    myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpache, *myCache, *myIndices,
-        myArtistRepository.get(), myAlbumRepository.get()}};
-
-    myArtistModel = unique_ptr<ArtistModel>{new ArtistModel(myArtistRepository.get())};
-    myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel(myAlbumRepository.get())};
-    myTrackModel = unique_ptr<TrackModel>{new TrackModel(myTrackRepository.get())};
-
-    myUi->artistsSelected += DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
-    myUi->albumsSelected += DELEGATE1(&AmpacheBrowser::onAlbumsSelected, pair<vector<string>, vector<string>>);
-    myUi->searchTriggered += DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
-    myUi->playTriggered += DELEGATE1(&AmpacheBrowser::onPlayTriggered, SelectedItems);
-    myUi->createPlaylistTriggered += DELEGATE1(&AmpacheBrowser::onCreatePlaylistTriggered, SelectedItems);
-    myUi->addToPlaylistTriggered += DELEGATE1(&AmpacheBrowser::onAddToPlaylistTriggered, SelectedItems);
-
-    myUi->setArtistModel(*myArtistModel);
-    myUi->setAlbumModel(*myAlbumModel);
-    myUi->setTrackModel(*myTrackModel);
-
-    myDataLoader = unique_ptr<DataLoader>{new DataLoader{myArtistRepository.get(), myAlbumRepository.get(),
-        myTrackRepository.get(), *myAmpache, *myCache}};
-    myDataLoader->finished += DELEGATE1(&AmpacheBrowser::onDataLoaderFinished, LoadingResult);
-    myDataLoader->load();
+    initializeAndLoad();
 }
 
 
 
 AmpacheBrowser::~AmpacheBrowser() {
-    myDataLoader->finished -= DELEGATE1(&AmpacheBrowser::onDataLoaderFinished, LoadingResult);
-
-    myUi->addToPlaylistTriggered -= DELEGATE1(&AmpacheBrowser::onAddToPlaylistTriggered, SelectedItems);
-    myUi->createPlaylistTriggered -= DELEGATE1(&AmpacheBrowser::onCreatePlaylistTriggered, SelectedItems);
-    myUi->playTriggered -= DELEGATE1(&AmpacheBrowser::onPlayTriggered, SelectedItems);
-    myUi->searchTriggered -= DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
-    myUi->albumsSelected -= DELEGATE1(&AmpacheBrowser::onAlbumsSelected, pair<vector<string>, vector<string>>);
-    myUi->artistsSelected -= DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
+    uninitializeDependencies();
 }
 
 
@@ -122,7 +85,13 @@ void AmpacheBrowser::onDataLoaderFinished(LoadingResult loadingResult) {
             myUi->showNotification(_("Unable to connect to server."));
             break;
         case LoadingResult::Aborted:
-            terminated();
+            if (mySettingsUpdated) {
+                mySettingsUpdated = false;
+                uninitializeDependencies();
+                initializeAndLoad();
+            } else {
+                terminated();
+            }
             break;
         default:
             myUi->showNotification(_("Loaded."));
@@ -217,6 +186,104 @@ void AmpacheBrowser::onAddReadySession(bool error) {
     auto playlistItems = createPlaylistItems(error);
     auto activePlaylist = aud_playlist_get_active();
     aud_playlist_entry_insert_batch(activePlaylist, -1, move(playlistItems), false);
+}
+
+
+
+void AmpacheBrowser::onSettingsUpdated(tuple<bool, string, string, string> settings) {
+    aud_set_bool(SETTINGS_SECTION.c_str(), SETTINGS_USE_DEMO_SERVER.c_str(), get<0>(settings));
+    aud_set_str(SETTINGS_SECTION.c_str(), SETTINGS_SERVER_URL.c_str(), get<1>(settings).c_str());
+    aud_set_str(SETTINGS_SECTION.c_str(), SETTINGS_USER_NAME.c_str(), get<2>(settings).c_str());
+    auto passwordHash = QCryptographicHash::hash(QByteArray::fromStdString(get<3>(settings).c_str()),
+        QCryptographicHash::Sha256).toHex().toStdString();
+    aud_set_str(SETTINGS_SECTION.c_str(), SETTINGS_PASSWORD_HASH.c_str(), passwordHash.c_str());
+
+    mySettingsUpdated = true;
+    requestTermination();
+}
+
+
+
+void AmpacheBrowser::initializeAndLoad() {
+    auto useDemoServer = aud_get_bool(SETTINGS_SECTION.c_str(), SETTINGS_USE_DEMO_SERVER.c_str());
+    auto serverUrl = string{aud_get_str(SETTINGS_SECTION.c_str(), SETTINGS_SERVER_URL.c_str())};
+    auto userName = string{aud_get_str(SETTINGS_SECTION.c_str(), SETTINGS_USER_NAME.c_str())};
+    auto passwordHash = string{aud_get_str(SETTINGS_SECTION.c_str(), SETTINGS_PASSWORD_HASH.c_str())};
+
+    myUi->populateSettings(useDemoServer, serverUrl, userName);
+
+    if (useDemoServer) {
+        serverUrl = "http://demo.ampache-browser.org/";
+        userName = "demo";
+        passwordHash = "1b2e48536c91351b5ea0a32a3bbaa0fc1ef9de6bc20b254a9a7e22043a211e33";
+    }
+
+    myAmpache = unique_ptr<Ampache>{new Ampache{serverUrl, userName, passwordHash}};
+    myCache = unique_ptr<Cache>{new Cache{serverUrl, userName}};
+    myIndices = unique_ptr<Indices>{new Indices{}};
+
+    initializeDependencies();
+
+    myDataLoader->load();
+}
+
+
+
+void AmpacheBrowser::initializeDependencies() {
+    myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpache, *myCache, *myIndices}};
+    myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpache, *myCache, *myIndices,
+        myArtistRepository.get()}};
+    myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpache, *myCache, *myIndices,
+        myArtistRepository.get(), myAlbumRepository.get()}};
+
+    myArtistModel = unique_ptr<ArtistModel>{new ArtistModel(myArtistRepository.get())};
+    myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel(myAlbumRepository.get())};
+    myTrackModel = unique_ptr<TrackModel>{new TrackModel(myTrackRepository.get())};
+
+    myUi->setArtistModel(*myArtistModel);
+    myUi->setAlbumModel(*myAlbumModel);
+    myUi->setTrackModel(*myTrackModel);
+
+    myDataLoader = unique_ptr<DataLoader>{new DataLoader{myArtistRepository.get(), myAlbumRepository.get(),
+        myTrackRepository.get(), *myAmpache, *myCache}};
+
+    myUi->artistsSelected += DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
+    myUi->albumsSelected += DELEGATE1(&AmpacheBrowser::onAlbumsSelected, pair<vector<string>, vector<string>>);
+    myUi->searchTriggered += DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
+    myUi->playTriggered += DELEGATE1(&AmpacheBrowser::onPlayTriggered, SelectedItems);
+    myUi->createPlaylistTriggered += DELEGATE1(&AmpacheBrowser::onCreatePlaylistTriggered, SelectedItems);
+    myUi->addToPlaylistTriggered += DELEGATE1(&AmpacheBrowser::onAddToPlaylistTriggered, SelectedItems);
+
+    myUi->settingsUpdated += DELEGATE1(&AmpacheBrowser::onSettingsUpdated, tuple<bool, string, string, string>);
+
+    myDataLoader->finished += DELEGATE1(&AmpacheBrowser::onDataLoaderFinished, LoadingResult);
+}
+
+
+
+void AmpacheBrowser::uninitializeDependencies() {
+    // no need to unsubscribe from myDataLoader->finished event because the instance is destroyed below anyway; in fact
+    // we can not unsubscribe because uninitializeDependencies() is called (also) from within the handler of the event;
+    // in that case the unsubscription is postponed and it is called later when myDataLoaded instance is already gone
+
+    myUi->settingsUpdated -= DELEGATE1(&AmpacheBrowser::onSettingsUpdated, tuple<bool, string, string, string>);
+
+    myUi->addToPlaylistTriggered -= DELEGATE1(&AmpacheBrowser::onAddToPlaylistTriggered, SelectedItems);
+    myUi->createPlaylistTriggered -= DELEGATE1(&AmpacheBrowser::onCreatePlaylistTriggered, SelectedItems);
+    myUi->playTriggered -= DELEGATE1(&AmpacheBrowser::onPlayTriggered, SelectedItems);
+    myUi->searchTriggered -= DELEGATE1(&AmpacheBrowser::onSearchTriggered, string);
+    myUi->albumsSelected -= DELEGATE1(&AmpacheBrowser::onAlbumsSelected, pair<vector<string>, vector<string>>);
+    myUi->artistsSelected -= DELEGATE1(&AmpacheBrowser::onArtistsSelected, vector<string>);
+
+    myDataLoader = nullptr;
+
+    myTrackModel = nullptr;
+    myAlbumModel = nullptr;
+    myArtistModel = nullptr;
+
+    myTrackRepository = nullptr;
+    myAlbumRepository = nullptr;
+    myArtistRepository = nullptr;
 }
 
 

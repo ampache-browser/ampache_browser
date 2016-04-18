@@ -17,6 +17,7 @@
 #include <QItemSelection>
 #include <QLineEdit>
 #include <QCompleter>
+#include "settings_dialog.h"
 #include "ampache_browser_main_window.h"
 #include "ui/selected_items.h"
 #include "ui/ui.h"
@@ -39,6 +40,8 @@ myMainWindow{new AmpacheBrowserMainWindow{}} {
     connect(myMainWindow->searchLineEdit, SIGNAL(textChanged(QString)), this, SLOT(onSearchTextChanged(QString)));
     connect(myMainWindow->searchLineEdit, SIGNAL(returnPressed()), this, SLOT(onSearchReturnPressed()));
 
+    connect(myMainWindow->settingsDialog, SIGNAL(accepted()), this, SLOT(onSettingsAccepted()));
+
     myMainWindow->show();
 }
 
@@ -56,27 +59,39 @@ void Ui::showNotification(const string& message) {
 
 
 
+void Ui::populateSettings(bool useDemoServer, string serverUrl, string userName) {
+    myMainWindow->settingsDialog->populate(useDemoServer, serverUrl, userName);
+}
+
+
+
 void Ui::setArtistModel(QAbstractItemModel& model) {
+    auto oldModel = myMainWindow->artistsListView->selectionModel();
     myMainWindow->artistsListView->setModel(&model);
     connect(myMainWindow->artistsListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
         this, SLOT(onArtistsSelectionModelSelectionChanged(QItemSelection, QItemSelection)));
+    delete oldModel;
 }
 
 
 
 void Ui::setAlbumModel(QAbstractItemModel& model) {
+    auto oldModel = myMainWindow->albumsListView->selectionModel();
     myMainWindow->albumsListView->setModel(&model);
     connect(myMainWindow->albumsListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
         this, SLOT(onAlbumsSelectionModelSelectionChanged(QItemSelection, QItemSelection)));
+    delete oldModel;
 }
 
 
 
 void Ui::setTrackModel(QAbstractItemModel& model) {
+    auto oldModel = myMainWindow->tracksTreeView->selectionModel();
     myMainWindow->tracksTreeView->setModel(&model);
     myMainWindow->tracksTreeView->hideColumn(3);
     connect(myMainWindow->tracksTreeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
         this, SLOT(onTracksSelectionModelSelectionChanged(QItemSelection, QItemSelection)));
+    delete oldModel;
 }
 
 
@@ -155,6 +170,16 @@ void Ui::onSearchReturnPressed() {
     auto searchText = myMainWindow->searchLineEdit->text().toStdString();
     searchTriggered(searchText);
     enableOrDisablePlayActions();
+}
+
+
+
+void Ui::onSettingsAccepted() {
+    myMainWindow->searchLineEdit->setText("");
+    auto settings = make_tuple(myMainWindow->settingsDialog->getUseDemoServer(),
+        myMainWindow->settingsDialog->getServerUrl(), myMainWindow->settingsDialog->getUserName(),
+        myMainWindow->settingsDialog->getPassword());
+    settingsUpdated(settings);
 }
 
 

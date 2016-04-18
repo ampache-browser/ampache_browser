@@ -7,6 +7,7 @@
 
 
 
+#include <memory>
 #include <libaudcore/i18n.h>
 #include <QToolBar>
 #include <QStatusBar>
@@ -17,7 +18,10 @@
 #include <QTreeView>
 #include <QHBoxLayout>
 #include <QDockWidget>
+#include "settings_dialog.h"
 #include "ampache_browser_main_window.h"
+
+using namespace std;
 
 
 
@@ -38,7 +42,7 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     auto spacerWidget = new QWidget();
     auto spacerWidget2 = new QWidget();
     auto mainToolBar = addToolBar(_("Main"));
-    auto aboutAction = new QAction(style()->standardIcon(QStyle::SP_ComputerIcon), _("About"), this);
+    auto settingsAction = new QAction(style()->standardIcon(QStyle::SP_ComputerIcon), _("Settings"), this);
 
     searchLineEdit->setPlaceholderText(_("Search..."));
     searchLineEdit->setToolTip(_("Search for artists, albums and tracks."));
@@ -53,7 +57,7 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     mainToolBar->addWidget(spacerWidget2);
     mainToolBar->addWidget(searchLineEdit);
     mainToolBar->addSeparator();
-    mainToolBar->addAction(aboutAction);
+    mainToolBar->addAction(settingsAction);
 
     // central widget
     auto centralWidget = new QWidget{};
@@ -93,11 +97,15 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     addDockWidget(Qt::RightDockWidgetArea, tracksDockWidget);
 
     statusBar()->setSizeGripEnabled(false);
+
+    settingsDialog = new SettingsDialog{};
+    connect(settingsAction, SIGNAL(triggered()), settingsDialog, SLOT(open()));
 }
 
 
 
 AmpacheBrowserMainWindow::~AmpacheBrowserMainWindow() {
+    delete(settingsDialog);
     delete(tracksTreeView);
     delete(artistsListView);
     delete(albumsListView);

@@ -252,16 +252,17 @@ void Repository<T, U>::onDataLoadRequestFinished(std::vector<std::unique_ptr<T>>
         return;
     }
 
+    for (auto& dataItem: data) {
+        handleLoadedItem(*dataItem);
+    }
+    updateIndices(data);
+
     uint offset = myLoadOffset;
     auto end = offset + data.size();
     if (end > myData.size()) {
         myData.resize(end);
     }
-
-    updateIndices(data);
     for (auto& dataItem: data) {
-        handleLoadedItem(*dataItem);
-
         myData[offset] = std::move(dataItem);
         offset++;
     }
@@ -290,10 +291,10 @@ template <typename T, typename U>
 void Repository<T, U>::loadFromCache() {
     loadDataFromCache();
 
-    updateIndices(myData);
     for (auto& data: myData) {
         handleLoadedItem(*data);
     }
+    updateIndices(myData);
 
     myUnfilteredFilter->processUpdatedSourceData();
     myFilter->processUpdatedSourceData();

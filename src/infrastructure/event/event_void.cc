@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -16,45 +16,22 @@
 namespace infrastructure {
 
 void Event<void>::operator()() {
-    myIsDispatching = true;
-    for (auto& subscriber: mySubscribers) {
+    for (auto& subscriber: std::vector<Delegate<void>>{mySubscribers}) {
         subscriber();
     }
-    myIsDispatching = false;
-
-    for (auto& subscriber: myPendingRemovals) {
-        removeSubscriber(subscriber);
-    }
-    myPendingRemovals.clear();
-    for (auto& subscriber: myPendingAdditions) {
-        mySubscribers.push_back(subscriber);
-    }
-    myPendingAdditions.clear();
+    // no instance variable should be accessed here in order to allow destruction of objects that fired an event during
+    // handling it
 }
 
 
 
 void Event<void>::operator+=(Delegate<void> subscriber) {
-    if (myIsDispatching) {
-        myPendingAdditions.push_back(subscriber);
-    } else {
-        mySubscribers.push_back(subscriber);
-    }
+    mySubscribers.push_back(subscriber);
 }
 
 
 
 void Event<void>::operator-=(Delegate<void> subscriber) {
-    if (myIsDispatching) {
-        myPendingRemovals.push_back(subscriber);
-    } else {
-        removeSubscriber(subscriber);
-    }
-}
-
-
-
-void Event<void>::removeSubscriber(Delegate<void>& subscriber) {
     auto subscriberIter = std::find(mySubscribers.begin(), mySubscribers.end(), subscriber);
     if (subscriberIter != mySubscribers.end()) {
         mySubscribers.erase(subscriberIter);

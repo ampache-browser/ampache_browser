@@ -44,6 +44,8 @@ public:
 private:
     std::unique_ptr<Ui> myUi = nullptr;
     std::unique_ptr<AmpacheBrowser> myAmpacheBrowser = nullptr;
+
+    void onTerminated();
 };
 
 
@@ -66,9 +68,7 @@ const PluginInfo AmpacheBrowserPlugin::pluginInfo = {
 
 
 void AmpacheBrowserPlugin::cleanup() {
-    // the termination may be executed asynchronously; normally handler of termination finished event would
-    // destroy myUi and myAmpacheBrowser instances; it is however not a good idea since the objects would be
-    // destroyed while handling the event
+    myAmpacheBrowser->terminated += DELEGATE0(&AmpacheBrowserPlugin::onTerminated);
     myAmpacheBrowser->requestTermination();
 }
 
@@ -76,10 +76,22 @@ void AmpacheBrowserPlugin::cleanup() {
 
 void* AmpacheBrowserPlugin::get_qt_widget()
 {
-    auto ui = std::unique_ptr<Ui>{new Ui{}};
-    myAmpacheBrowser = std::unique_ptr<AmpacheBrowser>{new AmpacheBrowser{*ui}};
-    myUi = std::move(ui);
+    myUi = std::unique_ptr<Ui>{new Ui{}};
+    myAmpacheBrowser = std::unique_ptr<AmpacheBrowser>{new AmpacheBrowser{*myUi}};
     return myUi->getMainWidget();
+}
+
+
+
+void AmpacheBrowserPlugin::onTerminated() {
+    AUDINFO("Terminating.\n");
+
+    // instance of AmpacheBrowser is destroyed during handling of its event (together with other dependend objects);
+    // the application must ensure that no instance variable of any object that is being destroyed here is accessed
+    // after the handling of this event
+    myAmpacheBrowser = nullptr;
+
+    myUi = nullptr;
 }
 
 
