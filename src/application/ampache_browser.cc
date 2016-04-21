@@ -194,9 +194,9 @@ void AmpacheBrowser::onSettingsUpdated(tuple<bool, string, string, string> setti
     aud_set_bool(SETTINGS_SECTION.c_str(), SETTINGS_USE_DEMO_SERVER.c_str(), get<0>(settings));
     aud_set_str(SETTINGS_SECTION.c_str(), SETTINGS_SERVER_URL.c_str(), get<1>(settings).c_str());
     aud_set_str(SETTINGS_SECTION.c_str(), SETTINGS_USER_NAME.c_str(), get<2>(settings).c_str());
-    auto passwordHash = QCryptographicHash::hash(QByteArray::fromStdString(get<3>(settings).c_str()),
-        QCryptographicHash::Sha256).toHex().toStdString();
-    aud_set_str(SETTINGS_SECTION.c_str(), SETTINGS_PASSWORD_HASH.c_str(), passwordHash.c_str());
+    auto passwordHash = QCryptographicHash::hash(QByteArray{get<3>(settings).c_str()},
+        QCryptographicHash::Sha256).toHex().data();
+    aud_set_str(SETTINGS_SECTION.c_str(), SETTINGS_PASSWORD_HASH.c_str(), passwordHash);
 
     mySettingsUpdated = true;
     requestTermination();

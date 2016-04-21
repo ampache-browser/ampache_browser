@@ -1,4 +1,4 @@
-// ampache_loader.cc
+// data_loader.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3

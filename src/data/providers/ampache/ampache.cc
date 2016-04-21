@@ -216,8 +216,8 @@ void Ampache::connectToServer() {
     auto currentTime = to_string(chrono::duration_cast<chrono::seconds>(chrono::system_clock::now().
         time_since_epoch()).count());
     auto passphrase = QCryptographicHash::hash(
-        QByteArray::fromStdString(currentTime) + QByteArray::fromStdString(myPasswordHash),
-        QCryptographicHash::Sha256).toHex().toStdString();
+        QByteArray{currentTime.c_str()} + QByteArray{myPasswordHash.c_str()},
+        QCryptographicHash::Sha256).toHex().data();
 
     ostringstream urlStream;
     urlStream << assembleUrlBase() << Method.Handshake << "&auth=" << passphrase << "&timestamp=" << currentTime
