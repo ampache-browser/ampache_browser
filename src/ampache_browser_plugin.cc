@@ -34,7 +34,7 @@ public:
 
     static const PluginInfo pluginInfo;
 
-    AmpacheBrowserPlugin(): GeneralPlugin(pluginInfo, true) {
+    AmpacheBrowserPlugin(): GeneralPlugin(pluginInfo, false) {
     }
 
     void cleanup() override;
