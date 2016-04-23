@@ -178,6 +178,7 @@ private:
         const std::map<std::string, QPixmap>& arts);
     AlbumData* findAlbumDataById(const std::string& id, int filteredOffset, int count) const;
     AlbumData* findAlbumDataByIdUnfiltered(const std::string& id, int offset, int count) const;
+    void fireArtsLoadedEvents();
 };
 
 }

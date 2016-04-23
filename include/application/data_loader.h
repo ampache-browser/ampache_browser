@@ -75,6 +75,11 @@ public:
     infrastructure::Event<LoadingResult> finished{};
 
     /**
+     * @brief Returns true if loading is in progress.
+     */
+    bool isLoadingInProgress() const;
+
+    /**
      * @brief Load data.
      *
      * @note Previously loaded data are cleared.

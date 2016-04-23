@@ -103,7 +103,11 @@ void AmpacheBrowser::onDataLoaderFinished(LoadingResult loadingResult) {
 void AmpacheBrowser::onPlayTriggered(SelectedItems& selectedItems) {
     myPlayIds = move(selectedItems);
     myAmpache->readySession += DELEGATE1(&AmpacheBrowser::onPlayOrCreateReadySession, bool);
-    myAmpache->refreshSession();
+    if (myDataLoader->isLoadingInProgress()) {
+        onPlayOrCreateReadySession(false);
+    } else {
+        myAmpache->refreshSession();
+    }
 }
 
 
@@ -113,7 +117,11 @@ void AmpacheBrowser::onCreatePlaylistTriggered(SelectedItems& selectedItems) {
 
     myPlayIds = move(selectedItems);
     myAmpache->readySession += DELEGATE1(&AmpacheBrowser::onPlayOrCreateReadySession, bool);
-    myAmpache->refreshSession();
+    if (myDataLoader->isLoadingInProgress()) {
+        onPlayOrCreateReadySession(false);
+    } else {
+        myAmpache->refreshSession();
+    }
 }
 
 
@@ -121,7 +129,11 @@ void AmpacheBrowser::onCreatePlaylistTriggered(SelectedItems& selectedItems) {
 void AmpacheBrowser::onAddToPlaylistTriggered(SelectedItems& selectedItems) {
     myPlayIds = move(selectedItems);
     myAmpache->readySession += DELEGATE1(&AmpacheBrowser::onAddReadySession, bool);
-    myAmpache->refreshSession();
+    if (myDataLoader->isLoadingInProgress()) {
+        onAddReadySession(false);
+    } else {
+        myAmpache->refreshSession();
+    }
 }
 
 

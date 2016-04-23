@@ -38,6 +38,12 @@ myCache(cache) {
 
 
 
+bool DataLoader::isLoadingInProgress() const {
+    return myState == Loading;
+}
+
+
+
 void DataLoader::load() {
     if (myState != Idle) {
         return;

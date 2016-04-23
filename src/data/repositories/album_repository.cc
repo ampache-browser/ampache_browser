@@ -253,9 +253,15 @@ void AlbumRepository::handleFilterSetUnsetOrChanged() {
 void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
     AUDDBG("Ready %d art entries from filtered offset %d; offset %d; requested count was %d.\n", arts.size(),
         myArtsLoadOffset, myArtsLoadOffsetUnfiltered, myArtsLoadCount);
-    if (!myLoadingEnabled)
-    {
+
+    if (!myLoadingEnabled) {
         artsLoadingDisabled();
+        return;
+    }
+
+    if (arts.size() == 0) {
+        auto error = true;
+        artsFullyLoaded(error);
         return;
     }
 
@@ -265,16 +271,7 @@ void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
     myArtsLoadProgress += loadedIdsAndArts.size();
     AUDDBG("Arts load progress: %d.\n", myArtsLoadProgress);
 
-    auto offset = myArtsLoadOffset != -1 ? myArtsLoadOffset : myArtsLoadOffsetUnfiltered;
-    auto offsetAndCount = offset != -1 ? pair<int, int>{offset, myArtsLoadCount} : pair<int, int>{0, 0};
-    myArtsLoadOffset = -1;
-    myArtsLoadOffsetUnfiltered = -1;
-    myArtsLoadCount = -1;
-    artsLoaded(offsetAndCount);
-    if (myArtsLoadProgress >= maxCount()) {
-        auto error = false;
-        artsFullyLoaded(error);
-    }
+    fireArtsLoadedEvents();
 }
 
 
@@ -296,7 +293,11 @@ void AlbumRepository::onCacheReadyArts(const map<string, QPixmap>& arts) {
         }
     }
 
-    myAmpache.requestAlbumArts(notLoadedIdsAndUrls);
+    if (notLoadedIdsAndUrls.size() != 0) {
+        myAmpache.requestAlbumArts(notLoadedIdsAndUrls);
+    } else {
+        fireArtsLoadedEvents();
+    }
 }
 
 
@@ -368,6 +369,21 @@ AlbumData* AlbumRepository::findAlbumDataByIdUnfiltered(const string& id, int of
         return nullptr;
     }
     return albumDataIter->get();
+}
+
+
+
+void AlbumRepository::fireArtsLoadedEvents() {
+    auto offset = myArtsLoadOffset != -1 ? myArtsLoadOffset : myArtsLoadOffsetUnfiltered;
+    auto offsetAndCount = offset != -1 ? pair<int, int>{offset, myArtsLoadCount} : pair<int, int>{0, 0};
+    myArtsLoadOffset = -1;
+    myArtsLoadOffsetUnfiltered = -1;
+    myArtsLoadCount = -1;
+    artsLoaded(offsetAndCount);
+    if (myArtsLoadProgress >= maxCount()) {
+        auto error = false;
+        artsFullyLoaded(error);
+    }
 }
 
 }
