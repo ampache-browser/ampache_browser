@@ -236,6 +236,7 @@ void AmpacheBrowser::initializeAndLoad() {
 
     initializeDependencies();
 
+    myUi->showNotification(_("Loading..."));
     myDataLoader->load();
 }
 
