@@ -98,9 +98,9 @@ U& Repository<T, U>::get(int filteredOffset) const {
 
 template <typename T, typename U>
 U& Repository<T, U>::getById(const std::string& id) const {
-    // SMELL: ad can be nullptr; in case album data is not found, return null?
+    // SMELL: in case album data is not found, return null?
     auto dataIter = find_if(myData.begin(), myData.end(),
-        [&id](const std::unique_ptr<T>& d) {return d->getId() == id;});
+        [&id](const std::unique_ptr<T>& d) {return d != nullptr && d->getId() == id;});
     return getDomainObject(**dataIter);
 }
 
