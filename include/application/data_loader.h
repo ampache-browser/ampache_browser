@@ -51,11 +51,6 @@ enum class LoadingResult {
      * @brief Error occured while readind data.
      */
     Error,
-
-    /**
-     * @brief Loading was aborted.
-     */
-    Aborted
 };
 
 
@@ -73,6 +68,11 @@ public:
      * @brief Fired when loading is finished.
      */
     infrastructure::Event<LoadingResult> finished{};
+
+    /**
+     * @brief Fired when loading is aborted.
+     */
+    infrastructure::Event<void> aborted{};
 
     /**
      * @brief Returns true if loading is in progress.
@@ -134,8 +134,9 @@ private:
     void onAlbumRepositoryArtsLoadingDisabled();
     void onTrackRepositoryLoadingDisabled();
 
-    void possiblyFireFinished();
+    void possiblyFireFinishedOrAborted();
     void fireFinished(LoadingResult loadingResult);
+    void fireAborted();
 };
 
 }

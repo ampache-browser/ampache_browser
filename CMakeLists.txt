@@ -47,7 +47,11 @@ set(ampache_browser_SRCS
     src/application/models/album_model.cc
     src/application/models/track_model.cc
     src/application/data_loader.cc
-    src/application/ampache_browser.cc)
+    src/application/filtering.cc
+    src/application/settings_internal.cc
+    src/application/ampache_browser_app.cc
+    src/settings.cc
+    src/ampache_browser.cc)
 
 # headers with QT meta objects
 set(ampache_browser_HEADERS_WITH_MO

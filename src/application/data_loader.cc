@@ -75,7 +75,7 @@ void DataLoader::abort() {
     }
 
     if (myState == Idle) {
-        fireFinished(LoadingResult::Aborted);
+        fireAborted();
         return;
     }
 
@@ -101,7 +101,7 @@ void DataLoader::onAmpacheInitialized(bool error) {
 
     myIsConnectionSuccessful = !error;
     if (myState == Aborting) {
-        possiblyFireFinished();
+        possiblyFireFinishedOrAborted();
         return;
     }
 
@@ -169,7 +169,7 @@ void DataLoader::onTracksFullyLoaded(bool error) {
         return;
     }
 
-    possiblyFireFinished();
+    possiblyFireFinishedOrAborted();
 }
 
 
@@ -183,7 +183,7 @@ void DataLoader::onArtsFullyLoaded(bool error) {
         return;
     }
 
-    possiblyFireFinished();
+    possiblyFireFinishedOrAborted();
 }
 
 
@@ -191,7 +191,7 @@ void DataLoader::onArtsFullyLoaded(bool error) {
 void DataLoader::onArtistRepositoryLoadingDisabled() {
     AUDINFO("Artists loading disabled.\n");
     myArtistsLoadingFinished = true;
-    possiblyFireFinished();
+    possiblyFireFinishedOrAborted();
 }
 
 
@@ -199,7 +199,7 @@ void DataLoader::onArtistRepositoryLoadingDisabled() {
 void DataLoader::onAlbumRepositoryLoadingDisabled() {
     AUDINFO("Albums loading disabled.\n");
     myAlbumsLoadingFinished = true;
-    possiblyFireFinished();
+    possiblyFireFinishedOrAborted();
 }
 
 
@@ -207,7 +207,7 @@ void DataLoader::onAlbumRepositoryLoadingDisabled() {
 void DataLoader::onAlbumRepositoryArtsLoadingDisabled() {
     AUDINFO("Album arts loading disabled.\n");
     myAlbumArtsLoadingFinished = true;
-    possiblyFireFinished();
+    possiblyFireFinishedOrAborted();
 }
 
 
@@ -215,12 +215,12 @@ void DataLoader::onAlbumRepositoryArtsLoadingDisabled() {
 void DataLoader::onTrackRepositoryLoadingDisabled() {
     AUDINFO("Tracks loading disabled.\n");
     myTracksLoadingFinished = true;
-    possiblyFireFinished();
+    possiblyFireFinishedOrAborted();
 }
 
 
 
-void DataLoader::possiblyFireFinished() {
+void DataLoader::possiblyFireFinishedOrAborted() {
     if (myAmpacheInitializationFinished && myArtistsLoadingFinished && myAlbumsLoadingFinished &&
         myAlbumArtsLoadingFinished && myTracksLoadingFinished) {
         if (myState == Aborting) {
@@ -228,7 +228,7 @@ void DataLoader::possiblyFireFinished() {
             myAlbumRepository->artsLoadingDisabled -= DELEGATE0(&DataLoader::onAlbumRepositoryArtsLoadingDisabled);
             myAlbumRepository->loadingDisabled -= DELEGATE0(&DataLoader::onAlbumRepositoryLoadingDisabled);
             myArtistRepository->loadingDisabled -= DELEGATE0(&DataLoader::onArtistRepositoryLoadingDisabled);
-            fireFinished(LoadingResult::Aborted);
+            fireAborted();
         } else {
             if (myIsConnectionSuccessful) {
                 fireFinished(LoadingResult::Success);
@@ -245,6 +245,14 @@ void DataLoader::fireFinished(LoadingResult loadingResult) {
     AUDINFO("Data loader finished with result %d.\n", loadingResult);
     myState = Idle;
     finished(loadingResult);
+}
+
+
+
+void DataLoader::fireAborted() {
+    AUDINFO("Data loader aborted.\n");
+    myState = Idle;
+    aborted();
 }
 
 }

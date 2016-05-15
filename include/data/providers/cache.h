@@ -161,7 +161,6 @@ private:
     // cache format version
     int const CACHE_VERSION = 0;
 
-    // SMELL: Use audacious cache dir.?
     // user cache directory
     const std::string CACHE_BASE_DIR = infrastructure::OsPaths::getCacheHome();
 
