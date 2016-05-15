@@ -26,10 +26,10 @@
 #include "application/models/album_model.h"
 #include "application/models/track_model.h"
 #include "application/data_loader.h"
+#include "application/settings_internal.h"
+#include "ampache_browser/settings.h"
 #include "filtering.h"
-#include "settings_internal.h"
-#include "settings.h"
-#include "ampache_browser_app.h"
+#include "application/ampache_browser_app.h"
 
 using namespace std;
 using namespace ampache_browser;

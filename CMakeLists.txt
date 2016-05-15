@@ -8,7 +8,7 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Concurrent REQUIRED)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-include_directories(include)
+include_directories(include/public include/internal)
 
 configure_file(ampache_browser.pc.cmakein ampache_browser.pc @ONLY)
 
@@ -50,20 +50,20 @@ set(ampache_browser_SRCS
     src/application/filtering.cc
     src/application/settings_internal.cc
     src/application/ampache_browser_app.cc
-    src/settings.cc
-    src/ampache_browser.cc)
+    src/ampache_browser/settings.cc
+    src/ampache_browser/ampache_browser.cc)
 
 # headers with QT meta objects
 set(ampache_browser_HEADERS_WITH_MO
-    include/application/models/artist_model.h
-    include/application/models/album_model.h
-    include/application/models/track_model.h
+    include/internal/application/models/artist_model.h
+    include/internal/application/models/album_model.h
+    include/internal/application/models/track_model.h
     src/data/providers/ampache/scale_album_art_runnable.h
-    include/data/providers/ampache.h
-    include/data/providers/cache.h
+    include/internal/data/providers/ampache.h
+    include/internal/data/providers/cache.h
     src/ui/settings_dialog.h
     src/ui/ampache_browser_main_window.h
-    include/ui/ui.h)
+    include/internal/ui/ui.h)
 qt5_wrap_cpp(ampache_browser_HEADERS_MOC ${ampache_browser_HEADERS_WITH_MO})
 
 #add_compile_options(-std=c++11 -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual -fvisibility=hidden)

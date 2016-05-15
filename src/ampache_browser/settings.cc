@@ -9,7 +9,7 @@
 
 #include <memory>
 #include "application/settings_internal.h"
-#include "settings.h"
+#include "ampache_browser/settings.h"
 
 using namespace std;
 using namespace application;
