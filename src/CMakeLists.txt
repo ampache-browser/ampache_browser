@@ -8,5 +8,3 @@ add_subdirectory(application)
 add_subdirectory(infrastructure)
 
 add_subdirectory(data)
-
-add_subdirectory(ampache_browser)

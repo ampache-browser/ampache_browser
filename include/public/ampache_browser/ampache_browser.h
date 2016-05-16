@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include "export.h"
 
 class QWidget;
 
@@ -33,7 +34,7 @@ class Settings;
 /**
  * @brief The Ampache Browser application public interface.
  */
-class AmpacheBrowser {
+class AMPACHE_BROWSER_EXPORT AmpacheBrowser {
 
 public:
     /**

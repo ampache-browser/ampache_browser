@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(ampache_browser VERSION 0.0.0)
 
 include(GNUInstallDirs)
+include(GenerateExportHeader)
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
@@ -50,8 +51,8 @@ set(ampache_browser_SRCS
     src/application/filtering.cc
     src/application/settings_internal.cc
     src/application/ampache_browser_app.cc
-    src/ampache_browser/settings.cc
-    src/ampache_browser/ampache_browser.cc)
+    src/settings.cc
+    src/ampache_browser.cc)
 
 # headers with QT meta objects
 set(ampache_browser_HEADERS_WITH_MO
@@ -66,15 +67,19 @@ set(ampache_browser_HEADERS_WITH_MO
     include/internal/ui/ui.h)
 qt5_wrap_cpp(ampache_browser_HEADERS_MOC ${ampache_browser_HEADERS_WITH_MO})
 
-#add_compile_options(-std=c++11 -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual -fvisibility=hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 add_compile_options(-std=c++11 -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual)
-add_definitions(-DPACKAGE=\"audacious-plugins\" -DEXPORT=__attribute__\(\(visibility\(\"default\"\)\)\))
+add_definitions(-DPACKAGE=\"audacious-plugins\")
 
 add_library(ampache_browser SHARED ${ampache_browser_SRCS} ${ampache_browser_HEADERS_MOC})
+generate_export_header(ampache_browser EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/include/public/ampache_browser/export.h)
 
 target_link_libraries(ampache_browser audcore Qt5::Core Qt5::Widgets Qt5Concurrent)
 
 install(TARGETS ampache_browser LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY include/public/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h")
+install(FILES ${PROJECT_BINARY_DIR}/ampache_browser.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 add_subdirectory(src)
 

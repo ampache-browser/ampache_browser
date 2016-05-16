@@ -15,6 +15,7 @@
 #include <string>
 #include <memory>
 #include <functional>
+#include "export.h"
 
 namespace application {
 class SettingsInternal;
@@ -27,7 +28,7 @@ namespace ampache_browser {
 /**
  * @brief The application settings container.
  */
-class Settings {
+class AMPACHE_BROWSER_EXPORT Settings {
 
 public:
     /**
