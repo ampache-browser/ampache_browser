@@ -24,7 +24,7 @@ string OsPaths::getConfigHome() {
     if ((configHome = getenv("XDG_CONFIG_HOME")) && configHome[0] == '/') {
         return string{configHome} + "/";
     }
-    return getHome() + "/.config/";
+    return getHome() + ".config/";
 }
 
 
@@ -34,17 +34,17 @@ string OsPaths::getCacheHome() {
     if ((cacheHome = getenv("XDG_CACHE_HOME")) && cacheHome[0] == '/') {
         return string{cacheHome} + "/";
     }
-    return getHome() + "/.cache/";
+    return getHome() + ".cache/";
 }
 
 
 
 string OsPaths::getHome() {
     const char* home;
-    if ((home = getenv("HOME"))) {
-        home = getpwuid(getuid())->pw_dir;
+    if ((home = getenv("HOME")) && home[0] == '/') {
+        return string{home} + "/";
     }
-    return home;
+    return string{getpwuid(getuid())->pw_dir} + "/";
 }
 
 }
