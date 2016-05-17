@@ -44,33 +44,83 @@ class TrackModel;
 class Filtering;
 class SettingsInternal;
 
+
+
 /**
  * @brief The application logic.
  */
 class AmpacheBrowserApp {
 
 public:
-    explicit AmpacheBrowserApp(SettingsInternal* const settings);
+    /**
+     * @brief Creates the instance of main application class.
+     *
+     * @param settingsInternal Application settings.
+     */
+    explicit AmpacheBrowserApp(SettingsInternal& settingsInternal);
 
+    /**
+     * @brief Destroys the instance.
+     *
+     * @warning The requestTermination() method should be called first and the instance destroyed after the callback
+     * terminatedCb is called.
+     */
     ~AmpacheBrowserApp();
 
+    /**
+     * @brief Sets a callback that will be called after the user performed "play" action.
+     *
+     * @param callback Function that shall be set as callback.
+     */
     void connectPlay(std::function<void(std::vector<std::string>)> callback);
 
+    /**
+     * @brief Sets a callback that will be called after the user performed "create playlist" action.
+     *
+     * @param callback Function that shall be set as callback.
+     */
     void connectCreatePlaylist(std::function<void(std::vector<std::string>)> callback);
 
+    /**
+     * @brief Sets a callback that will be called after the user performed "add to playlist" action.
+     *
+     * @param callback Function that shall be set as callback.
+     */
     void connectAddToPlaylist(std::function<void(std::vector<std::string>)> callback);
 
+    /**
+     * @brief Gets main window widget.
+     *
+     * @note Widget is not created until run() is called.
+     *
+     * @return The main window widget or nullptr if not created yet.
+     */
     QWidget* getMainWidget() const;
 
+    /**
+     * @brief Creates UI window, connects to the server and starts reading data.
+     */
+    void run();
+
+    /**
+     * @brief Request to terminate the application.
+     *
+     * This method should be used to end the application gracefully.  It signals to terminate all asynchronous
+     * operations and once they are terminated it calls the passed callback function.  The callback can delete
+     * the instance then.
+     *
+     * The implementation must ensure that no instance variable is accessed after the callback returns because
+     * the instance will be already destroyed.
+     */
     void requestTermination(std::function<void()> terminatedCb);
 
 private:
+    SettingsInternal& mySettingsInternal;
+
     std::function<void(std::vector<std::string>)> myPlayCb = [](std::vector<std::string>) { };
     std::function<void(std::vector<std::string>)> myCreatePlaylistCb = [](std::vector<std::string>) { };
     std::function<void(std::vector<std::string>)> myAddToPlaylistCb = [](std::vector<std::string>) { };
     std::function<void()> myTerminatedCb;
-
-    SettingsInternal* const mySettings = nullptr;
 
     std::unique_ptr<ui::Ui> myUi;
     std::unique_ptr<application::DataLoader> myDataLoader;

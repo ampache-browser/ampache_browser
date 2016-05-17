@@ -28,6 +28,7 @@
 #include "application/data_loader.h"
 #include "application/settings_internal.h"
 #include "ampache_browser/settings.h"
+#include "ampache_browser/ampache_browser.h"
 #include "filtering.h"
 #include "application/ampache_browser_app.h"
 
@@ -41,15 +42,13 @@ using namespace ui;
 
 namespace application {
 
-AmpacheBrowserApp::AmpacheBrowserApp(SettingsInternal* const settings): mySettings(settings) {
-    myUi = unique_ptr<Ui>(new Ui{});
-    initializeAndLoad();
+AmpacheBrowserApp::AmpacheBrowserApp(SettingsInternal& settingsInternal):
+mySettingsInternal(settingsInternal) {
 }
 
 
 
 AmpacheBrowserApp::~AmpacheBrowserApp() {
-    uninitializeDependencies();
 }
 
 
@@ -73,7 +72,14 @@ void AmpacheBrowserApp::connectAddToPlaylist(function<void(vector<string>)> call
 
 
 QWidget* AmpacheBrowserApp::getMainWidget() const {
-    return myUi->getMainWidget();
+    return myUi != nullptr ? myUi->getMainWidget() : nullptr;
+}
+
+
+
+void AmpacheBrowserApp::run() {
+    myUi = unique_ptr<Ui>(new Ui{});
+    initializeAndLoad();
 }
 
 
@@ -118,6 +124,7 @@ void AmpacheBrowserApp::onApplySettingsDataLoaderAborted() {
 
 void AmpacheBrowserApp::onRequestTerminationDataLoaderAborted() {
     myDataLoader->aborted -= DELEGATE0(&AmpacheBrowserApp::onRequestTerminationDataLoaderAborted);
+    uninitializeDependencies();
     myTerminatedCb();
 }
 
@@ -185,14 +192,14 @@ void AmpacheBrowserApp::onAddToPlaylistTriggeredAmpacheReadySession(bool error) 
 
 
 void AmpacheBrowserApp::onSettingsUpdated(tuple<bool, string, string, string> settings) {
-    mySettings->beginGroupSet();
-    mySettings->setBool(Settings::USE_DEMO_SERVER, get<0>(settings));
-    mySettings->setString(Settings::SERVER_URL, get<1>(settings));
-    mySettings->setString(Settings::USER_NAME, get<2>(settings));
+    mySettingsInternal.beginGroupSet();
+    mySettingsInternal.setBool(Settings::USE_DEMO_SERVER, get<0>(settings));
+    mySettingsInternal.setString(Settings::SERVER_URL, get<1>(settings));
+    mySettingsInternal.setString(Settings::USER_NAME, get<2>(settings));
     auto passwordHash = QCryptographicHash::hash(QByteArray{get<3>(settings).c_str()},
         QCryptographicHash::Sha256).toHex().data();
-    mySettings->setString(Settings::PASSWORD_HASH, passwordHash);
-    mySettings->endGroupSet();
+    mySettingsInternal.setString(Settings::PASSWORD_HASH, passwordHash);
+    mySettingsInternal.endGroupSet();
 
     applySettings();
 }
@@ -200,10 +207,10 @@ void AmpacheBrowserApp::onSettingsUpdated(tuple<bool, string, string, string> se
 
 
 void AmpacheBrowserApp::initializeAndLoad() {
-    auto useDemoServer = mySettings->getBool(Settings::USE_DEMO_SERVER);
-    auto serverUrl = mySettings->getString(Settings::SERVER_URL);
-    auto userName = mySettings->getString(Settings::USER_NAME);
-    auto passwordHash = mySettings->getString(Settings::PASSWORD_HASH);
+    auto useDemoServer = mySettingsInternal.getBool(Settings::USE_DEMO_SERVER);
+    auto serverUrl = mySettingsInternal.getString(Settings::SERVER_URL);
+    auto userName = mySettingsInternal.getString(Settings::USER_NAME);
+    auto passwordHash = mySettingsInternal.getString(Settings::PASSWORD_HASH);
 
     myUi->populateSettings(useDemoServer, serverUrl, userName);
 

@@ -29,11 +29,6 @@ const string Settings::PASSWORD_HASH = "password_hash";
 
 
 
-Settings::Settings(): mySettingsInternal(new SettingsInternal{}) {
-}
-
-
-
 Settings::~Settings() {
 }
 
@@ -77,6 +72,11 @@ void Settings::beginGroupSet() {
 
 void Settings::endGroupSet() {
     mySettingsInternal->endGroupSet();
+}
+
+
+
+Settings::Settings(unique_ptr<SettingsInternal> settingsInternal): mySettingsInternal(move(settingsInternal)) {
 }
 
 }

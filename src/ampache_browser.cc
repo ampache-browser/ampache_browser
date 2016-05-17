@@ -8,7 +8,6 @@
 
 
 #include "application/ampache_browser_app.h"
-#include "ampache_browser/settings.h"
 #include "ampache_browser/ampache_browser.h"
 
 using namespace std;
@@ -17,12 +16,6 @@ using namespace application;
 
 
 namespace ampache_browser {
-
-AmpacheBrowser::AmpacheBrowser(Settings* const settings):
-myAmpacheBrowserApp(new AmpacheBrowserApp{settings->mySettingsInternal.get()}) {
-}
-
-
 
 AmpacheBrowser::~AmpacheBrowser() {
 }
@@ -47,14 +40,20 @@ void AmpacheBrowser::connectAddToPlaylist(function<void(vector<string>)> callbac
 
 
 
-QWidget* AmpacheBrowser::getMainWidget() const {
-    return myAmpacheBrowserApp->getMainWidget();
+void AmpacheBrowser::run() {
+    myAmpacheBrowserApp->run();
 }
 
 
 
 void AmpacheBrowser::requestTermination(function<void()> terminatedCb) {
     myAmpacheBrowserApp->requestTermination(terminatedCb);
+}
+
+
+
+AmpacheBrowser::AmpacheBrowser(unique_ptr<AmpacheBrowserApp> ampacheBrowserApp):
+myAmpacheBrowserApp(move(ampacheBrowserApp)) {
 }
 
 }

@@ -51,8 +51,11 @@ set(ampache_browser_SRCS
     src/application/filtering.cc
     src/application/settings_internal.cc
     src/application/ampache_browser_app.cc
+    src/application/application.cc
+    src/application/qt_application_internal.cc
     src/settings.cc
-    src/ampache_browser.cc)
+    src/ampache_browser.cc
+    src/qt_application.cc)
 
 # headers with QT meta objects
 set(ampache_browser_HEADERS_WITH_MO
