@@ -47,6 +47,25 @@ void SettingsInternal::setString(const string& key, const string& value) {
 
 
 
+int SettingsInternal::getInt(const string& key) const {
+    return myInts.at(key);
+}
+
+
+
+void SettingsInternal::setInt(const string& key, int value) {
+    bool isNewKey;
+    auto oldValue = (isNewKey = myInts.count(key) == 0) ? myInts[key] : 0;
+
+    myInts[key] = value;
+
+    if (isNewKey || (value != oldValue)) {
+        fireChanged();
+    }
+}
+
+
+
 bool SettingsInternal::getBool(const string& key) const {
     return myBools.at(key);
 }

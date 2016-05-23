@@ -7,11 +7,11 @@
 
 
 
-#include <libaudcore/runtime.h>
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
 
 #include "infrastructure/event/delegate.h"
+#include "infrastructure/logging/logging.h"
 #include "domain/artist.h"
 #include "data//repositories/artist_repository.h"
 #include "requests.h"
@@ -112,7 +112,7 @@ void ArtistModel::onProviderChanged() {
 
 
 void ArtistModel::requestAllData() {
-    AUDDBG("Requesting all data.\n");
+    LOG_DBG("Requesting all data.");
     for (int row = 0; row < myArtistRepository->maxCount(); row++) {
         myRequests->add(row);
     }

@@ -7,13 +7,14 @@
 
 
 
-#include <libaudcore/runtime.h>
 #include <libaudcore/i18n.h>
+
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
 #include <QtCore/QAbstractTableModel>
 
 #include "infrastructure/event/delegate.h"
+#include "infrastructure/logging/logging.h"
 #include "domain/track.h"
 #include "data/repositories/track_repository.h"
 #include "requests.h"
@@ -139,7 +140,7 @@ void TrackModel::onProviderChanged() {
 
 
 void TrackModel::requestAllData() {
-    AUDDBG("Requesting all data.\n");
+    LOG_DBG("Requesting all data.");
     for (int row = 0; row < myTrackRepository->maxCount(); row++) {
         myRequests->add(row);
     }

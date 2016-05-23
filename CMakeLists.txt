@@ -17,6 +17,8 @@ set(ampache_browser_SRCS
     src/infrastructure/os_paths.cc
     src/infrastructure/event/delegate_void.cc
     src/infrastructure/event/event_void.cc
+    src/infrastructure/logging/qt_logger/set_qt_logger_default_message_pattern.cc
+    src/infrastructure/logging/qt_logger/qt_logger.cc
     src/domain/album.cc
     src/domain/track.cc
     src/domain/artist.cc
@@ -74,6 +76,9 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 add_compile_options(-std=c++11 -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual)
 add_definitions(-DPACKAGE=\"audacious-plugins\")
+if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT CMAKE_BUILD_TYPE STREQUAL "")
+    add_definitions(-DAMPACHE_BROWSER_RELEASE)
+endif ()
 
 add_library(ampache_browser SHARED ${ampache_browser_SRCS} ${ampache_browser_HEADERS_MOC})
 generate_export_header(ampache_browser EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/include/public/ampache_browser/export.h)

@@ -15,13 +15,13 @@
 #include <fstream>
 #include <chrono>
 
-#include <libaudcore/runtime.h>
 #include <QString>
 #include <QPixmap>
 #include <QFutureWatcher>
 #include <QFutureIterator>
 #include <QtConcurrent/QtConcurrent>
 
+#include "infrastructure/logging/logging.h"
 #include "domain/artist.h"
 #include "domain/album.h"
 #include "domain/track.h"
@@ -32,6 +32,7 @@
 
 using namespace std;
 using namespace chrono;
+using namespace infrastructure;
 using namespace domain;
 
 
@@ -185,7 +186,7 @@ vector<unique_ptr<TrackData>> Cache::loadTracksData() const {
 
 
 void Cache::requestAlbumArts(const vector<string>& ids) {
-    AUDDBG("Getting %d album arts.\n", ids.size());
+    LOG_DBG("Getting %d album arts.", ids.size());
     myRequestedAlbumArtIds = ids;
     auto artsLoadFutureWatcher = new QFutureWatcher<pair<string, QPixmap>>();
     connect(artsLoadFutureWatcher, SIGNAL(finished()), this, SLOT(onArtsLoadFinished()));
@@ -286,7 +287,7 @@ void Cache::updateAlbumArts(const map<string, QPixmap>& arts) const {
 
 
 void Cache::onArtsLoadFinished() {
-    AUDDBG("Album art request has returned.\n");
+    LOG_DBG("Album art request has returned.");
     auto artsLoadFutureWatcher = reinterpret_cast<QFutureWatcher<pair<string, QPixmap>>*>(sender());
     QFutureIterator<pair<string, QPixmap>> results{artsLoadFutureWatcher->future()};
 

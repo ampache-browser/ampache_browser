@@ -12,7 +12,6 @@
 #include <memory>
 #include <utility>
 
-#include <libaudcore/runtime.h>
 #include <QObject>
 #include <QString>
 #include <QUrl>
@@ -24,6 +23,7 @@
 
 #include <libaudcore/vfs_async.h>
 
+#include "infrastructure/logging/logging.h"
 #include "domain/artist.h"
 #include "domain/album.h"
 #include "domain/track.h"
@@ -134,7 +134,7 @@ void Ampache::requestAlbumArts(const map<string, string>& idsAndUrls) {
         return;
     }
 
-    AUDDBG("Getting %d album arts.\n", idsAndUrls.size());
+    LOG_DBG("Getting %d album arts.", idsAndUrls.size());
     for (auto& idAndUrl: idsAndUrls) {
         myPendingAlbumArts.insert(idAndUrl.first);
         vfs_async_file_get_contents(refreshUrl(idAndUrl.second).c_str(), onGetContentsCStyleWrapper,
@@ -169,7 +169,7 @@ void Ampache::onGetContents(const char* url, const Index<char>& contentBuffer) {
 
     QXmlStreamReader xmlStreamReader{QString::fromStdString(content)};
     string methodName = AmpacheUrl{url}.parseActionValue();
-    AUDDBG("Server call of method '%s' has returned with content of length %d and error %d.\n",
+    LOG_DBG("Server call of method '%s' has returned with content of length %d and error %d.",
         methodName.c_str(), contentBuffer.len(), error);
     dispatchToMethodHandler(methodName, xmlStreamReader, error);
 }
@@ -177,7 +177,7 @@ void Ampache::onGetContents(const char* url, const Index<char>& contentBuffer) {
 
 
 void Ampache::onAlbumArtFinished(const char* artUrl, const Index<char>& contentBuffer) {
-    AUDDBG("Album art request has returned with content of length %d.\n", contentBuffer.len());
+    LOG_DBG("Album art request has returned with content of length %d.", contentBuffer.len());
     auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(AmpacheUrl{artUrl}.parseIdValue(),
         QByteArray{contentBuffer.begin(), contentBuffer.len()});
     scaleAlbumArtRunnable->setAutoDelete(false);
@@ -189,7 +189,7 @@ void Ampache::onAlbumArtFinished(const char* artUrl, const Index<char>& contentB
 
 
 void Ampache::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable) {
-    AUDDBG("Scaling of album art with ID %s has returned.\n", scaleAlbumArtRunnable->getId().c_str());
+    LOG_DBG("Scaling of album art with ID %s has returned.", scaleAlbumArtRunnable->getId().c_str());
     // SMELL: It crashes when not found.  Either use condition or do not search for ID at all and use the one from
     // scaleAlbumArtRunnable.
     auto albumId = *(myPendingAlbumArts.find(scaleAlbumArtRunnable->getId()));
@@ -212,7 +212,7 @@ void Ampache::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumA
 
 
 void Ampache::connectToServer() {
-    AUDDBG("Handshaking with server.\n");
+    LOG_DBG("Handshaking with server.");
     auto currentTime = to_string(chrono::duration_cast<chrono::seconds>(chrono::system_clock::now().
         time_since_epoch()).count());
     auto passphrase = QCryptographicHash::hash(
@@ -235,7 +235,7 @@ void Ampache::callMethod(const string& name, const map<string, string>& argument
         return;
     }
 
-    AUDDBG("Calling server method '%s'.\n", name.c_str());
+    LOG_DBG("Calling server method '%s'.", name.c_str());
     ostringstream urlStream;
     urlStream << assembleUrlBase() << name << "&auth=" << myAuthToken;
     for (auto nameValuePair: arguments) {

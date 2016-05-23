@@ -60,6 +60,15 @@ public:
      */
     static const std::string PASSWORD_HASH;
 
+    /**
+     * @brief Configuration variable name for verbosity of logging system.
+     *
+     * 0 - no log messages, ..., 4 - all log messages
+     *
+     * Value type: int.
+     */
+    static const std::string LOGGING_VERBOSITY;
+
     ~Settings();
 
     /**
@@ -85,6 +94,21 @@ public:
      * @param value The value.
      */
     void setString(const std::string& key, const std::string& value);
+
+    /**
+     * @brief Gets the value of the given configuration variable of type int.
+     *
+     * @param key The name of configuration variable.
+     */
+    int getInt(const std::string& key) const;
+
+    /**
+     * @brief Sets the value of the given configuration variable of type int.
+     *
+     * @param key The name of configuration variable.
+     * @param value The value.
+     */
+    void setInt(const std::string& key, int value);
 
     /**
      * @brief Gets the value of the given configuration variable of type bool.

@@ -9,9 +9,8 @@
 
 #include <chrono>
 
-#include <libaudcore/runtime.h>
-
 #include "infrastructure/event/delegate.h"
+#include "infrastructure/logging/logging.h"
 #include "data/providers/ampache.h"
 #include "data/providers/cache.h"
 #include "data/repositories/artist_repository.h"
@@ -49,7 +48,7 @@ void DataLoader::load() {
         return;
     }
 
-    AUDINFO("Begin loading.\n");
+    LOG_INF("Begin loading.");
     myState = Loading;
     myIsConnectionSuccessful = false;
 
@@ -79,7 +78,7 @@ void DataLoader::abort() {
         return;
     }
 
-    AUDINFO("Begin aborting\n");
+    LOG_INF("Begin aborting.");
     myState = Aborting;
 
     myArtistRepository->loadingDisabled += DELEGATE0(&DataLoader::onArtistRepositoryLoadingDisabled);
@@ -95,7 +94,7 @@ void DataLoader::abort() {
 
 
 void DataLoader::onAmpacheInitialized(bool error) {
-    AUDINFO("Ampache initialized with result %d.\n", error);
+    LOG_INF("Ampache initialized with result %d.", error);
     myAmpache.initialized -= DELEGATE1(&DataLoader::onAmpacheInitialized, bool);
     myAmpacheInitializationFinished = true;
 
@@ -114,11 +113,11 @@ void DataLoader::onAmpacheInitialized(bool error) {
 
     if (error || (myCache.getServerUrl() == myAmpache.getUrl() && myCache.getUser() == myAmpache.getUser() &&
             myCache.getLastUpdate() > myAmpache.getLastUpdate())) {
-        AUDDBG("Setting data provider type to Cache (artists: %d, albums: %d, tracks: %d).\n",
+        LOG_DBG("Setting data provider type to Cache (artists: %d, albums: %d, tracks: %d).",
             myCache.numberOfArtists(), myCache.numberOfAlbums(), myCache.numberOfTracks());
         myProviderType = ProviderType::Cache;
     } else {
-        AUDDBG("Setting data provider type to Ampache (artists: %d, albums: %d, tracks: %d).\n",
+        LOG_DBG("Setting data provider type to Ampache (artists: %d, albums: %d, tracks: %d).",
             myAmpache.numberOfArtists(), myAmpache.numberOfAlbums(), myAmpache.numberOfTracks());
         myProviderType = ProviderType::Ampache;
     }
@@ -130,7 +129,7 @@ void DataLoader::onAmpacheInitialized(bool error) {
 
 
 void DataLoader::onArtistsFullyLoaded(bool error) {
-    AUDINFO("Artists fully loaded with result %d.\n", error);
+    LOG_INF("Artists fully loaded with result %d.", error);
     myArtistRepository->fullyLoaded -= DELEGATE1(&DataLoader::onArtistsFullyLoaded, bool);
     myArtistsLoadingFinished = true;
     if (error) {
@@ -146,7 +145,7 @@ void DataLoader::onArtistsFullyLoaded(bool error) {
 
 
 void DataLoader::onAlbumsFullyLoaded(bool error) {
-    AUDINFO("Albums fully loaded with result %d.\n", error);
+    LOG_INF("Albums fully loaded with result %d.", error);
     myAlbumRepository->fullyLoaded -= DELEGATE1(&DataLoader::onAlbumsFullyLoaded, bool);
     myAlbumsLoadingFinished = true;
     if (error) {
@@ -161,7 +160,7 @@ void DataLoader::onAlbumsFullyLoaded(bool error) {
 
 
 void DataLoader::onTracksFullyLoaded(bool error) {
-    AUDINFO("Tracks fully loaded with result %d.\n", error);
+    LOG_INF("Tracks fully loaded with result %d.", error);
     myTrackRepository->fullyLoaded -= DELEGATE1(&DataLoader::onTracksFullyLoaded, bool);
     myTracksLoadingFinished = true;
     if (error) {
@@ -175,7 +174,7 @@ void DataLoader::onTracksFullyLoaded(bool error) {
 
 
 void DataLoader::onArtsFullyLoaded(bool error) {
-    AUDINFO("Arts fully loaded with result %d.\n", error);
+    LOG_INF("Arts fully loaded with result %d.", error);
     myAlbumRepository->artsFullyLoaded -= DELEGATE1(&DataLoader::onArtsFullyLoaded, bool);
     myAlbumArtsLoadingFinished = true;
     if (error) {
@@ -189,7 +188,7 @@ void DataLoader::onArtsFullyLoaded(bool error) {
 
 
 void DataLoader::onArtistRepositoryLoadingDisabled() {
-    AUDINFO("Artists loading disabled.\n");
+    LOG_INF("Artists loading disabled.");
     myArtistsLoadingFinished = true;
     possiblyFireFinishedOrAborted();
 }
@@ -197,7 +196,7 @@ void DataLoader::onArtistRepositoryLoadingDisabled() {
 
 
 void DataLoader::onAlbumRepositoryLoadingDisabled() {
-    AUDINFO("Albums loading disabled.\n");
+    LOG_INF("Albums loading disabled.");
     myAlbumsLoadingFinished = true;
     possiblyFireFinishedOrAborted();
 }
@@ -205,7 +204,7 @@ void DataLoader::onAlbumRepositoryLoadingDisabled() {
 
 
 void DataLoader::onAlbumRepositoryArtsLoadingDisabled() {
-    AUDINFO("Album arts loading disabled.\n");
+    LOG_INF("Album arts loading disabled.");
     myAlbumArtsLoadingFinished = true;
     possiblyFireFinishedOrAborted();
 }
@@ -213,7 +212,7 @@ void DataLoader::onAlbumRepositoryArtsLoadingDisabled() {
 
 
 void DataLoader::onTrackRepositoryLoadingDisabled() {
-    AUDINFO("Tracks loading disabled.\n");
+    LOG_INF("Tracks loading disabled.");
     myTracksLoadingFinished = true;
     possiblyFireFinishedOrAborted();
 }
@@ -242,7 +241,7 @@ void DataLoader::possiblyFireFinishedOrAborted() {
 
 
 void DataLoader::fireFinished(LoadingResult loadingResult) {
-    AUDINFO("Data loader finished with result %d.\n", loadingResult);
+    LOG_INF("Data loader finished with result %d.", loadingResult);
     myState = Idle;
     finished(loadingResult);
 }
@@ -250,7 +249,7 @@ void DataLoader::fireFinished(LoadingResult loadingResult) {
 
 
 void DataLoader::fireAborted() {
-    AUDINFO("Data loader aborted.\n");
+    LOG_INF("Data loader aborted.");
     myState = Idle;
     aborted();
 }

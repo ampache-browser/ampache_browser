@@ -9,13 +9,14 @@
 
 #include <memory>
 
-#include <libaudcore/runtime.h>
 #include <libaudcore/i18n.h>
+
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
 #include <QtGui/QIcon>
 
 #include "infrastructure/event/delegate.h"
+#include "infrastructure/logging/logging.h"
 #include "domain/album.h"
 #include "data/repositories/album_repository.h"
 #include "requests.h"
@@ -84,7 +85,7 @@ QVariant AlbumModel::data(const QModelIndex& index, int role) const {
         } else {
             if (!album.hasArt()) {
                 if (myIsInUnfilteredArtsLoadMode) {
-                    AUDDBG("Removing all art requests and setting unfiltered mode to false.\n");
+                    LOG_DBG("Removing all art requests and setting unfiltered mode to false.");
                     myArtRequests->removeAll();
                     myIsInUnfilteredArtsLoadMode = false;
                 }
@@ -164,7 +165,7 @@ void AlbumModel::onArtsLoaded(pair<int, int> offsetAndCount) {
 void AlbumModel::onFilterChanged() {
     beginResetModel();
 
-    AUDDBG("Removing all art requests.\n");
+    LOG_DBG("Removing all art requests.");
     myArtRequests->removeAll();
 
     // filterChanged event is fired even if it does not results to an actual change of filtered data; it that case
@@ -190,7 +191,7 @@ void AlbumModel::onProviderChanged() {
 
 
 void AlbumModel::requestAllData() {
-    AUDDBG("Requesting all data.\n");
+    LOG_DBG("Requesting all data.");
     for (int row = 0; row < myAlbumRepository->maxCount(); row++) {
         myAlbumRequests->add(row);
     }
@@ -199,7 +200,7 @@ void AlbumModel::requestAllData() {
 
 
 void AlbumModel::requestUnloadedArts() {
-    AUDDBG("Requesting all unloaded arts.\n");
+    LOG_DBG("Requesting all unloaded arts.");
     for (int row = 0; row < myAlbumRepository->maxCount(); row++) {
         if (myAlbumRepository->isLoadedUnfiltered(row)) {
             auto& album = myAlbumRepository->getUnfiltered(row);

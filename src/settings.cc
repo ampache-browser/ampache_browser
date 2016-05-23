@@ -27,6 +27,8 @@ const string Settings::USER_NAME = "user_name";
 
 const string Settings::PASSWORD_HASH = "password_hash";
 
+const string Settings::LOGGING_VERBOSITY = "logging_verbosity";
+
 
 
 Settings::~Settings() {
@@ -48,6 +50,18 @@ string Settings::getString(const string& key) const {
 
 void Settings::setString(const string& key, const string& value) {
     mySettingsInternal->setString(key, value);
+}
+
+
+
+int Settings::getInt(const string& key) const {
+    return mySettingsInternal->getInt(key);
+}
+
+
+
+void Settings::setInt(const string& key, int value) {
+    mySettingsInternal->setInt(key, value);
 }
 
 

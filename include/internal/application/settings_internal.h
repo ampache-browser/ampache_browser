@@ -56,6 +56,21 @@ public:
     void setString(const std::string& key, const std::string& value);
 
     /**
+     * @brief Gets the value of the given configuration variable of type int.
+     *
+     * @param key The name of configuration variable.
+     */
+    int getInt(const std::string& key) const;
+
+    /**
+     * @brief Sets the value of the given configuration variable of type int.
+     *
+     * @param key The name of configuration variable.
+     * @param value The value.
+     */
+    void setInt(const std::string& key, int value);
+
+    /**
      * @brief Gets the value of the given configuration variable of type bool.
      *
      * @param key The name of configuration variable.
@@ -87,6 +102,7 @@ public:
 
 private:
     std::map<std::string, std::string> myStrings;
+    std::map<std::string, int> myInts;
     std::map<std::string, bool> myBools;
     std::function<void()> myChangedCb = []() { };
 

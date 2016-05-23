@@ -10,8 +10,6 @@
 #include <QObject>
 #include <QImage>
 
-#include <libaudcore/vfs_async.h>
-
 #include "scale_album_art_runnable.h"
 
 using namespace std;

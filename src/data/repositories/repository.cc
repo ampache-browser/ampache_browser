@@ -7,8 +7,7 @@
 
 
 
-#include <libaudcore/runtime.h>
-
+#include "infrastructure/logging/logging.h"
 #include "infrastructure/event/delegate.h"
 #include "data/provider_type.h"
 #include "data/providers/ampache.h"
@@ -68,7 +67,7 @@ bool Repository<T, U>::load(int offset, int limit) {
         return false;
     }
 
-    AUDDBG("Load from %d, limit %d.\n", offset, limit);
+    infrastructure::LOG_DBG("Load from %d, limit %d.", offset, limit);
     if (myProviderType == ProviderType::Ampache) {
         myLoadOffset = offset;
         getDataLoadRequestFinishedEvent() += infrastructure::DELEGATE1(
@@ -140,7 +139,7 @@ void Repository<T, U>::disableLoading() {
 
 template <typename T, typename U>
 void Repository<T, U>::setFilter(std::unique_ptr<Filter<T>> filter) {
-    AUDDBG("Setting a filter.\n");
+    infrastructure::LOG_DBG("Setting a filter.");
     myIsFilterSet = true;
 
     myFilter->changed -= infrastructure::DELEGATE0((&Repository<T, U>::onFilterChanged));
@@ -159,7 +158,7 @@ void Repository<T, U>::unsetFilter() {
     if (!isFiltered()) {
         return;
     }
-    AUDDBG("Unsetting a filter.\n");
+    infrastructure::LOG_DBG("Unsetting a filter.");
     myIsFilterSet = false;
 
     myFilter->changed -= infrastructure::DELEGATE0((&Repository<T, U>::onFilterChanged));
@@ -188,7 +187,7 @@ void Repository<T, U>::handleLoadedItem(const T&) const {
 
 template <typename T, typename U>
 void Repository<T, U>::clear() {
-    AUDDBG("Clearing.\n");
+    infrastructure::LOG_DBG("Clearing.");
     myData.clear();
     myLoadProgress = 0;
     myLoadOffset = -1;
@@ -214,7 +213,7 @@ void Repository<T, U>::handleFilterSetUnsetOrChanged() {
 
 template <typename T, typename U>
 void Repository<T, U>::onFilterChanged() {
-    AUDDBG("Processing filter changed event.\n");
+    infrastructure::LOG_DBG("Processing filter changed event.");
     handleFilterSetUnsetOrChanged();
 }
 
@@ -222,7 +221,7 @@ void Repository<T, U>::onFilterChanged() {
 
 template <typename T, typename U>
 void Repository<T, U>::onDataLoadRequestFinished(std::vector<std::unique_ptr<T>>& data) {
-    AUDDBG("Ready %d entries from offset %d.\n", data.size(), myLoadOffset);
+    infrastructure::LOG_DBG("Ready %d entries from offset %d.", data.size(), myLoadOffset);
     getDataLoadRequestFinishedEvent() -= infrastructure::DELEGATE1((&Repository<T, U>::onDataLoadRequestFinished),
         std::vector<std::unique_ptr<T>>);
 
@@ -272,7 +271,7 @@ void Repository<T, U>::onDataLoadRequestFinished(std::vector<std::unique_ptr<T>>
     myFilter->processUpdatedSourceData(myLoadOffset, data.size());
     myLoadOffset = -1;
     myLoadProgress += data.size();
-    AUDDBG("Load progress: %d.\n", myLoadProgress);
+    infrastructure::LOG_DBG("Load progress: %d.", myLoadProgress);
 
     bool isFullyLoaded = myLoadProgress >= maxCount();
     if (isFullyLoaded) {

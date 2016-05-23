@@ -10,8 +10,7 @@
 #include <string>
 #include <vector>
 
-#include <libaudcore/runtime.h>
-
+#include "infrastructure/logging/logging.h"
 #include "infrastructure/event/delegate.h"
 #include "domain/artist.h"
 #include "data/provider_type.h"
@@ -89,7 +88,7 @@ bool AlbumRepository::loadArts(int filteredOffset, int count) {
         return false;
     }
 
-    AUDDBG("Load arts from filtered offset %d, count %d.\n", filteredOffset, count);
+    LOG_DBG("Load arts from filtered offset %d, count %d.", filteredOffset, count);
     myArtsLoadOffset = filteredOffset;
     myArtsLoadCount = count;
     if (myProviderType == ProviderType::Ampache) {
@@ -120,7 +119,7 @@ bool AlbumRepository::loadArtsUnfiltered(int offset, int count) {
         return false;
     }
 
-    AUDDBG("Load arts from offset %d, count %d.\n", offset, count);
+    LOG_DBG("Load arts from offset %d, count %d.", offset, count);
     myArtsLoadOffsetUnfiltered = offset;
     myArtsLoadCount = count;
     if (myProviderType == ProviderType::Ampache) {
@@ -251,7 +250,7 @@ void AlbumRepository::handleFilterSetUnsetOrChanged() {
 
 
 void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
-    AUDDBG("Ready %d art entries from filtered offset %d; offset %d; requested count was %d.\n", arts.size(),
+    LOG_DBG("Ready %d art entries from filtered offset %d; offset %d; requested count was %d.", arts.size(),
         myArtsLoadOffset, myArtsLoadOffsetUnfiltered, myArtsLoadCount);
 
     if (!myLoadingEnabled) {
@@ -269,7 +268,7 @@ void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
 
     myCache.updateAlbumArts(loadedIdsAndArts);
     myArtsLoadProgress += loadedIdsAndArts.size();
-    AUDDBG("Arts load progress: %d.\n", myArtsLoadProgress);
+    LOG_DBG("Arts load progress: %d.", myArtsLoadProgress);
 
     fireArtsLoadedEvents();
 }
@@ -277,7 +276,7 @@ void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
 
 
 void AlbumRepository::onCacheReadyArts(const map<string, QPixmap>& arts) {
-    AUDDBG("Ready %d art entries from filtered offset %d; offset %d; requested count was %d.\n", arts.size(),
+    LOG_DBG("Ready %d art entries from filtered offset %d; offset %d; requested count was %d.", arts.size(),
         myArtsLoadOffset, myArtsLoadOffsetUnfiltered, myArtsLoadCount);
 
     auto loadedAndNotLoadedIds = setArts(arts);

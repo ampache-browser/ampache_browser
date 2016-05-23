@@ -9,12 +9,12 @@
 
 #include <string>
 
-#include <libaudcore/runtime.h>
 #include <libaudcore/i18n.h>
 
 #include <QCryptographicHash>
 
 #include "infrastructure/event/delegate.h"
+#include "infrastructure/logging/logging.h"
 #include "data/providers/ampache.h"
 #include "data/providers/cache.h"
 #include "data/indices.h"
@@ -78,6 +78,9 @@ QWidget* AmpacheBrowserApp::getMainWidget() const {
 
 
 void AmpacheBrowserApp::run() {
+    SET_LOG_LEVEL(verbosityToLogLevel(mySettingsInternal.getInt(Settings::LOGGING_VERBOSITY)));
+    LOG_INF("Starting...");
+
     myUi = unique_ptr<Ui>(new Ui{});
     initializeAndLoad();
 }
@@ -85,7 +88,7 @@ void AmpacheBrowserApp::run() {
 
 
 void AmpacheBrowserApp::requestTermination(function<void()> terminatedCb) {
-    AUDINFO("Termination request.\n");
+    LOG_INF("Termination request.");
 
     myTerminatedCb = terminatedCb;
 
@@ -321,6 +324,18 @@ vector<string> AmpacheBrowserApp::createPlaylistItems(bool error) {
 
     myPlayIds = SelectedItems{};
     return playlistUrls;
+}
+
+
+
+LogLevel AmpacheBrowserApp::verbosityToLogLevel(int verbosity) {
+    switch (verbosity) {
+        case 0: return LogLevel::None;
+        case 1: return LogLevel::Error;
+        case 2: return LogLevel::Warning;
+        case 3: return LogLevel::Info;
+        default: return LogLevel::Debug;
+    }
 }
 
 }

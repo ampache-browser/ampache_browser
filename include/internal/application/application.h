@@ -46,6 +46,9 @@ public:
 
     /**
      * @brief Gets instance of Ampache Browser.
+     *
+     * @warning Settings instance returned by getSettings() has to be initialized (all settings have to be set) prior
+     * to usage of the returned AmpacheBrowser instance.
      */
     std::unique_ptr<ampache_browser::AmpacheBrowser> getAmpacheBrowser() const;
 

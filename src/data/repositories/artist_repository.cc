@@ -7,8 +7,6 @@
 
 
 
-#include <libaudcore/runtime.h>
-
 #include "domain/artist.h"
 #include "infrastructure/event/delegate.h"
 #include "data/provider_type.h"
