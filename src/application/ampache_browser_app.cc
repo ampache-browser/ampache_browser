@@ -10,7 +10,6 @@
 #include <string>
 
 #include <libaudcore/i18n.h>
-
 #include <QCryptographicHash>
 
 #include "infrastructure/event/delegate.h"
@@ -86,15 +85,15 @@ void AmpacheBrowserApp::run() {
 
 
 
-void AmpacheBrowserApp::requestTermination(function<void()> terminatedCb) {
-    LOG_INF("Termination request.");
+void AmpacheBrowserApp::finishRequest(function<void()> finishedCb) {
+    LOG_INF("Finish request.");
 
-    myTerminatedCb = terminatedCb;
+    myFinishedCb = finishedCb;
 
     // SMELL: Handshake with the server can be in progress.  Unsubscribing from event here is most likely not enough.
     myAmpache->readySession -= DELEGATE1(&AmpacheBrowserApp::onPlayTriggeredAmpacheReadySession, bool);
 
-    myDataLoader->aborted += DELEGATE0(&AmpacheBrowserApp::onRequestTerminationDataLoaderAborted);
+    myDataLoader->aborted += DELEGATE0(&AmpacheBrowserApp::onFinishRequestDataLoaderAborted);
     myDataLoader->abort();
 }
 
@@ -124,10 +123,11 @@ void AmpacheBrowserApp::onApplySettingsDataLoaderAborted() {
 
 
 
-void AmpacheBrowserApp::onRequestTerminationDataLoaderAborted() {
-    myDataLoader->aborted -= DELEGATE0(&AmpacheBrowserApp::onRequestTerminationDataLoaderAborted);
+void AmpacheBrowserApp::onFinishRequestDataLoaderAborted() {
+    myDataLoader->aborted -= DELEGATE0(&AmpacheBrowserApp::onFinishRequestDataLoaderAborted);
     uninitializeDependencies();
-    myTerminatedCb();
+    myUi = nullptr;
+    myFinishedCb();
 }
 
 

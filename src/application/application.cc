@@ -26,9 +26,10 @@ namespace application {
 
 Application::Application() {
     auto settingsInternal = new SettingsInternal{};
-    mySettings = new Settings{unique_ptr<SettingsInternal>{settingsInternal}};
+    mySettings = unique_ptr<Settings>{new Settings{unique_ptr<SettingsInternal>{settingsInternal}}};
     myAmpacheBrowserApp = new AmpacheBrowserApp{*settingsInternal};
-    myAmpacheBrowser = new AmpacheBrowser{unique_ptr<AmpacheBrowserApp>{myAmpacheBrowserApp}};
+    myAmpacheBrowser = unique_ptr<AmpacheBrowser>{
+        new AmpacheBrowser{unique_ptr<AmpacheBrowserApp>{myAmpacheBrowserApp}}};
 }
 
 
@@ -38,14 +39,14 @@ Application::~Application() {
 
 
 
-unique_ptr<AmpacheBrowser> Application::getAmpacheBrowser() const {
-    return unique_ptr<AmpacheBrowser>{myAmpacheBrowser};
+AmpacheBrowser& Application::getAmpacheBrowser() const {
+    return *myAmpacheBrowser;
 }
 
 
 
-unique_ptr<Settings> Application::getSettings() const {
-    return unique_ptr<Settings>{mySettings};
+Settings& Application::getSettings() const {
+    return *mySettings;
 }
 
 
@@ -63,8 +64,8 @@ void Application::run() {
 
 
 
-void Application::requestTermination(function<void()> terminatedCb) {
-    myAmpacheBrowserApp->requestTermination(terminatedCb);
+void Application::finishRequest(function<void()> finishedCb) {
+    myAmpacheBrowserApp->finishRequest(finishedCb);
 }
 
 

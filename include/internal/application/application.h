@@ -30,8 +30,6 @@ class AmpacheBrowserApp;
 
 /**
  * @brief Instantiates the application and provides main interfaces.
- *
- * @note This class is not responsible for lifecycle of instances it provides.
  */
 class Application {
 
@@ -50,12 +48,12 @@ public:
      *
      * @warning run() method has to be called prior to usage of the returned AmpacheBrowser instance.
      */
-    std::unique_ptr<ampache_browser::AmpacheBrowser> getAmpacheBrowser() const;
+    ampache_browser::AmpacheBrowser& getAmpacheBrowser() const;
 
     /**
      * @brief Gets instance of application settings.
      */
-    std::unique_ptr<ampache_browser::Settings> getSettings() const;
+    ampache_browser::Settings& getSettings() const;
 
     /**
      * @brief Creates UI window, connects to the server and starts reading data.
@@ -66,13 +64,13 @@ public:
     void run();
 
     /**
-     * @brief Request to terminate the application.
+     * @brief Request to finish/stop the application.
      *
-     * This method should be used to end the application gracefully.  It signals to terminate all asynchronous
+     * This method should be used to stop the application gracefully.  It signals to terminate all asynchronous
      * operations and once they are terminated it calls the passed callback function.  The callback can delete
      * the instance then.
      */
-    void requestTermination(std::function<void()> terminatedCb);
+    void finishRequest(std::function<void()> finishedCb);
 
 protected:
     /**
@@ -81,8 +79,8 @@ protected:
     AmpacheBrowserApp& getAmpacheBrowserApp() const;
 
 private:
-    ampache_browser::AmpacheBrowser* myAmpacheBrowser;
-    ampache_browser::Settings* mySettings;
+    std::unique_ptr<ampache_browser::AmpacheBrowser> myAmpacheBrowser;
+    std::unique_ptr<ampache_browser::Settings> mySettings;
     AmpacheBrowserApp* myAmpacheBrowserApp;
 
     static infrastructure::LogLevel verbosityToLogLevel(int verbosity);

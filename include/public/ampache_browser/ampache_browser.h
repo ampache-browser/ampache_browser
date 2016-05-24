@@ -36,8 +36,7 @@ public:
     /**
      * @brief Destroys the instance.
      *
-     * @warning The requestTermination() method should be called first and the instance destroyed after the callback
-     * terminatedCb is called.
+     * @warning The instance can be destroyed after QtApplication::finishRequest() has finished (its callback called).
      */
     ~AmpacheBrowser();
 

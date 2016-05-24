@@ -32,13 +32,13 @@ QtApplication::~QtApplication() {
 
 
 
-unique_ptr<AmpacheBrowser> QtApplication::getAmpacheBrowser() const {
+AmpacheBrowser& QtApplication::getAmpacheBrowser() const {
     return myQtApplicationInternal->getAmpacheBrowser();
 }
 
 
 
-unique_ptr<Settings> QtApplication::getSettings() const {
+Settings& QtApplication::getSettings() const {
     return myQtApplicationInternal->getSettings();
 }
 
@@ -56,10 +56,8 @@ void QtApplication::run() {
 
 
 
-void QtApplication::requestTermination(function<void()> terminatedCb) {
-    myQtApplicationInternal->requestTermination(terminatedCb);
+void QtApplication::finishRequest(function<void()> finishedCb) {
+    myQtApplicationInternal->finishRequest(finishedCb);
 }
-
-
 
 }

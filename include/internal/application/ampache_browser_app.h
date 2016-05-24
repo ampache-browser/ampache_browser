@@ -62,8 +62,8 @@ public:
     /**
      * @brief Destroys the instance.
      *
-     * @warning The requestTermination() method should be called first and the instance destroyed after the callback
-     * terminatedCb is called.
+     * @warning The finishRequest() method should be called first and the instance destroyed after the callback
+     * finishedCb is called.
      */
     ~AmpacheBrowserApp();
 
@@ -106,16 +106,16 @@ public:
     void run();
 
     /**
-     * @brief Request to terminate the application.
+     * @brief Request to finish/stop the application.
      *
-     * This method should be used to end the application gracefully.  It signals to terminate all asynchronous
+     * This method should be used to stop the application gracefully.  It signals to terminate all asynchronous
      * operations and once they are terminated it calls the passed callback function.  The callback can delete
      * the instance then.
      *
      * The implementation must ensure that no instance variable is accessed after the callback returns because
-     * the instance will be already destroyed.
+     * the instance might be already destroyed.
      */
-    void requestTermination(std::function<void()> terminatedCb);
+    void finishRequest(std::function<void()> finishedCb);
 
 private:
     SettingsInternal& mySettingsInternal;
@@ -123,7 +123,7 @@ private:
     std::function<void(std::vector<std::string>)> myPlayCb = [](std::vector<std::string>) { };
     std::function<void(std::vector<std::string>)> myCreatePlaylistCb = [](std::vector<std::string>) { };
     std::function<void(std::vector<std::string>)> myAddToPlaylistCb = [](std::vector<std::string>) { };
-    std::function<void()> myTerminatedCb;
+    std::function<void()> myFinishedCb;
 
     std::unique_ptr<ui::Ui> myUi;
     std::unique_ptr<application::DataLoader> myDataLoader;
@@ -144,7 +144,7 @@ private:
 
     void onDataLoaderFinished(application::LoadingResult loadingResult);
     void onApplySettingsDataLoaderAborted();
-    void onRequestTerminationDataLoaderAborted();
+    void onFinishRequestDataLoaderAborted();
     void onPlayTriggered(ui::SelectedItems& selectedItems);
     void onCreatePlaylistTriggered(ui::SelectedItems& selectedItems);
     void onAddToPlaylistTriggered(ui::SelectedItems& selectedItems);

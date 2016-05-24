@@ -38,7 +38,7 @@ public:
     /**
      * @brief Gets main window widget.
      *
-     * @note Widget is not created until AmpacheBrowser::run() is called.
+     * @note Widget is not created until run() is called and is invalidated when finishRequest() is called.
      *
      * @return The main window widget or nullptr if not created yet.
      */

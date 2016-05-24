@@ -32,8 +32,6 @@ class Settings;
 
 /**
  * @brief Instantiates the application with Qt UI and provides public interfaces.
- *
- * @note This class is not responsible for lifecycle of instances it provides.
  */
 class AMPACHE_BROWSER_EXPORT QtApplication {
 
@@ -52,17 +50,17 @@ public:
      *
      * @warning run() method has to be called prior to usage of the returned AmpacheBrowser instance.
      */
-    std::unique_ptr<AmpacheBrowser> getAmpacheBrowser() const;
+    AmpacheBrowser& getAmpacheBrowser() const;
 
     /**
      * @brief Gets instance of application settings.
      */
-    std::unique_ptr<Settings> getSettings() const;
+    Settings& getSettings() const;
 
     /**
      * @brief Gets main window widget.
      *
-     * @note Widget is not created until AmpacheBrowser::run() is called.
+     * @note Widget is not created until run() is called and is invalidated when finishRequest() is called.
      *
      * @return The main window widget or nullptr if not created yet.
      */
@@ -77,13 +75,13 @@ public:
     void run();
 
     /**
-     * @brief Request to terminate the application.
+     * @brief Request to finish/stop the application.
      *
-     * This method should be used to end the application gracefully.  It signals to terminate all asynchronous
+     * This method should be used to stop the application gracefully.  It signals to terminate all asynchronous
      * operations and once they are terminated it calls the passed callback function.  The callback can delete
      * the instance then.
      */
-    void requestTermination(std::function<void()> terminatedCb);
+    void finishRequest(std::function<void()> finishedCb);
 
 private:
     std::unique_ptr<application::QtApplicationInternal> myQtApplicationInternal;
