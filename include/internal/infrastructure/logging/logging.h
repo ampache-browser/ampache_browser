@@ -62,7 +62,7 @@ namespace infrastructure {
  */
 #define LOG_INF QtLogger(__FILE__, __LINE__, Q_FUNC_INFO).info
 
-#ifndef AMPACHE_BROWSER_RELEASE
+#ifdef AMPACHE_BROWSER_DEBUG
 
 /**
  * @brief Logs a debug (LogLevel::Debug) message.
@@ -84,9 +84,13 @@ namespace infrastructure {
  * LOG_DBG("Value of 'tmp' is ", tmp, ".");
  * @endcode
  */
-#define LOG_DBG(...)
+#define LOG_DBG __noopLog
 
 #endif
+
+
+
+void __noopLog(const char*, ...);
 
 }
 
