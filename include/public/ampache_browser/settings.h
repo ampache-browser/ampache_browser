@@ -7,8 +7,8 @@
 
 
 
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#ifndef AMPACHE_BROWSER_SETTINGS_H
+#define AMPACHE_BROWSER_SETTINGS_H
 
 
 
@@ -156,4 +156,4 @@ private:
 
 
 
-#endif // SETTINGS_H
+#endif // AMPACHE_BROWSER_SETTINGS_H

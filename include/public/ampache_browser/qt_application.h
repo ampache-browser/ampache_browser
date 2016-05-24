@@ -7,8 +7,8 @@
 
 
 
-#ifndef QTAPPLICATION_H
-#define QTAPPLICATION_H
+#ifndef AMPACHE_BROWSER_QTAPPLICATION_H
+#define AMPACHE_BROWSER_QTAPPLICATION_H
 
 
 
@@ -50,8 +50,7 @@ public:
     /**
      * @brief Gets instance of Ampache Browser.
      *
-     * @warning Settings instance returned by getSettings() has to be initialized (all settings have to be set) prior
-     * to usage of the returned AmpacheBrowser instance.
+     * @warning run() method has to be called prior to usage of the returned AmpacheBrowser instance.
      */
     std::unique_ptr<AmpacheBrowser> getAmpacheBrowser() const;
 
@@ -69,6 +68,23 @@ public:
      */
     QWidget* getMainWidget() const;
 
+    /**
+     * @brief Creates UI window, connects to the server and starts reading data.
+     *
+     * @warning The Settings instance returned by getSettings() has to be initialized (all settings have to be set)
+     * prior calling this method.
+     */
+    void run();
+
+    /**
+     * @brief Request to terminate the application.
+     *
+     * This method should be used to end the application gracefully.  It signals to terminate all asynchronous
+     * operations and once they are terminated it calls the passed callback function.  The callback can delete
+     * the instance then.
+     */
+    void requestTermination(std::function<void()> terminatedCb);
+
 private:
     std::unique_ptr<application::QtApplicationInternal> myQtApplicationInternal;
 };
@@ -77,4 +93,4 @@ private:
 
 
 
-#endif // QTAPPLICATION_H
+#endif // AMPACHE_BROWSER_QTAPPLICATION_H

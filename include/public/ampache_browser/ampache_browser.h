@@ -62,20 +62,6 @@ public:
      */
     void connectAddToPlaylist(std::function<void(std::vector<std::string>)> callback);
 
-    /**
-     * @brief Creates UI window, connects to the server and starts reading data.
-     */
-    void run();
-
-    /**
-     * @brief Request to terminate the application.
-     *
-     * This method should be used to end the application gracefully.  It signals to terminate all asynchronous
-     * operations and once they are terminated it calls the passed callback function.  The callback can delete
-     * the instance then.
-     */
-    void requestTermination(std::function<void()> terminatedCb);
-
 private:
     // Application needs constructor
     friend class application::Application;

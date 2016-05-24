@@ -7,18 +7,18 @@
 
 
 
-#include "application/application.h"
-
-
 #include <memory>
-#include "application/settings_internal.h"
+#include <functional>
 #include "ampache_browser/settings.h"
-#include "application/ampache_browser_app.h"
 #include "ampache_browser/ampache_browser.h"
-#include "application/qt_application_internal.h"
+#include "infrastructure/logging/logging.h"
+#include "application/settings_internal.h"
+#include "application/ampache_browser_app.h"
+#include "application/application.h"
 
 using namespace std;
 using namespace ampache_browser;
+using namespace infrastructure;
 
 
 
@@ -52,6 +52,31 @@ unique_ptr<Settings> Application::getSettings() const {
 
 AmpacheBrowserApp& Application::getAmpacheBrowserApp() const {
     return *myAmpacheBrowserApp;
+}
+
+
+
+void Application::run() {
+    SET_LOG_LEVEL(verbosityToLogLevel(mySettings->getInt(Settings::LOGGING_VERBOSITY)));
+    myAmpacheBrowserApp->run();
+}
+
+
+
+void Application::requestTermination(function<void()> terminatedCb) {
+    myAmpacheBrowserApp->requestTermination(terminatedCb);
+}
+
+
+
+LogLevel Application::verbosityToLogLevel(int verbosity) {
+    switch (verbosity) {
+        case 0: return LogLevel::None;
+        case 1: return LogLevel::Error;
+        case 2: return LogLevel::Warning;
+        case 3: return LogLevel::Info;
+        default: return LogLevel::Debug;
+    }
 }
 
 }

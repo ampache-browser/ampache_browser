@@ -8,6 +8,7 @@
 
 
 #include <memory>
+#include <functional>
 #include <QWidget>
 #include "application/qt_application_internal.h"
 #include "ampache_browser/settings.h"
@@ -46,5 +47,19 @@ unique_ptr<Settings> QtApplication::getSettings() const {
 QWidget* QtApplication::getMainWidget() const {
     return myQtApplicationInternal->getMainWidget();
 }
+
+
+
+void QtApplication::run() {
+    myQtApplicationInternal->run();
+}
+
+
+
+void QtApplication::requestTermination(function<void()> terminatedCb) {
+    myQtApplicationInternal->requestTermination(terminatedCb);
+}
+
+
 
 }

@@ -40,18 +40,6 @@ void AmpacheBrowser::connectAddToPlaylist(function<void(vector<string>)> callbac
 
 
 
-void AmpacheBrowser::run() {
-    myAmpacheBrowserApp->run();
-}
-
-
-
-void AmpacheBrowser::requestTermination(function<void()> terminatedCb) {
-    myAmpacheBrowserApp->requestTermination(terminatedCb);
-}
-
-
-
 AmpacheBrowser::AmpacheBrowser(unique_ptr<AmpacheBrowserApp> ampacheBrowserApp):
 myAmpacheBrowserApp(move(ampacheBrowserApp)) {
 }

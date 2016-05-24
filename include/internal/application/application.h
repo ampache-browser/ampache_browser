@@ -13,6 +13,7 @@
 
 
 #include <memory>
+#include "infrastructure/logging/log_level.h"
 
 namespace ampache_browser {
 class AmpacheBrowser;
@@ -47,8 +48,7 @@ public:
     /**
      * @brief Gets instance of Ampache Browser.
      *
-     * @warning Settings instance returned by getSettings() has to be initialized (all settings have to be set) prior
-     * to usage of the returned AmpacheBrowser instance.
+     * @warning run() method has to be called prior to usage of the returned AmpacheBrowser instance.
      */
     std::unique_ptr<ampache_browser::AmpacheBrowser> getAmpacheBrowser() const;
 
@@ -56,6 +56,23 @@ public:
      * @brief Gets instance of application settings.
      */
     std::unique_ptr<ampache_browser::Settings> getSettings() const;
+
+    /**
+     * @brief Creates UI window, connects to the server and starts reading data.
+     *
+     * @warning The Settings instance returned by getSettings() has to be initialized (all settings have to be set)
+     * prior calling this method.
+     */
+    void run();
+
+    /**
+     * @brief Request to terminate the application.
+     *
+     * This method should be used to end the application gracefully.  It signals to terminate all asynchronous
+     * operations and once they are terminated it calls the passed callback function.  The callback can delete
+     * the instance then.
+     */
+    void requestTermination(std::function<void()> terminatedCb);
 
 protected:
     /**
@@ -67,6 +84,8 @@ private:
     ampache_browser::AmpacheBrowser* myAmpacheBrowser;
     ampache_browser::Settings* mySettings;
     AmpacheBrowserApp* myAmpacheBrowserApp;
+
+    static infrastructure::LogLevel verbosityToLogLevel(int verbosity);
 };
 
 }

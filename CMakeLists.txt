@@ -9,7 +9,6 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Concurrent REQUIRED)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-include_directories(include/public include/internal)
 
 configure_file(ampache_browser.pc.cmakein ampache_browser.pc @ONLY)
 
@@ -75,14 +74,19 @@ qt5_wrap_cpp(ampache_browser_HEADERS_MOC ${ampache_browser_HEADERS_WITH_MO})
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-add_compile_options(-std=c++11 -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual)
-add_definitions(-DPACKAGE=\"audacious-plugins\")
 
 add_library(ampache_browser SHARED ${ampache_browser_SRCS} ${ampache_browser_HEADERS_MOC})
-generate_export_header(ampache_browser EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/include/public/ampache_browser/export.h)
 
 target_link_libraries(ampache_browser audcore Qt5::Core Qt5::Widgets Qt5Concurrent)
+target_include_directories(ampache_browser PRIVATE include/public include/internal)
+
+target_compile_options(ampache_browser PRIVATE -std=c++11 -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual)
+
+target_compile_definitions(ampache_browser PRIVATE PACKAGE=\"audacious-plugins\")
 target_compile_definitions(ampache_browser PRIVATE $<$<CONFIG:Debug>:AMPACHE_BROWSER_DEBUG>)
+
+
+generate_export_header(ampache_browser EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/include/public/ampache_browser/export.h)
 
 install(TARGETS ampache_browser LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY include/public/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h")

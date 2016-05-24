@@ -16,7 +16,6 @@
 #include <vector>
 #include <memory>
 #include <functional>
-#include "infrastructure/logging/log_level.h"
 #include "ui/selected_items.h"
 #include "application/data_loader.h"
 
@@ -102,7 +101,7 @@ public:
      * @brief Creates UI window, connects to the server and starts reading data.
      *
      * @warning The SettingsInternal instance passed to the constructor has to be initialized (all settings have to
-     * be set).
+     * be set) prior to calling this method.
      */
     void run();
 
@@ -161,7 +160,6 @@ private:
     void uninitializeDependencies();
     void applySettings();
     std::vector<std::string> createPlaylistItems(bool error);
-    static infrastructure::LogLevel verbosityToLogLevel(int verbosity);
 };
 
 }
