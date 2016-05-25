@@ -9,11 +9,11 @@
 
 #include <string>
 
-#include <libaudcore/i18n.h>
 #include <QCryptographicHash>
 
 #include "infrastructure/event/delegate.h"
 #include "infrastructure/logging/logging.h"
+#include "infrastructure/i18n.h"
 #include "data/providers/ampache.h"
 #include "data/providers/cache.h"
 #include "data/indices.h"

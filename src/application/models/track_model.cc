@@ -7,14 +7,13 @@
 
 
 
-#include <libaudcore/i18n.h>
-
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
 #include <QtCore/QAbstractTableModel>
 
 #include "infrastructure/event/delegate.h"
 #include "infrastructure/logging/logging.h"
+#include "infrastructure/i18n.h"
 #include "domain/track.h"
 #include "data/repositories/track_repository.h"
 #include "requests.h"

@@ -3,6 +3,7 @@ project(ampache_browser VERSION 0.0.0)
 
 include(GNUInstallDirs)
 include(GenerateExportHeader)
+include(FindIntl)
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
@@ -77,14 +78,17 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
 add_library(ampache_browser SHARED ${ampache_browser_SRCS} ${ampache_browser_HEADERS_MOC})
 
-target_link_libraries(ampache_browser audcore Qt5::Core Qt5::Widgets Qt5Concurrent)
 target_include_directories(ampache_browser PRIVATE include/public include/internal)
 
 target_compile_options(ampache_browser PRIVATE -std=c++11 -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual)
 
-target_compile_definitions(ampache_browser PRIVATE PACKAGE=\"audacious-plugins\")
+target_compile_definitions(ampache_browser PRIVATE PACKAGE=\"${PROJECT_NAME}\")
 target_compile_definitions(ampache_browser PRIVATE $<$<CONFIG:Debug>:AMPACHE_BROWSER_DEBUG>)
+if (Intl_FOUND)
+    target_compile_definitions(ampache_browser PRIVATE ENABLE_NLS)
+endif()
 
+target_link_libraries(ampache_browser ${Intl_LIBRARIES} audcore Qt5::Core Qt5::Widgets Qt5Concurrent)
 
 generate_export_header(ampache_browser EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/include/public/ampache_browser/export.h)
 

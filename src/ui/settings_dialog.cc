@@ -7,15 +7,16 @@
 
 
 
-#include <libaudcore/i18n.h>
-#include "settings_dialog.h"
 #include <QFormLayout>
 #include <QCheckBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QDialogButtonBox>
+#include "infrastructure/i18n.h"
+#include "settings_dialog.h"
 
 using namespace std;
+using namespace infrastructure;
 
 
 

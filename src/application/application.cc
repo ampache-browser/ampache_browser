@@ -12,6 +12,7 @@
 #include "ampache_browser/settings.h"
 #include "ampache_browser/ampache_browser.h"
 #include "infrastructure/logging/logging.h"
+#include "infrastructure/i18n.h"
 #include "application/settings_internal.h"
 #include "application/ampache_browser_app.h"
 #include "application/application.h"

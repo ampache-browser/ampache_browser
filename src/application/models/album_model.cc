@@ -9,14 +9,13 @@
 
 #include <memory>
 
-#include <libaudcore/i18n.h>
-
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
 #include <QtGui/QIcon>
 
 #include "infrastructure/event/delegate.h"
 #include "infrastructure/logging/logging.h"
+#include "infrastructure/i18n.h"
 #include "domain/album.h"
 #include "data/repositories/album_repository.h"
 #include "requests.h"

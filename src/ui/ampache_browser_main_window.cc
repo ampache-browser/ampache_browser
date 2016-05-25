@@ -8,7 +8,6 @@
 
 
 #include <memory>
-#include <libaudcore/i18n.h>
 #include <QToolBar>
 #include <QStatusBar>
 #include <QStyle>
@@ -18,10 +17,12 @@
 #include <QTreeView>
 #include <QHBoxLayout>
 #include <QDockWidget>
+#include "infrastructure/i18n.h"
 #include "settings_dialog.h"
 #include "ampache_browser_main_window.h"
 
 using namespace std;
+using namespace infrastructure;
 
 
 
