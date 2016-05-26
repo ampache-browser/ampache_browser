@@ -21,8 +21,7 @@
 
 #include <QtCore/QObject>
 #include <QPixmap>
-
-#include <libaudcore/index.h>
+#include <QNetworkAccessManager>
 
 #include "infrastructure/event/event.h"
 
@@ -48,11 +47,6 @@ class Ampache: public QObject {
     Q_OBJECT
 
 public:
-    /**
-     * @brief Callback function for network communication.
-     */
-    using OnGetContentsFunc = std::function<void (const char* url, const Index<char>& buffer)>;
-
     /**
      * @brief Constructor
      *
@@ -231,6 +225,8 @@ public:
     std::string refreshUrl(const std::string& url) const;
 
 private slots:
+    void onFinished();
+    void onAlbumArtFinished();
     void onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable);
 
 private:
@@ -247,6 +243,8 @@ private:
     const std::string myUrl;
     const std::string myUser;
     const std::string myPasswordHash;
+
+    const std::unique_ptr<QNetworkAccessManager> myNetworkAccessManager;
 
     // true if handshake with the server was successful
     bool myIsInitialized = false;
@@ -268,13 +266,6 @@ private:
 
     // map of [URL, album art] of album arts that were requested to load and the request was fulfilled
     std::map<std::string, QPixmap> myFinishedAlbumArts;
-
-    // network communication callback functions
-    OnGetContentsFunc myOnGetContentsFunc;
-    OnGetContentsFunc myOnAlbumArtFinishedFunc;
-
-    void onGetContents(const char* url, const Index<char>& contentBuffer);
-    void onAlbumArtFinished(const char* artUrl, const Index<char>& contentBuffer);
 
     void connectToServer();
     void callMethod(const std::string& name, const std::map<std::string, std::string>& arguments);

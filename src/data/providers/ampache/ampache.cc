@@ -15,13 +15,14 @@
 #include <QObject>
 #include <QString>
 #include <QUrl>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QNetworkAccessManager>
 #include <QDateTime>
 #include <QThreadPool>
 #include <QPixmap>
 #include <QXmlStreamReader>
 #include <QCryptographicHash>
-
-#include <libaudcore/vfs_async.h>
 
 #include "infrastructure/logging/logging.h"
 #include "domain/artist.h"
@@ -35,7 +36,6 @@
 #include "data/providers/ampache.h"
 
 using namespace std;
-using namespace placeholders;
 using namespace chrono;
 using namespace infrastructure;
 using namespace domain;
@@ -44,19 +44,11 @@ using namespace domain;
 
 namespace data {
 
-void onGetContentsCStyleWrapper(const char* url, const Index<char>& buffer, void* userData) {
-    auto& callback = *reinterpret_cast<Ampache::OnGetContentsFunc*>(userData);
-    callback(url, buffer);
-}
-
-
-
 Ampache::Ampache(const string& url, const string& user, const string& passwordHash):
 myUrl{url},
 myUser{user},
 myPasswordHash{passwordHash},
-myOnGetContentsFunc{bind(&Ampache::onGetContents, this, _1, _2)},
-myOnAlbumArtFinishedFunc{bind(&Ampache::onAlbumArtFinished, this, _1, _2)} {
+myNetworkAccessManager{new QNetworkAccessManager{this}} {
 }
 
 
@@ -137,8 +129,9 @@ void Ampache::requestAlbumArts(const map<string, string>& idsAndUrls) {
     LOG_DBG("Getting %d album arts.", idsAndUrls.size());
     for (auto& idAndUrl: idsAndUrls) {
         myPendingAlbumArts.insert(idAndUrl.first);
-        vfs_async_file_get_contents(refreshUrl(idAndUrl.second).c_str(), onGetContentsCStyleWrapper,
-            &myOnAlbumArtFinishedFunc);
+        QNetworkReply* networkReply = myNetworkAccessManager->get(QNetworkRequest(QUrl(QString::fromStdString(
+            idAndUrl.second))));
+        connect(networkReply, SIGNAL(finished()), this, SLOT(onAlbumArtFinished()));
     }
 }
 
@@ -161,29 +154,36 @@ string Ampache::refreshUrl(const string& url) const {
 
 
 
-void Ampache::onGetContents(const char* url, const Index<char>& contentBuffer) {
-    string content = string{contentBuffer.begin(), static_cast<size_t>(contentBuffer.len())};
+void Ampache::onFinished() {
+    auto networkReply = qobject_cast<QNetworkReply*>(sender());
+    auto replyContent = networkReply->readAll();
 
-    QXmlStreamReader errorXmlStreamReader{QString::fromStdString(content)};
+    QXmlStreamReader errorXmlStreamReader{replyContent};
     bool error = isError(errorXmlStreamReader);
 
-    QXmlStreamReader xmlStreamReader{QString::fromStdString(content)};
-    string methodName = AmpacheUrl{url}.parseActionValue();
-    LOG_DBG("Server call of method '%s' has returned with content of length %d and error %d.",
-        methodName.c_str(), contentBuffer.len(), error);
+    QXmlStreamReader xmlStreamReader{replyContent};
+    string methodName = AmpacheUrl{networkReply->request().url().toString().toStdString()}.parseActionValue();
+    LOG_DBG("Server call of method '%s' has returned with network error %d and error %d.",
+        methodName.c_str(), networkReply->errorString().toStdString().c_str(), error);
     dispatchToMethodHandler(methodName, xmlStreamReader, error);
+
+    networkReply->deleteLater();
 }
 
 
 
-void Ampache::onAlbumArtFinished(const char* artUrl, const Index<char>& contentBuffer) {
-    LOG_DBG("Album art request has returned with content of length %d.", contentBuffer.len());
-    auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(AmpacheUrl{artUrl}.parseIdValue(),
-        QByteArray{contentBuffer.begin(), contentBuffer.len()});
+void Ampache::onAlbumArtFinished() {
+    auto networkReply = qobject_cast<QNetworkReply*>(sender());
+    LOG_DBG("Album art request has returned with network error %d.", networkReply->errorString().toStdString().c_str());
+
+    auto artUrl = networkReply->request().url().toString().toStdString();
+    auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(AmpacheUrl{artUrl}.parseIdValue(), networkReply->readAll());
     scaleAlbumArtRunnable->setAutoDelete(false);
     connect(scaleAlbumArtRunnable, SIGNAL(finished(ScaleAlbumArtRunnable*)), this,
         SLOT(onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable*)));
     QThreadPool::globalInstance()->start(scaleAlbumArtRunnable);
+
+    networkReply->deleteLater();
 }
 
 
@@ -223,7 +223,9 @@ void Ampache::connectToServer() {
     urlStream << assembleUrlBase() << Method.Handshake << "&auth=" << passphrase << "&timestamp=" << currentTime
       << "&version=350001&user=" << myUser;
 
-    vfs_async_file_get_contents(urlStream.str().c_str(), onGetContentsCStyleWrapper, &myOnGetContentsFunc);
+    QNetworkReply* networkReply = myNetworkAccessManager->get(QNetworkRequest(QUrl(QString::fromStdString(
+        urlStream.str()))));
+    connect(networkReply, SIGNAL(finished()), this, SLOT(onFinished()));
 }
 
 
@@ -241,8 +243,9 @@ void Ampache::callMethod(const string& name, const map<string, string>& argument
     for (auto nameValuePair: arguments) {
         urlStream << "&" << nameValuePair.first << "=" << nameValuePair.second;
     }
-
-    vfs_async_file_get_contents(urlStream.str().c_str(), onGetContentsCStyleWrapper, &myOnGetContentsFunc);
+    QNetworkReply* networkReply = myNetworkAccessManager->get(QNetworkRequest(QUrl(QString::fromStdString(
+        urlStream.str()))));
+    connect(networkReply, SIGNAL(finished()), this, SLOT(onFinished()));
 }
 
 
