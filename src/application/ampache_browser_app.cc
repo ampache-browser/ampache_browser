@@ -14,6 +14,7 @@
 #include "infrastructure/event/delegate.h"
 #include "infrastructure/logging/logging.h"
 #include "infrastructure/i18n.h"
+#include "data/providers/connection_info.h"
 #include "data/providers/ampache.h"
 #include "data/providers/cache.h"
 #include "data/indices.h"
@@ -222,7 +223,10 @@ void AmpacheBrowserApp::initializeAndLoad() {
         passwordHash = "1b2e48536c91351b5ea0a32a3bbaa0fc1ef9de6bc20b254a9a7e22043a211e33";
     }
 
-    myAmpache = unique_ptr<Ampache>{new Ampache{serverUrl, userName, passwordHash}};
+    myAmpache = unique_ptr<Ampache>{new Ampache{
+        ConnectionInfo{serverUrl, userName, passwordHash, mySettingsInternal.getString(Settings::PROXY_HOST),
+        mySettingsInternal.getInt(Settings::PROXY_PORT), mySettingsInternal.getString(Settings::PROXY_USER),
+        mySettingsInternal.getString(Settings::PROXY_PASSWORD)}}};
     myCache = unique_ptr<Cache>{new Cache{serverUrl, userName}};
     myIndices = unique_ptr<Indices>{new Indices{}};
 

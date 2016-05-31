@@ -31,6 +31,10 @@ public:
      */
     explicit SettingsInternal();
 
+    SettingsInternal(const SettingsInternal& other) = delete;
+
+    SettingsInternal& operator=(const SettingsInternal& other) = delete;
+
     /**
      * @brief Connect a callback function to a settings changed event.
      *

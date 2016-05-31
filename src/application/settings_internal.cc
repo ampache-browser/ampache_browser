@@ -29,7 +29,11 @@ void SettingsInternal::connectChanged(function<void()> callback) {
 
 
 string SettingsInternal::getString(const string& key) const {
-    return myStrings.at(key);
+    if (myStrings.count(key) != 0) {
+        return myStrings.at(key);
+    } else {
+        return "";
+    }
 }
 
 
@@ -48,7 +52,11 @@ void SettingsInternal::setString(const string& key, const string& value) {
 
 
 int SettingsInternal::getInt(const string& key) const {
-    return myInts.at(key);
+    if (myInts.count(key) != 0) {
+        return myInts.at(key);
+    } else {
+        return 0;
+    }
 }
 
 
@@ -67,7 +75,11 @@ void SettingsInternal::setInt(const string& key, int value) {
 
 
 bool SettingsInternal::getBool(const string& key) const {
-    return myBools.at(key);
+    if (myBools.count(key) != 0) {
+        return myBools.at(key);
+    } else {
+        return false;
+    }
 }
 
 

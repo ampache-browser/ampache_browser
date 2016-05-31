@@ -32,6 +32,7 @@
 #include "../../data_objects/artist_data.h"
 #include "../../data_objects/track_data.h"
 #include "scale_album_art_runnable.h"
+#include "data/providers/connection_info.h"
 #include "ampache_url.h"
 #include "data/providers/ampache.h"
 
@@ -44,10 +45,8 @@ using namespace domain;
 
 namespace data {
 
-Ampache::Ampache(const string& url, const string& user, const string& passwordHash):
-myUrl{url},
-myUser{user},
-myPasswordHash{passwordHash},
+Ampache::Ampache(const ConnectionInfo& connectionInfo):
+myConnectionInfo{connectionInfo},
 myNetworkAccessManager{new QNetworkAccessManager{this}} {
 }
 
@@ -60,13 +59,13 @@ bool Ampache::getIsInitialized() const {
 
 
 string Ampache::getUrl() const {
-    return myUrl;
+    return myConnectionInfo.getServerUrl();
 }
 
 
 
 string Ampache::getUser() const {
-    return myUser;
+    return myConnectionInfo.getUserName();
 }
 
 
@@ -216,13 +215,14 @@ void Ampache::connectToServer() {
     auto currentTime = to_string(chrono::duration_cast<chrono::seconds>(chrono::system_clock::now().
         time_since_epoch()).count());
     auto passphrase = QCryptographicHash::hash(
-        QByteArray{currentTime.c_str()} + QByteArray{myPasswordHash.c_str()},
+        QByteArray{currentTime.c_str()} + QByteArray{myConnectionInfo.getPasswordHash().c_str()},
         QCryptographicHash::Sha256).toHex().data();
 
     ostringstream urlStream;
     urlStream << assembleUrlBase() << Method.Handshake << "&auth=" << passphrase << "&timestamp=" << currentTime
-      << "&version=350001&user=" << myUser;
+      << "&version=350001&user=" << myConnectionInfo.getUserName();
 
+    auto stream = urlStream.str();
     QNetworkReply* networkReply = myNetworkAccessManager->get(QNetworkRequest(QUrl(QString::fromStdString(
         urlStream.str()))));
     connect(networkReply, SIGNAL(finished()), this, SLOT(onFinished()));
@@ -610,7 +610,7 @@ vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamR
 
 
 string Ampache::assembleUrlBase() const {
-    return myUrl + "/server/xml.server.php?action=";
+    return myConnectionInfo.getServerUrl() + "/server/xml.server.php?action=";
 }
 
 }

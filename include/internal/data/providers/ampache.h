@@ -24,6 +24,7 @@
 #include <QNetworkAccessManager>
 
 #include "infrastructure/event/event.h"
+#include "data/providers/connection_info.h"
 
 class QXmlStreamReader;
 
@@ -48,13 +49,11 @@ class Ampache: public QObject {
 
 public:
     /**
-     * @brief Constructor
+     * @brief Constructor.
      *
-     * @param url The Ampache server URL.
-     * @param user User name to login with.
-     * @param passwordHash SHA256 hash of the password in hexadecimal string format.
+     * @param connectionInfo Information used to connect to the Ampache server.
      */
-    explicit Ampache(const std::string& url, const std::string& user, const std::string& passwordHash);
+    explicit Ampache(const ConnectionInfo& connectionInfo);
 
     Ampache(const Ampache& other) = delete;
 
@@ -240,9 +239,7 @@ private:
     } Method;
 
     // arguments from the constructor
-    const std::string myUrl;
-    const std::string myUser;
-    const std::string myPasswordHash;
+    const ConnectionInfo myConnectionInfo;
 
     const std::unique_ptr<QNetworkAccessManager> myNetworkAccessManager;
 

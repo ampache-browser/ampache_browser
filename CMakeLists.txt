@@ -27,6 +27,7 @@ set(ampache_browser_SRCS
     src/data/data_objects/track_data.cc
     src/data/data_objects/artist_data.cc
     src/data/data_objects/album_data.cc
+    src/data/providers/connection_info.cc
     src/data/providers/ampache/ampache_url.cc
     src/data/providers/ampache/scale_album_art_runnable.cc
     src/data/providers/ampache/ampache.cc

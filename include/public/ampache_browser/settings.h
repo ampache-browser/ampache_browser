@@ -61,6 +61,34 @@ public:
     static const std::string PASSWORD_HASH;
 
     /**
+     * @brief Configuration variable name for proxy host name.
+     *
+     * Value type: string.
+     */
+    static const std::string PROXY_HOST;
+
+    /**
+     * @brief Configuration variable name for proxy port.
+     *
+     * Value type: string.
+     */
+    static const std::string PROXY_PORT;
+
+    /**
+     * @brief Configuration variable name for proxy user name.
+     *
+     * Value type: string.
+     */
+    static const std::string PROXY_USER;
+
+    /**
+     * @brief Configuration variable name for proxy password.
+     *
+     * Value type: string.
+     */
+    static const std::string PROXY_PASSWORD;
+
+    /**
      * @brief Configuration variable name for verbosity of logging system.
      *
      * 0 - no log messages, ..., 4 - all log messages

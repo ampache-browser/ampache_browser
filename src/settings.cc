@@ -29,6 +29,14 @@ const string Settings::PASSWORD_HASH = "password_hash";
 
 const string Settings::LOGGING_VERBOSITY = "logging_verbosity";
 
+const string Settings::PROXY_HOST = "proxy_host";
+
+const string Settings::PROXY_PORT = "proxy_port";
+
+const string Settings::PROXY_USER = "proxy_user";
+
+const string Settings::PROXY_PASSWORD = "proxy_password";
+
 
 
 Settings::~Settings() {
