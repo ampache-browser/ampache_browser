@@ -22,7 +22,7 @@ class ConnectionInfo {
 
 public:
     explicit ConnectionInfo(const std::string& serverUrl, const std::string& userName, const std::string& password,
-        const std::string& proxyHost, const int proxyPort, const std::string& proxyUser,
+        const std::string& proxyHost, const unsigned short proxyPort, const std::string& proxyUser,
         const std::string& proxyPassword);
 
     std::string getServerUrl() const;
@@ -33,7 +33,7 @@ public:
 
     std::string getProxyHost() const;
 
-    int getProxyPort() const;
+    unsigned short getProxyPort() const;
 
     std::string getProxyUser() const;
 
@@ -48,7 +48,7 @@ private:
     const std::string myUserName;
     const std::string myPasswordHash;
     const std::string myProxyHost;
-    const int myProxyPort;
+    const unsigned short myProxyPort;
     const std::string myProxyUser;
     const std::string myProxyPassword;
 };

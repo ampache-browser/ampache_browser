@@ -241,7 +241,7 @@ private:
     // arguments from the constructor
     const ConnectionInfo myConnectionInfo;
 
-    const std::unique_ptr<QNetworkAccessManager> myNetworkAccessManager;
+    QNetworkAccessManager* myNetworkAccessManager;
 
     // true if handshake with the server was successful
     bool myIsInitialized = false;

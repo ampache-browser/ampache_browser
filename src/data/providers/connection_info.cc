@@ -18,7 +18,7 @@ using namespace std;
 namespace data {
 
 ConnectionInfo::ConnectionInfo(const std::string& serverUrl, const std::string& userName,
-    const std::string& passwordHash, const string& proxyHost, const int proxyPort, const string& proxyUser,
+    const std::string& passwordHash, const string& proxyHost, const unsigned short proxyPort, const string& proxyUser,
     const string& proxyPassword):
 myServerUrl(serverUrl),
 myUserName(userName),
@@ -55,7 +55,7 @@ string ConnectionInfo::getProxyHost() const {
 
 
 
-int ConnectionInfo::getProxyPort() const {
+unsigned short ConnectionInfo::getProxyPort() const {
     return myProxyPort;
 }
 

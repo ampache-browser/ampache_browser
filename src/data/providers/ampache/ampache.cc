@@ -18,6 +18,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
+#include <QNetworkProxy>
 #include <QDateTime>
 #include <QThreadPool>
 #include <QPixmap>
@@ -48,6 +49,15 @@ namespace data {
 Ampache::Ampache(const ConnectionInfo& connectionInfo):
 myConnectionInfo{connectionInfo},
 myNetworkAccessManager{new QNetworkAccessManager{this}} {
+    if (myConnectionInfo.isProxyUsed()) {
+        QNetworkProxy proxy{QNetworkProxy::HttpProxy, QString::fromStdString(myConnectionInfo.getProxyHost()),
+            myConnectionInfo.getProxyPort()};
+        if (myConnectionInfo.doesProxyRequireAuthentication()) {
+            proxy.setUser(QString::fromStdString(myConnectionInfo.getProxyUser()));
+            proxy.setPassword(QString::fromStdString(myConnectionInfo.getProxyPassword()));
+        }
+        myNetworkAccessManager->setProxy(proxy);
+    }
 }
 
 
@@ -162,8 +172,8 @@ void Ampache::onFinished() {
 
     QXmlStreamReader xmlStreamReader{replyContent};
     string methodName = AmpacheUrl{networkReply->request().url().toString().toStdString()}.parseActionValue();
-    LOG_DBG("Server call of method '%s' has returned with network error %d and error %d.",
-        methodName.c_str(), networkReply->errorString().toStdString().c_str(), error);
+    LOG_DBG("Server call of method '%s' has returned with network error %d and error %d.",  methodName.c_str(),
+        networkReply->error(), error);
     dispatchToMethodHandler(methodName, xmlStreamReader, error);
 
     networkReply->deleteLater();
@@ -173,7 +183,7 @@ void Ampache::onFinished() {
 
 void Ampache::onAlbumArtFinished() {
     auto networkReply = qobject_cast<QNetworkReply*>(sender());
-    LOG_DBG("Album art request has returned with network error %d.", networkReply->errorString().toStdString().c_str());
+    LOG_DBG("Album art request has returned with network error %d.", networkReply->error());
 
     auto artUrl = networkReply->request().url().toString().toStdString();
     auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(AmpacheUrl{artUrl}.parseIdValue(), networkReply->readAll());

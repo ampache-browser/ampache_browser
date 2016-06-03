@@ -225,8 +225,8 @@ void AmpacheBrowserApp::initializeAndLoad() {
 
     myAmpache = unique_ptr<Ampache>{new Ampache{
         ConnectionInfo{serverUrl, userName, passwordHash, mySettingsInternal.getString(Settings::PROXY_HOST),
-        mySettingsInternal.getInt(Settings::PROXY_PORT), mySettingsInternal.getString(Settings::PROXY_USER),
-        mySettingsInternal.getString(Settings::PROXY_PASSWORD)}}};
+        static_cast<unsigned short>(mySettingsInternal.getInt(Settings::PROXY_PORT)),
+        mySettingsInternal.getString(Settings::PROXY_USER), mySettingsInternal.getString(Settings::PROXY_PASSWORD)}}};
     myCache = unique_ptr<Cache>{new Cache{serverUrl, userName}};
     myIndices = unique_ptr<Indices>{new Indices{}};
 
