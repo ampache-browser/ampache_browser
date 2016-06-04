@@ -165,6 +165,8 @@ string Ampache::refreshUrl(const string& url) const {
 
 void Ampache::onFinished() {
     auto networkReply = qobject_cast<QNetworkReply*>(sender());
+    networkReply->deleteLater();
+
     auto replyContent = networkReply->readAll();
 
     QXmlStreamReader errorXmlStreamReader{replyContent};
@@ -175,14 +177,13 @@ void Ampache::onFinished() {
     LOG_DBG("Server call of method '%s' has returned with network error %d and error %d.",  methodName.c_str(),
         networkReply->error(), error);
     dispatchToMethodHandler(methodName, xmlStreamReader, error);
-
-    networkReply->deleteLater();
 }
 
 
 
 void Ampache::onAlbumArtFinished() {
     auto networkReply = qobject_cast<QNetworkReply*>(sender());
+    networkReply->deleteLater();
     LOG_DBG("Album art request has returned with network error %d.", networkReply->error());
 
     auto artUrl = networkReply->request().url().toString().toStdString();
@@ -191,14 +192,13 @@ void Ampache::onAlbumArtFinished() {
     connect(scaleAlbumArtRunnable, SIGNAL(finished(ScaleAlbumArtRunnable*)), this,
         SLOT(onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable*)));
     QThreadPool::globalInstance()->start(scaleAlbumArtRunnable);
-
-    networkReply->deleteLater();
 }
 
 
 
 void Ampache::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable) {
     LOG_DBG("Scaling of album art with ID %s has returned.", scaleAlbumArtRunnable->getId().c_str());
+    scaleAlbumArtRunnable->deleteLater();
     // SMELL: It crashes when not found.  Either use condition or do not search for ID at all and use the one from
     // scaleAlbumArtRunnable.
     auto albumId = *(myPendingAlbumArts.find(scaleAlbumArtRunnable->getId()));
@@ -207,8 +207,6 @@ void Ampache::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumA
 
     myFinishedAlbumArts.emplace(albumId, art);
     myPendingAlbumArts.erase(albumId);
-
-    scaleAlbumArtRunnable->deleteLater();
 
     if (myPendingAlbumArts.empty()) {
         auto finishedAlbumArts = myFinishedAlbumArts;

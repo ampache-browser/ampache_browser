@@ -289,8 +289,9 @@ void Cache::updateAlbumArts(const map<string, QPixmap>& arts) const {
 void Cache::onArtsLoadFinished() {
     LOG_DBG("Album art request has returned.");
     auto artsLoadFutureWatcher = reinterpret_cast<QFutureWatcher<pair<string, QPixmap>>*>(sender());
-    QFutureIterator<pair<string, QPixmap>> results{artsLoadFutureWatcher->future()};
+    artsLoadFutureWatcher->deleteLater();
 
+    QFutureIterator<pair<string, QPixmap>> results{artsLoadFutureWatcher->future()};
     map<string, QPixmap> arts;
     while (results.hasNext()) {
         auto result = results.next();
@@ -299,8 +300,6 @@ void Cache::onArtsLoadFinished() {
 
     myRequestedAlbumArtIds.clear();
     readyAlbumArts(arts);
-
-    artsLoadFutureWatcher->deleteLater();
 }
 
 
