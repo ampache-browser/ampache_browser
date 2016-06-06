@@ -14,6 +14,7 @@
 
 #include <memory>
 #include "infrastructure/logging/log_level.h"
+#include "data/providers/ampache.h"
 
 namespace ampache_browser {
 class AmpacheBrowser;
@@ -54,6 +55,11 @@ public:
      * @brief Gets instance of application settings.
      */
     ampache_browser::Settings& getSettings() const;
+
+    /**
+     * @brief Injects function for processing network requests.
+     */
+    void setNetworkRequestFunction(const data::Ampache::NetworkRequestFn& networkRequestFn);
 
     /**
      * @brief Creates UI window, connects to the server and starts reading data.

@@ -37,6 +37,16 @@ class AMPACHE_BROWSER_EXPORT QtApplication {
 
 public:
     /**
+     * @brief Callback function called when a network request finishes.
+     */
+    using NetworkRequestCb = std::function<void(const std::string& url, const std::vector<char>& data)>;
+
+    /**
+     * @brief Function for making a network request.
+     */
+    using NetworkRequestFn = std::function<void(const std::string& url, NetworkRequestCb& networkRequestCb)>;
+
+    /**
      * @brief Creates instance of the application.
      *
      * Constructs Ampache Browser and its dependencies.
@@ -65,6 +75,11 @@ public:
      * @return The main window widget or nullptr if not created yet.
      */
     QWidget* getMainWidget() const;
+
+    /**
+     * @brief Injects function for processing network requests.
+     */
+    void setNetworkRequestFunction(const NetworkRequestFn& networkRequestFn);
 
     /**
      * @brief Creates UI window, connects to the server and starts reading data.

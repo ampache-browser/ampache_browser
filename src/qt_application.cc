@@ -50,6 +50,12 @@ QWidget* QtApplication::getMainWidget() const {
 
 
 
+void QtApplication::setNetworkRequestFunction(const QtApplication::NetworkRequestFn& networkRequestFn) {
+    myQtApplicationInternal->setNetworkRequestFunction(networkRequestFn);
+}
+
+
+
 void QtApplication::run() {
     myQtApplicationInternal->run();
 }

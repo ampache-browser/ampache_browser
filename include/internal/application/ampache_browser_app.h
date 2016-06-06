@@ -17,7 +17,8 @@
 #include <memory>
 #include <functional>
 #include "ui/selected_items.h"
-#include "application/data_loader.h"
+#include "data/providers/ampache.h"
+#include "data_loader.h"
 
 class QWidget;
 
@@ -98,6 +99,11 @@ public:
     QWidget* getMainWidget() const;
 
     /**
+     * @brief Injects function for processing network requests.
+     */
+    void setNetworkRequestFunction(const data::Ampache::NetworkRequestFn& networkRequestFn);
+
+    /**
      * @brief Creates UI window, connects to the server and starts reading data.
      *
      * @warning The SettingsInternal instance passed to the constructor has to be initialized (all settings have to
@@ -119,6 +125,7 @@ public:
 
 private:
     SettingsInternal& mySettingsInternal;
+    data::Ampache::NetworkRequestFn myNetworkRequestFn;
 
     std::function<void(std::vector<std::string>)> myPlayCb = [](std::vector<std::string>) { };
     std::function<void(std::vector<std::string>)> myCreatePlaylistCb = [](std::vector<std::string>) { };

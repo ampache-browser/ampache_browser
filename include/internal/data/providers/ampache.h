@@ -21,7 +21,6 @@
 
 #include <QtCore/QObject>
 #include <QPixmap>
-#include <QNetworkAccessManager>
 
 #include "infrastructure/event/event.h"
 #include "data/providers/connection_info.h"
@@ -49,11 +48,23 @@ class Ampache: public QObject {
 
 public:
     /**
+     * @brief Callback function called when a network request finishes.
+     */
+    using NetworkRequestCb = std::function<void(const std::string& url, const std::vector<char>& data)>;
+
+    /**
+     * @brief Function for making a network request.
+     */
+    using NetworkRequestFn = std::function<void(const std::string& url, NetworkRequestCb& networkRequestCb)>;
+
+    /**
      * @brief Constructor.
      *
      * @param connectionInfo Information used to connect to the Ampache server.
+     * @param networkRequestFn Function that will be called to retrieve data from network.  Usage of this function
+     *        is workaround for segfault on exit when QNetworkAccessManager is used together with Audacious.
      */
-    explicit Ampache(const ConnectionInfo& connectionInfo);
+    explicit Ampache(const ConnectionInfo& connectionInfo, const NetworkRequestFn& networkRequestFn);
 
     Ampache(const Ampache& other) = delete;
 
@@ -224,8 +235,6 @@ public:
     std::string refreshUrl(const std::string& url) const;
 
 private slots:
-    void onFinished();
-    void onAlbumArtFinished();
     void onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumArtRunnable);
 
 private:
@@ -240,8 +249,11 @@ private:
 
     // arguments from the constructor
     const ConnectionInfo myConnectionInfo;
+    const NetworkRequestFn myNetworkRequestFn;
 
-    QNetworkAccessManager* myNetworkAccessManager;
+    // network communication callback functions
+    NetworkRequestCb myNetworkRequestCb;
+    NetworkRequestCb myAlbumArtsNetworkRequestCb;
 
     // true if handshake with the server was successful
     bool myIsInitialized = false;
@@ -263,6 +275,9 @@ private:
 
     // map of [URL, album art] of album arts that were requested to load and the request was fulfilled
     std::map<std::string, QPixmap> myFinishedAlbumArts;
+
+    void onNetworkRequestFinished(const std::string& url, const std::vector<char>& content);
+    void onAlbumArtsNetworkRequestFinished(const std::string& artUrl, const std::vector<char>& content);
 
     void connectToServer();
     void callMethod(const std::string& name, const std::map<std::string, std::string>& arguments);

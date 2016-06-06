@@ -15,10 +15,6 @@
 #include <QObject>
 #include <QString>
 #include <QUrl>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QNetworkAccessManager>
-#include <QNetworkProxy>
 #include <QDateTime>
 #include <QThreadPool>
 #include <QPixmap>
@@ -38,6 +34,7 @@
 #include "data/providers/ampache.h"
 
 using namespace std;
+using namespace placeholders;
 using namespace chrono;
 using namespace infrastructure;
 using namespace domain;
@@ -46,18 +43,11 @@ using namespace domain;
 
 namespace data {
 
-Ampache::Ampache(const ConnectionInfo& connectionInfo):
+Ampache::Ampache(const ConnectionInfo& connectionInfo, const Ampache::NetworkRequestFn& networkRequestFn):
 myConnectionInfo{connectionInfo},
-myNetworkAccessManager{new QNetworkAccessManager{this}} {
-    if (myConnectionInfo.isProxyUsed()) {
-        QNetworkProxy proxy{QNetworkProxy::HttpProxy, QString::fromStdString(myConnectionInfo.getProxyHost()),
-            myConnectionInfo.getProxyPort()};
-        if (myConnectionInfo.doesProxyRequireAuthentication()) {
-            proxy.setUser(QString::fromStdString(myConnectionInfo.getProxyUser()));
-            proxy.setPassword(QString::fromStdString(myConnectionInfo.getProxyPassword()));
-        }
-        myNetworkAccessManager->setProxy(proxy);
-    }
+myNetworkRequestFn{networkRequestFn},
+myNetworkRequestCb{bind(&Ampache::onNetworkRequestFinished, this, _1, _2)},
+myAlbumArtsNetworkRequestCb{bind(&Ampache::onAlbumArtsNetworkRequestFinished, this, _1, _2)} {
 }
 
 
@@ -138,9 +128,7 @@ void Ampache::requestAlbumArts(const map<string, string>& idsAndUrls) {
     LOG_DBG("Getting %d album arts.", idsAndUrls.size());
     for (auto& idAndUrl: idsAndUrls) {
         myPendingAlbumArts.insert(idAndUrl.first);
-        QNetworkReply* networkReply = myNetworkAccessManager->get(QNetworkRequest(QUrl(QString::fromStdString(
-            idAndUrl.second))));
-        connect(networkReply, SIGNAL(finished()), this, SLOT(onAlbumArtFinished()));
+        myNetworkRequestFn(idAndUrl.second, myAlbumArtsNetworkRequestCb);
     }
 }
 
@@ -163,31 +151,25 @@ string Ampache::refreshUrl(const string& url) const {
 
 
 
-void Ampache::onFinished() {
-    auto networkReply = qobject_cast<QNetworkReply*>(sender());
-    networkReply->deleteLater();
-
-    auto replyContent = networkReply->readAll();
-
-    QXmlStreamReader errorXmlStreamReader{replyContent};
+void Ampache::onNetworkRequestFinished(const string& url, const vector<char>& content) {
+    auto qByteArrayContent = QByteArray{&content[0], static_cast<int>(content.size())};
+    QXmlStreamReader errorXmlStreamReader{qByteArrayContent};
     bool error = isError(errorXmlStreamReader);
 
-    QXmlStreamReader xmlStreamReader{replyContent};
-    string methodName = AmpacheUrl{networkReply->request().url().toString().toStdString()}.parseActionValue();
-    LOG_DBG("Server call of method '%s' has returned with network error %d and error %d.",  methodName.c_str(),
-        networkReply->error(), error);
+    QXmlStreamReader xmlStreamReader{qByteArrayContent};
+    string methodName = AmpacheUrl{url}.parseActionValue();
+    LOG_DBG("Server call of method '%s' has returned with content of length %d and error %d.",  methodName.c_str(),
+        content.size(), error);
     dispatchToMethodHandler(methodName, xmlStreamReader, error);
 }
 
 
 
-void Ampache::onAlbumArtFinished() {
-    auto networkReply = qobject_cast<QNetworkReply*>(sender());
-    networkReply->deleteLater();
-    LOG_DBG("Album art request has returned with network error %d.", networkReply->error());
+void Ampache::onAlbumArtsNetworkRequestFinished(const string& artUrl, const vector<char>& content) {
+    LOG_DBG("Album art request has returned with network content of length %d.", content.size());
 
-    auto artUrl = networkReply->request().url().toString().toStdString();
-    auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(AmpacheUrl{artUrl}.parseIdValue(), networkReply->readAll());
+    auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(AmpacheUrl{artUrl}.parseIdValue(),
+        QByteArray{&content[0], static_cast<int>(content.size())});
     scaleAlbumArtRunnable->setAutoDelete(false);
     connect(scaleAlbumArtRunnable, SIGNAL(finished(ScaleAlbumArtRunnable*)), this,
         SLOT(onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable*)));
@@ -230,10 +212,7 @@ void Ampache::connectToServer() {
     urlStream << assembleUrlBase() << Method.Handshake << "&auth=" << passphrase << "&timestamp=" << currentTime
       << "&version=350001&user=" << myConnectionInfo.getUserName();
 
-    auto stream = urlStream.str();
-    QNetworkReply* networkReply = myNetworkAccessManager->get(QNetworkRequest(QUrl(QString::fromStdString(
-        urlStream.str()))));
-    connect(networkReply, SIGNAL(finished()), this, SLOT(onFinished()));
+    myNetworkRequestFn(urlStream.str(), myNetworkRequestCb);
 }
 
 
@@ -251,9 +230,7 @@ void Ampache::callMethod(const string& name, const map<string, string>& argument
     for (auto nameValuePair: arguments) {
         urlStream << "&" << nameValuePair.first << "=" << nameValuePair.second;
     }
-    QNetworkReply* networkReply = myNetworkAccessManager->get(QNetworkRequest(QUrl(QString::fromStdString(
-        urlStream.str()))));
-    connect(networkReply, SIGNAL(finished()), this, SLOT(onFinished()));
+    myNetworkRequestFn(urlStream.str(), myNetworkRequestCb);
 }
 
 

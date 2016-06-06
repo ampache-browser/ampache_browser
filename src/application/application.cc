@@ -20,6 +20,7 @@
 using namespace std;
 using namespace ampache_browser;
 using namespace infrastructure;
+using namespace data;
 
 
 
@@ -54,6 +55,12 @@ Settings& Application::getSettings() const {
 
 AmpacheBrowserApp& Application::getAmpacheBrowserApp() const {
     return *myAmpacheBrowserApp;
+}
+
+
+
+void Application::setNetworkRequestFunction(const Ampache::NetworkRequestFn& networkRequestFn) {
+    myAmpacheBrowserApp->setNetworkRequestFunction(networkRequestFn);
 }
 
 

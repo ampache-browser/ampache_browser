@@ -8,7 +8,6 @@ include(FindIntl)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Concurrent REQUIRED)
-find_package(Qt5Network REQUIRED)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -90,7 +89,7 @@ if (Intl_FOUND)
     target_compile_definitions(ampache_browser PRIVATE ENABLE_NLS)
 endif()
 
-target_link_libraries(ampache_browser ${Intl_LIBRARIES} Qt5::Core Qt5::Widgets Qt5Concurrent Qt5::Network)
+target_link_libraries(ampache_browser ${Intl_LIBRARIES} Qt5::Core Qt5::Widgets Qt5Concurrent)
 
 generate_export_header(ampache_browser EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/include/public/ampache_browser/export.h)
 
