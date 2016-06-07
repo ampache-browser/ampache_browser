@@ -1,12 +1,12 @@
 prefix=@CMAKE_INSTALL_PREFIX@
 exec_prefix=${prefix}
 libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
-includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@/@libName@
 
-Name: ampache_browser
+Name: Ampache Browser
 Description: Ampache desktop client library
 Version: @PROJECT_VERSION@
 
 Requires:
-Libs: -L${libdir} -lampache_browser
+Libs: -L${libdir} -l@libName@
 Cflags: -I${includedir}

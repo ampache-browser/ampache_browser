@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 project(ampache_browser VERSION 0.0.0)
+set(soVersion 0)
 
 include(GNUInstallDirs)
 include(GenerateExportHeader)
@@ -9,11 +10,7 @@ find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Concurrent REQUIRED)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-configure_file(ampache_browser.pc.cmakein ampache_browser.pc @ONLY)
-
-set(ampache_browser_SRCS
+set(sources
     src/infrastructure/os_paths.cc
     src/infrastructure/event/delegate_void.cc
     src/infrastructure/event/event_void.cc
@@ -62,7 +59,7 @@ set(ampache_browser_SRCS
     src/qt_application.cc)
 
 # headers with QT meta objects
-set(ampache_browser_HEADERS_WITH_MO
+set(headersWithMo
     include/internal/application/models/artist_model.h
     include/internal/application/models/album_model.h
     include/internal/application/models/track_model.h
@@ -72,30 +69,39 @@ set(ampache_browser_HEADERS_WITH_MO
     src/ui/settings_dialog.h
     src/ui/ampache_browser_main_window.h
     include/internal/ui/ui.h)
-qt5_wrap_cpp(ampache_browser_HEADERS_MOC ${ampache_browser_HEADERS_WITH_MO})
+qt5_wrap_cpp(mocs ${headersWithMo})
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
-add_library(ampache_browser SHARED ${ampache_browser_SRCS} ${ampache_browser_HEADERS_MOC})
+set(libTarget ampache_browser)
+set(libName ${libTarget}_${PROJECT_VERSION_MAJOR})
 
-target_include_directories(ampache_browser PRIVATE include/public include/internal)
+add_library(${libTarget} SHARED ${sources} ${mocs})
 
-target_compile_options(ampache_browser PRIVATE -std=c++11 -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual)
+set_target_properties(${libTarget} PROPERTIES
+    OUTPUT_NAME ${libName}
+    VERSION ${soVersion}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
+    SOVERSION ${soVersion})
 
-target_compile_definitions(ampache_browser PRIVATE PACKAGE=\"${PROJECT_NAME}\")
-target_compile_definitions(ampache_browser PRIVATE $<$<CONFIG:Debug>:AMPACHE_BROWSER_DEBUG>)
+target_include_directories(${libTarget} PRIVATE include/public include/internal)
+
+target_compile_options(${libTarget} PRIVATE -std=c++11 -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual)
+target_compile_definitions(${libTarget} PRIVATE PACKAGE=\"${PROJECT_NAME}\")
+target_compile_definitions(${libTarget} PRIVATE $<$<CONFIG:Debug>:AMPACHE_BROWSER_DEBUG>)
 if (Intl_FOUND)
-    target_compile_definitions(ampache_browser PRIVATE ENABLE_NLS)
+    target_compile_definitions(${libTarget} PRIVATE ENABLE_NLS)
 endif()
 
-target_link_libraries(ampache_browser ${Intl_LIBRARIES} Qt5::Core Qt5::Widgets Qt5Concurrent)
+target_link_libraries(${libTarget} ${Intl_LIBRARIES} Qt5::Core Qt5::Widgets Qt5Concurrent)
 
-generate_export_header(ampache_browser EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/include/public/ampache_browser/export.h)
+configure_file(ampache_browser.pc.cmakein ${libName}.pc @ONLY)
+generate_export_header(${libTarget} EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/include/public/ampache_browser/export.h)
 
-install(TARGETS ampache_browser LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(DIRECTORY include/public/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h")
-install(FILES ${PROJECT_BINARY_DIR}/ampache_browser.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+install(TARGETS ${libTarget} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY include/public/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${libName} FILES_MATCHING PATTERN "*.h")
+install(FILES ${PROJECT_BINARY_DIR}/${libName}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 add_subdirectory(src)
 
