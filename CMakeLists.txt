@@ -1,14 +1,22 @@
+# CMakeLists.txt
+#
+# Project: Ampache Browser
+# License: GNU GPLv3
+#
+# Copyright (C) 2015 - 2016 Róbert Čerňanský
+
+
+
 cmake_minimum_required(VERSION 3.0)
 project(ampache_browser VERSION 0.0.0)
 set(soVersion 0)
 
 include(GNUInstallDirs)
 include(GenerateExportHeader)
+include(CMakePackageConfigHelpers)
 include(FindIntl)
 
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Concurrent REQUIRED)
+find_package(Qt5 REQUIRED Core Widgets Concurrent)
 
 set(sources
     src/infrastructure/os_paths.cc
@@ -75,6 +83,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
+add_subdirectory(src)
+add_subdirectory(include)
+
 set(libTarget ampache_browser)
 set(libName ${libTarget}_${PROJECT_VERSION_MAJOR})
 
@@ -85,24 +96,30 @@ set_target_properties(${libTarget} PROPERTIES
     VERSION ${soVersion}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
     SOVERSION ${soVersion})
 
-target_include_directories(${libTarget} PRIVATE include/public include/internal)
+target_include_directories(${libTarget}
+    PRIVATE include/internal
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public> $<INSTALL_INTERFACE:include/${libName}>)
 
 target_compile_options(${libTarget} PRIVATE -std=c++11 -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual)
-target_compile_definitions(${libTarget} PRIVATE PACKAGE=\"${PROJECT_NAME}\")
-target_compile_definitions(${libTarget} PRIVATE $<$<CONFIG:Debug>:AMPACHE_BROWSER_DEBUG>)
+target_compile_definitions(${libTarget}
+    PRIVATE PACKAGE=\"${PROJECT_NAME}\"
+    PRIVATE $<$<CONFIG:Debug>:AMPACHE_BROWSER_DEBUG>)
 if (Intl_FOUND)
     target_compile_definitions(${libTarget} PRIVATE ENABLE_NLS)
 endif()
 
-target_link_libraries(${libTarget} ${Intl_LIBRARIES} Qt5::Core Qt5::Widgets Qt5Concurrent)
+target_link_libraries(${libTarget} PRIVATE ${Intl_LIBRARIES} Qt5::Core Qt5::Widgets Qt5Concurrent)
 
-configure_file(ampache_browser.pc.cmakein ${libName}.pc @ONLY)
+set(configFileName ${libName}-config.cmake)
+write_basic_package_version_file(${libName}-config-version.cmake COMPATIBILITY SameMajorVersion)
+configure_file(${libTarget}-config.cmake.cmakein ${configFileName} COPYONLY)
+configure_file(${libTarget}.pc.cmakein ${libName}.pc @ONLY)
 generate_export_header(${libTarget} EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/include/public/ampache_browser/export.h)
 
-install(TARGETS ${libTarget} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+set(exportedLibTargets ${libName}-targets)
+install(TARGETS ${libTarget} EXPORT ${exportedLibTargets} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY include/public/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${libName} FILES_MATCHING PATTERN "*.h")
 install(FILES ${PROJECT_BINARY_DIR}/${libName}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-
-add_subdirectory(src)
-
-add_subdirectory(include)
+install(FILES ${PROJECT_BINARY_DIR}/${configFileName} ${PROJECT_BINARY_DIR}/${libName}-config-version.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${libName})
+install(EXPORT ${exportedLibTargets} DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${libName})
