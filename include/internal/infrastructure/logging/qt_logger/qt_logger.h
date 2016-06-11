@@ -48,28 +48,54 @@ public:
     /**
      * @brief Logs an error (LogLevel::Error) message.
      *
-     * @sa setMaxLogLevel()
+     * @param args Message as a format string and its arguments.
      */
     template <typename... TArgs>
     void error(TArgs... args) const;
 
     /**
+     * @brief Logs an error (LogLevel::Error) message.
+     */
+    void error(const char* message) const;
+
+    /**
      * @brief Logs a warning (LogLevel::Warning) message.
+     *
+     * @param args Message as a format string and its arguments.
      */
     template <typename... TArgs>
     void warning(TArgs... args) const;
 
     /**
+     * @brief Logs a warning (LogLevel::Warning) message.
+     */
+    void warning(const char* message) const;
+
+    /**
      * @brief Logs an info (LogLevel::Info) message.
+     *
+     * @param args Message as a format string and its arguments.
      */
     template <typename... TArgs>
     void info(TArgs... args) const;
 
     /**
+     * @brief Logs an info (LogLevel::Info) message.
+     */
+    void info(const char* message) const;
+
+    /**
      * @brief Logs a debug (LogLevel::Debug) message.
+     *
+     * @param args Message as a format string and its arguments.
      */
     template <typename... TArgs>
     void debug(TArgs... args) const;
+
+    /**
+     * @brief Logs a debug (LogLevel::Debug) message.
+     */
+    void debug(const char* message) const;
 
 private:
     const char* myFile;

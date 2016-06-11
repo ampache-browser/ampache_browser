@@ -37,7 +37,7 @@ namespace infrastructure {
  *
  * Usage example:
  * @code
- * LOG_ERR("An error nr. ", errorNumber, " has occured.");
+ * LOG_ERR("An error nr. %d has occured.", errorNumber);
  * @endcode
  */
 #define LOG_ERR QtLogger(__FILE__, __LINE__, Q_FUNC_INFO).error
@@ -47,7 +47,7 @@ namespace infrastructure {
  *
  * Usage example:
  * @code
- * LOG_WARN("Value of 'x' (", x, ") is too small.");
+ * LOG_WARN("Value of 'x' (%d) is too small.", x);
  * @endcode
  */
 #define LOG_WARN QtLogger(__FILE__, __LINE__, Q_FUNC_INFO).warning
@@ -57,7 +57,7 @@ namespace infrastructure {
  *
  * Usage example:
  * @code
- * LOG_INF("Value of 'y' is ", y, ".");
+ * LOG_INF("Value of 'y' is %d.", y);
  * @endcode
  */
 #define LOG_INF QtLogger(__FILE__, __LINE__, Q_FUNC_INFO).info
@@ -69,7 +69,7 @@ namespace infrastructure {
  *
  * Usage example:
  * @code
- * LOG_DBG("Value of 'tmp' is ", tmp, ".");
+ * LOG_DBG("Value of 'tmp' is '%s'.", tmp);
  * @endcode
  */
 #define LOG_DBG QtLogger(__FILE__, __LINE__, Q_FUNC_INFO).debug
@@ -81,7 +81,7 @@ namespace infrastructure {
  *
  * Usage example:
  * @code
- * LOG_DBG("Value of 'tmp' is ", tmp, ".");
+ * LOG_DBG("Value of 'tmp' is '%s'.", tmp);
  * @endcode
  */
 #define LOG_DBG __noopLog

@@ -100,7 +100,9 @@ target_include_directories(${libTarget}
     PRIVATE include/internal
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public> $<INSTALL_INTERFACE:include/${libName}>)
 
-target_compile_options(${libTarget} PRIVATE -std=c++11 -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual)
+target_compile_options(${libTarget} PRIVATE -std=c++11 -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual
+    -Wformat-security)
+
 target_compile_definitions(${libTarget}
     PRIVATE PACKAGE=\"${PROJECT_NAME}\"
     PRIVATE $<$<CONFIG:Debug>:AMPACHE_BROWSER_DEBUG>)
