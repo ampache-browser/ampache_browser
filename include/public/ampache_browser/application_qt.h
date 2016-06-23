@@ -39,7 +39,7 @@ public:
     /**
      * @brief Callback function called when a network request finishes.
      */
-    using NetworkRequestCb = std::function<void(const std::string& url, const std::vector<char>& data)>;
+    using NetworkRequestCb = std::function<void(const std::string& url, const char* content, int contentSize)>;
 
     /**
      * @brief Function for making a network request.

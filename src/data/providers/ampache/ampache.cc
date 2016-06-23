@@ -46,8 +46,8 @@ namespace data {
 Ampache::Ampache(const ConnectionInfo& connectionInfo, const Ampache::NetworkRequestFn& networkRequestFn):
 myConnectionInfo{connectionInfo},
 myNetworkRequestFn{networkRequestFn},
-myNetworkRequestCb{bind(&Ampache::onNetworkRequestFinished, this, _1, _2)},
-myAlbumArtsNetworkRequestCb{bind(&Ampache::onAlbumArtsNetworkRequestFinished, this, _1, _2)} {
+myNetworkRequestCb{bind(&Ampache::onNetworkRequestFinished, this, _1, _2, _3)},
+myAlbumArtsNetworkRequestCb{bind(&Ampache::onAlbumArtsNetworkRequestFinished, this, _1, _2, _3)} {
 }
 
 
@@ -151,25 +151,25 @@ string Ampache::refreshUrl(const string& url) const {
 
 
 
-void Ampache::onNetworkRequestFinished(const string& url, const vector<char>& content) {
-    auto qByteArrayContent = QByteArray{&content[0], static_cast<int>(content.size())};
+void Ampache::onNetworkRequestFinished(const string& url, const char* content, int contentSize) {
+    auto qByteArrayContent = QByteArray{content, contentSize};
     QXmlStreamReader errorXmlStreamReader{qByteArrayContent};
     bool error = isError(errorXmlStreamReader);
 
     QXmlStreamReader xmlStreamReader{qByteArrayContent};
     string methodName = AmpacheUrl{url}.parseActionValue();
     LOG_DBG("Server call of method '%s' has returned with content of length %d and error %d.",  methodName.c_str(),
-        content.size(), error);
+        contentSize, error);
     dispatchToMethodHandler(methodName, xmlStreamReader, error);
 }
 
 
 
-void Ampache::onAlbumArtsNetworkRequestFinished(const string& artUrl, const vector<char>& content) {
-    LOG_DBG("Album art request has returned with network content of length %d.", content.size());
+void Ampache::onAlbumArtsNetworkRequestFinished(const string& artUrl, const char* content, int contentSize) {
+    LOG_DBG("Album art request has returned with network content of length %d.", contentSize);
 
     auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(AmpacheUrl{artUrl}.parseIdValue(),
-        QByteArray{&content[0], static_cast<int>(content.size())});
+        QByteArray{content, contentSize});
     scaleAlbumArtRunnable->setAutoDelete(false);
     connect(scaleAlbumArtRunnable, SIGNAL(finished(ScaleAlbumArtRunnable*)), this,
         SLOT(onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable*)));

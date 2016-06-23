@@ -50,7 +50,7 @@ public:
     /**
      * @brief Callback function called when a network request finishes.
      */
-    using NetworkRequestCb = std::function<void(const std::string& url, const std::vector<char>& data)>;
+    using NetworkRequestCb = std::function<void(const std::string& url, const char* content, int contentSize)>;
 
     /**
      * @brief Function for making a network request.
@@ -276,8 +276,8 @@ private:
     // map of [URL, album art] of album arts that were requested to load and the request was fulfilled
     std::map<std::string, QPixmap> myFinishedAlbumArts;
 
-    void onNetworkRequestFinished(const std::string& url, const std::vector<char>& content);
-    void onAlbumArtsNetworkRequestFinished(const std::string& artUrl, const std::vector<char>& content);
+    void onNetworkRequestFinished(const std::string& url, const char* content, int contentSize);
+    void onAlbumArtsNetworkRequestFinished(const std::string& artUrl, const char* content, int contentSize);
 
     void connectToServer();
     void callMethod(const std::string& name, const std::map<std::string, std::string>& arguments);
