@@ -1,4 +1,4 @@
-// qt_application_internal.cc
+// application_qt_internal.cc
 //
 // Project: Ampache Browser
 // License: GNU GPLv3
@@ -9,7 +9,7 @@
 
 #include "application/ampache_browser_app.h"
 #include "application/application.h"
-#include "application/qt_application_internal.h"
+#include "application/application_qt_internal.h"
 
 using namespace std;
 using namespace ampache_browser;
@@ -18,12 +18,12 @@ using namespace ampache_browser;
 
 namespace application {
 
-QtApplicationInternal::QtApplicationInternal(): Application() {
+ApplicationQtInternal::ApplicationQtInternal(): Application() {
 }
 
 
 
-QWidget* QtApplicationInternal::getMainWidget() const {
+QWidget* ApplicationQtInternal::getMainWidget() const {
     return getAmpacheBrowserApp().getMainWidget();
 }
 

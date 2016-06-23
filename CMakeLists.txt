@@ -61,10 +61,10 @@ set(sources
     src/application/settings_internal.cc
     src/application/ampache_browser_app.cc
     src/application/application.cc
-    src/application/qt_application_internal.cc
+    src/application/application_qt_internal.cc
     src/settings.cc
     src/ampache_browser.cc
-    src/qt_application.cc)
+    src/application_qt.cc)
 
 # headers with QT meta objects
 set(headersWithMo

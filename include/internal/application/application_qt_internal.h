@@ -1,4 +1,4 @@
-// qt_application_internal.h
+// application_qt_internal.h
 //
 // Project: Ampache Browser
 // License: GNU GPLv3
@@ -7,8 +7,8 @@
 
 
 
-#ifndef QTAPPLICATIONINTERNAL_H
-#define QTAPPLICATIONINTERNAL_H
+#ifndef APPLICATIONQTINTERNAL_H
+#define APPLICATIONQTINTERNAL_H
 
 
 
@@ -25,7 +25,7 @@ namespace application {
  *
  * @sa Application
  */
-class QtApplicationInternal: public Application {
+class ApplicationQtInternal: public Application {
 
 public:
     /**
@@ -33,7 +33,7 @@ public:
      *
      * @sa Application::Application()
      */
-    explicit QtApplicationInternal();
+    explicit ApplicationQtInternal();
 
     /**
      * @brief Gets main window widget.
@@ -49,4 +49,4 @@ public:
 
 
 
-#endif // QTAPPLICATIONINTERNAL_H
+#endif // APPLICATIONQTINTERNAL_H

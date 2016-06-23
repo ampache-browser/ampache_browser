@@ -1,4 +1,4 @@
-// qt_application.h
+// application_qt.h
 //
 // Project: Ampache Browser
 // License: GNU GPLv3
@@ -7,8 +7,8 @@
 
 
 
-#ifndef AMPACHE_BROWSER_QTAPPLICATION_H
-#define AMPACHE_BROWSER_QTAPPLICATION_H
+#ifndef AMPACHE_BROWSER_APPLICATIONQT_H
+#define AMPACHE_BROWSER_APPLICATIONQT_H
 
 
 
@@ -18,7 +18,7 @@
 class QWidget;
 
 namespace application {
-class QtApplicationInternal;
+class ApplicationQtInternal;
 }
 
 
@@ -33,7 +33,7 @@ class Settings;
 /**
  * @brief Instantiates the application with Qt UI and provides public interfaces.
  */
-class AMPACHE_BROWSER_EXPORT QtApplication {
+class AMPACHE_BROWSER_EXPORT ApplicationQt {
 
 public:
     /**
@@ -51,9 +51,9 @@ public:
      *
      * Constructs Ampache Browser and its dependencies.
      */
-    explicit QtApplication();
+    explicit ApplicationQt();
 
-    ~QtApplication();
+    ~ApplicationQt();
 
     /**
      * @brief Gets instance of Ampache Browser.
@@ -99,11 +99,11 @@ public:
     void finishRequest(std::function<void()> finishedCb);
 
 private:
-    std::unique_ptr<application::QtApplicationInternal> myQtApplicationInternal;
+    std::unique_ptr<application::ApplicationQtInternal> myApplicationQtInternal;
 };
 
 }
 
 
 
-#endif // AMPACHE_BROWSER_QTAPPLICATION_H
+#endif // AMPACHE_BROWSER_APPLICATIONQT_H
