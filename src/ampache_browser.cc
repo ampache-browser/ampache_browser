@@ -22,19 +22,19 @@ AmpacheBrowser::~AmpacheBrowser() {
 
 
 
-void AmpacheBrowser::connectPlay(function<void(vector<string>)> callback) {
+void AmpacheBrowser::connectPlay(function<void(const vector<string>&)> callback) {
     myAmpacheBrowserApp->connectPlay(callback);
 }
 
 
 
-void AmpacheBrowser::connectCreatePlaylist(function<void(vector<string>)> callback) {
+void AmpacheBrowser::connectCreatePlaylist(function<void(const vector<string>&)> callback) {
     myAmpacheBrowserApp->connectCreatePlaylist(callback);
 }
 
 
 
-void AmpacheBrowser::connectAddToPlaylist(function<void(vector<string>)> callback) {
+void AmpacheBrowser::connectAddToPlaylist(function<void(const vector<string>&)> callback) {
     myAmpacheBrowserApp->connectAddToPlaylist(callback);
 }
 

@@ -73,21 +73,21 @@ public:
      *
      * @param callback Function that shall be set as callback.
      */
-    void connectPlay(std::function<void(std::vector<std::string>)> callback);
+    void connectPlay(std::function<void(const std::vector<std::string>&)> callback);
 
     /**
      * @brief Sets a callback that will be called after the user performed "create playlist" action.
      *
      * @param callback Function that shall be set as callback.
      */
-    void connectCreatePlaylist(std::function<void(std::vector<std::string>)> callback);
+    void connectCreatePlaylist(std::function<void(const std::vector<std::string>&)> callback);
 
     /**
      * @brief Sets a callback that will be called after the user performed "add to playlist" action.
      *
      * @param callback Function that shall be set as callback.
      */
-    void connectAddToPlaylist(std::function<void(std::vector<std::string>)> callback);
+    void connectAddToPlaylist(std::function<void(const std::vector<std::string>&)> callback);
 
     /**
      * @brief Gets main window widget.
@@ -127,9 +127,9 @@ private:
     SettingsInternal& mySettingsInternal;
     data::Ampache::NetworkRequestFn myNetworkRequestFn;
 
-    std::function<void(std::vector<std::string>)> myPlayCb = [](std::vector<std::string>) { };
-    std::function<void(std::vector<std::string>)> myCreatePlaylistCb = [](std::vector<std::string>) { };
-    std::function<void(std::vector<std::string>)> myAddToPlaylistCb = [](std::vector<std::string>) { };
+    std::function<void(std::vector<std::string>)> myPlayCb = [](const std::vector<std::string>&) { };
+    std::function<void(std::vector<std::string>)> myCreatePlaylistCb = [](const std::vector<std::string>&) { };
+    std::function<void(std::vector<std::string>)> myAddToPlaylistCb = [](const std::vector<std::string>&) { };
     std::function<void()> myFinishedCb;
 
     std::unique_ptr<ui::Ui> myUi;

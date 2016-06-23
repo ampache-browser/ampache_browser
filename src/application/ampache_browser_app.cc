@@ -53,19 +53,19 @@ AmpacheBrowserApp::~AmpacheBrowserApp() {
 
 
 
-void AmpacheBrowserApp::connectPlay(function<void(vector<string>)> callback) {
+void AmpacheBrowserApp::connectPlay(function<void(const vector<string>&)> callback) {
     myPlayCb = callback;
 }
 
 
 
-void AmpacheBrowserApp::connectCreatePlaylist(function<void(vector<string>)> callback) {
+void AmpacheBrowserApp::connectCreatePlaylist(function<void(const vector<string>&)> callback) {
     myCreatePlaylistCb = callback;
 }
 
 
 
-void AmpacheBrowserApp::connectAddToPlaylist(function<void(vector<string>)> callback) {
+void AmpacheBrowserApp::connectAddToPlaylist(function<void(const vector<string>&)> callback) {
     myAddToPlaylistCb = callback;
 }
 

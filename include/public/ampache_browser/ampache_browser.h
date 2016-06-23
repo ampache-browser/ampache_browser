@@ -45,21 +45,21 @@ public:
      *
      * @param callback Function that shall be set as callback.
      */
-    void connectPlay(std::function<void(std::vector<std::string>)> callback);
+    void connectPlay(std::function<void(const std::vector<std::string>&)> callback);
 
     /**
      * @brief Sets a callback that will be called after the user performed "create playlist" action.
      *
      * @param callback Function that shall be set as callback.
      */
-    void connectCreatePlaylist(std::function<void(std::vector<std::string>)> callback);
+    void connectCreatePlaylist(std::function<void(const std::vector<std::string>&)> callback);
 
     /**
      * @brief Sets a callback that will be called after the user performed "add to playlist" action.
      *
      * @param callback Function that shall be set as callback.
      */
-    void connectAddToPlaylist(std::function<void(std::vector<std::string>)> callback);
+    void connectAddToPlaylist(std::function<void(const std::vector<std::string>&)> callback);
 
 private:
     // Application needs constructor
