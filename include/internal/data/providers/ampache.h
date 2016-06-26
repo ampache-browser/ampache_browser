@@ -84,21 +84,21 @@ public:
      *
      * @sa requestAlbums()
      */
-    infrastructure::Event<std::vector<std::unique_ptr<AlbumData>>> readyAlbums{};
+    infrastructure::Event<std::pair<std::vector<std::unique_ptr<AlbumData>>, bool>> readyAlbums{};
 
     /**
      * @brief Event fired when some artists data has been retrieved from the server.
      *
      * @sa requestArtists()
      */
-    infrastructure::Event<std::vector<std::unique_ptr<ArtistData>>> readyArtists{};
+    infrastructure::Event<std::pair<std::vector<std::unique_ptr<ArtistData>>, bool>> readyArtists{};
 
     /**
      * @brief Event fired when some tracks data has been retrieved from the server.
      *
      * @sa requesTracks()
      */
-    infrastructure::Event<std::vector<std::unique_ptr<TrackData>>> readyTracks{};
+    infrastructure::Event<std::pair<std::vector<std::unique_ptr<TrackData>>, bool>> readyTracks{};
 
     /**
      * @brief Event fired when some album arts has been retrieved from the server.

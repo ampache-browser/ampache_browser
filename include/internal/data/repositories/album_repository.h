@@ -143,7 +143,7 @@ protected:
 
     domain::Album& getDomainObject(const AlbumData& dataItem) const override;
 
-    infrastructure::Event<std::vector<std::unique_ptr<AlbumData>>>& getDataLoadRequestFinishedEvent() override;
+    infrastructure::Event<std::pair<std::vector<std::unique_ptr<AlbumData>>, bool>>& getDataLoadRequestFinishedEvent() override;
 
     void loadDataFromCache() override;
 

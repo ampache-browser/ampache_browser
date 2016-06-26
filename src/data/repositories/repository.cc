@@ -71,7 +71,7 @@ bool Repository<T, U>::load(int offset, int limit) {
     if (myProviderType == ProviderType::Ampache) {
         myLoadOffset = offset;
         getDataLoadRequestFinishedEvent() += infrastructure::DELEGATE1(
-            (&Repository<T, U>::onDataLoadRequestFinished), std::vector<std::unique_ptr<T>>);
+            (&Repository<T, U>::onDataLoadRequestFinished), std::pair<std::vector<std::unique_ptr<T>>, bool>);
 
         requestDataLoad(offset, limit);
     } else if (myProviderType == ProviderType::Cache) {
@@ -220,10 +220,11 @@ void Repository<T, U>::onFilterChanged() {
 
 
 template <typename T, typename U>
-void Repository<T, U>::onDataLoadRequestFinished(std::vector<std::unique_ptr<T>>& data) {
+void Repository<T, U>::onDataLoadRequestFinished(std::pair<std::vector<std::unique_ptr<T>>, bool>& dataAndError) {
+    auto data = std::move(dataAndError.first);
     infrastructure::LOG_DBG("Ready %d entries from offset %d.", data.size(), myLoadOffset);
     getDataLoadRequestFinishedEvent() -= infrastructure::DELEGATE1((&Repository<T, U>::onDataLoadRequestFinished),
-        std::vector<std::unique_ptr<T>>);
+        std::pair<std::vector<std::unique_ptr<T>>, bool>);
 
     if (!myLoadingEnabled)
     {
@@ -245,7 +246,7 @@ void Repository<T, U>::onDataLoadRequestFinished(std::vector<std::unique_ptr<T>>
         return;
     }
 
-    if (data.size() == 0) {
+    if (dataAndError.second) {
         error = true;
         fullyLoaded(error);
         return;

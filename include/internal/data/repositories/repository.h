@@ -242,10 +242,8 @@ protected:
      * @brief Returns event that is fired when load request has finished.
      *
      * @sa requestDataLoad
-     *
-     * @return infrastructure::Event<std::vector<std::unique_ptr<T>>>&
      */
-    virtual infrastructure::Event<std::vector<std::unique_ptr<T>>>& getDataLoadRequestFinishedEvent() = 0;
+    virtual infrastructure::Event<std::pair<std::vector<std::unique_ptr<T>>, bool>>& getDataLoadRequestFinishedEvent() = 0;
 
     /**
      * @brief Loads data from cache.
@@ -312,7 +310,7 @@ private:
     int myCachedCount = -1;
 
     void onFilterChanged();
-    void onDataLoadRequestFinished(std::vector<std::unique_ptr<T>>& data);
+    void onDataLoadRequestFinished(std::pair<std::vector<std::unique_ptr<T>>, bool>& dataAndError);
 
     void loadFromCache();
     int computeCount() const;

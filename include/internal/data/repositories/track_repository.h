@@ -59,7 +59,7 @@ protected:
 
     domain::Track& getDomainObject(const TrackData& dataItem) const override;
 
-    infrastructure::Event<std::vector<std::unique_ptr<TrackData>>>& getDataLoadRequestFinishedEvent() override;
+    infrastructure::Event<std::pair<std::vector<std::unique_ptr<TrackData>>, bool>>& getDataLoadRequestFinishedEvent() override;
 
     void loadDataFromCache() override;
 

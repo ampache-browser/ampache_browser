@@ -52,7 +52,7 @@ protected:
 
     domain::Artist& getDomainObject(const ArtistData& dataItem) const override;
 
-    infrastructure::Event<std::vector<std::unique_ptr<ArtistData>>>& getDataLoadRequestFinishedEvent() override;
+    infrastructure::Event<std::pair<std::vector<std::unique_ptr<ArtistData>>, bool>>& getDataLoadRequestFinishedEvent() override;
 
     void loadDataFromCache() override;
 

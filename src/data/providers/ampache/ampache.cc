@@ -346,7 +346,8 @@ void Ampache::processAlbums(QXmlStreamReader& xmlStreamReader, bool error) {
         albumsData = createAlbums(xmlStreamReader);
     }
 
-    readyAlbums(albumsData);
+    auto dataAndError = make_pair(move(albumsData), error);
+    readyAlbums(dataAndError);
 }
 
 
@@ -438,7 +439,8 @@ void Ampache::processArtists(QXmlStreamReader& xmlStreamReader, bool error) {
         artistsData = createArtists(xmlStreamReader);
     }
 
-    readyArtists(artistsData);
+    auto dataAndError = make_pair(move(artistsData), error);
+    readyArtists(dataAndError);
 }
 
 
@@ -515,7 +517,8 @@ void Ampache::processTracks(QXmlStreamReader& xmlStreamReader, bool error) {
         tracksData = createTracks(xmlStreamReader);
     }
 
-    readyTracks(tracksData);
+    auto dataAndError = make_pair(move(tracksData), error);
+    readyTracks(dataAndError);
 }
 
 

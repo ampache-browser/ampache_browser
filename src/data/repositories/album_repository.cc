@@ -176,7 +176,7 @@ Album& AlbumRepository::getDomainObject(const AlbumData& dataItem) const {
 
 
 
-Event<vector<unique_ptr<AlbumData>>>& AlbumRepository::getDataLoadRequestFinishedEvent() {
+Event<pair<vector<unique_ptr<AlbumData>>, bool>>& AlbumRepository::getDataLoadRequestFinishedEvent() {
     return myAmpache.readyAlbums;
 }
 

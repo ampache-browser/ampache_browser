@@ -55,7 +55,7 @@ Artist& ArtistRepository::getDomainObject(const data::ArtistData& dataItem) cons
 
 
 
-Event<vector<unique_ptr<ArtistData>>>& ArtistRepository::getDataLoadRequestFinishedEvent() {
+Event<pair<vector<unique_ptr<ArtistData>>, bool>>& ArtistRepository::getDataLoadRequestFinishedEvent() {
     return myAmpache.readyArtists;
 }
 

@@ -59,7 +59,7 @@ Track& TrackRepository::getDomainObject(const data::TrackData& dataItem) const {
 
 
 
-Event<vector<unique_ptr<TrackData>>>& TrackRepository::getDataLoadRequestFinishedEvent() {
+Event<pair<vector<unique_ptr<TrackData>>, bool>>& TrackRepository::getDataLoadRequestFinishedEvent() {
     return myAmpache.readyTracks;
 }
 
