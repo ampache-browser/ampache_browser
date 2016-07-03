@@ -31,7 +31,8 @@ ArtistModel::ArtistModel(ArtistRepository* const artistRepository, QObject* pare
 myArtistRepository(artistRepository) {
     myRequests->readyToExecute += DELEGATE1(&ArtistModel::onReadyToExecute, RequestGroup);
     myArtistRepository->loaded += DELEGATE1(&ArtistModel::onLoaded, pair<int, int>);
-    myArtistRepository->filterChanged += DELEGATE0(&ArtistModel::onFilterChanged);
+    myArtistRepository->dataSizeChanged += DELEGATE0(&ArtistModel::onDataSizeOrFilterChanged);
+    myArtistRepository->filterChanged += DELEGATE0(&ArtistModel::onDataSizeOrFilterChanged);
     myArtistRepository->providerChanged += DELEGATE0(&ArtistModel::onProviderChanged);
 }
 
@@ -39,7 +40,8 @@ myArtistRepository(artistRepository) {
 
 ArtistModel::~ArtistModel() {
     myArtistRepository->providerChanged -= DELEGATE0(&ArtistModel::onProviderChanged);
-    myArtistRepository->filterChanged -= DELEGATE0(&ArtistModel::onFilterChanged);
+    myArtistRepository->filterChanged -= DELEGATE0(&ArtistModel::onDataSizeOrFilterChanged);
+    myArtistRepository->dataSizeChanged -= DELEGATE0(&ArtistModel::onDataSizeOrFilterChanged);
     myArtistRepository->loaded -= DELEGATE1(&ArtistModel::onLoaded, pair<int, int>);
     myRequests->readyToExecute -= DELEGATE1(&ArtistModel::onReadyToExecute, RequestGroup);
 }
@@ -95,7 +97,7 @@ void ArtistModel::onLoaded(pair<int, int>) {
 
 
 
-void ArtistModel::onFilterChanged() {
+void ArtistModel::onDataSizeOrFilterChanged() {
     beginResetModel();
     endResetModel();
 }

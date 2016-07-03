@@ -77,8 +77,8 @@ void Filtering::onAlbumsSelected(const pair<vector<string>, vector<string>>& alb
     } else {
         vector<reference_wrapper<const Album>> albums;
         for (auto& id: albumAndArtistIds.first) {
-            auto& album = myAlbumRepository.getById(id);
-            albums.push_back(album);
+            auto album = myAlbumRepository.getById(id);
+            albums.push_back(*album);
         }
         myTrackRepository.setFilter(unique_ptr<Filter<TrackData>>{new AlbumFilterForTracks{albums, myIndices}});
     }
@@ -103,8 +103,8 @@ void Filtering::onSearchTriggered(const string& searchText) {
 void Filtering::setArtistFilters(const vector<string>& ids) {
     vector<reference_wrapper<const Artist>> artists;
     for (auto& id: ids) {
-        auto& artist = myArtistRepository.getById(id);
-        artists.push_back(artist);
+        auto artist = myArtistRepository.getById(id);
+        artists.push_back(*artist);
     }
     myAlbumRepository.setFilter(unique_ptr<Filter<AlbumData>>{new ArtistFilterForAlbums{artists, myIndices}});
     myTrackRepository.setFilter(unique_ptr<Filter<TrackData>>{new ArtistFilterForTracks{artists, myIndices}});

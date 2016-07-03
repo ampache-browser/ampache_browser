@@ -48,22 +48,16 @@ public:
 
     /**
      * @brief Gets the identifier.
-     *
-     * @return const std::string
      */
     const std::string getId() const;
 
     /**
      * @brief Gets album's name/title.
-     *
-     * @return const std::string
      */
     const std::string getName() const;
 
     /**
      * @brief Gets year of the album's release.
-     *
-     * @return int
      */
     int getReleaseYear() const;
 
@@ -72,17 +66,13 @@ public:
      *
      * Some albums can be on multiple media such as CDs or DVDs.  This denotes the media which this part of the album
      * is.
-     *
-     * @return int
      */
     int getMediaNumber() const;
 
     /**
      * @brief Gets album's artist.
-     *
-     * @return const domain::Artist&
      */
-    const Artist& getArtist() const;
+    const Artist* getArtist() const;
 
     /**
      * @brief Sets album's artist.
@@ -94,16 +84,12 @@ public:
     /**
      * @brief Returns true if this instance has an album art.
      *
-     * @return bool
-     *
      * @sa getArt(), setArt()
      */
     bool hasArt() const;
 
     /**
      * @brief Gets the album's art (cover).
-     *
-     * @return QPixmap&
      *
      * @sa hasArt(), setArt()
      */

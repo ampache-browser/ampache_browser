@@ -74,6 +74,11 @@ public:
     infrastructure::Event<bool> fullyLoaded{};
 
     /**
+     * @brief Event fired when the number of data items has changed.
+     */
+    infrastructure::Event<void> dataSizeChanged{};
+
+    /**
      * @brief Event fired when a filter was changed.
      *
      * @sa setFilter(), unsetFilter()
@@ -131,7 +136,7 @@ public:
      * @param id The ID of the data item which domain object shall be returned.
      * @return The domain object of the data item with the given @p id.
      */
-    U& getById(const std::string& id) const;
+    U* getById(const std::string& id) const;
 
     /**
      * @brief Gets the load status of the given data items.
@@ -304,8 +309,10 @@ private:
     // number of loaded data items so far
     int myLoadProgress = 0;
 
-    // starting offset of data items that are being currently loaded; -1 if no loading is in progress
+    // starting offset and count of data items that are being currently loaded; myLoadOffset = -1 if no loading
+    // is in progress
     int myLoadOffset = -1;
+    int myLimit;
 
     // filter which is active when no filter is set
     std::shared_ptr<UnfilteredFilter<T>> myUnfilteredFilter = std::shared_ptr<UnfilteredFilter<T>>{
@@ -316,6 +323,9 @@ private:
 
     // cached value for maxCount() method
     int myCachedCount = -1;
+
+    // number of data entries that were not able to be loaded
+    int myNumberOfUnavailableEntries = 0;
 
     void onFilterChanged();
     void onDataLoadRequestFinished(std::pair<std::vector<std::unique_ptr<T>>, bool>& dataAndError);
@@ -377,6 +387,7 @@ bool Repository<T, U>::load(int offset, int limit) {
     infrastructure::LOG_DBG("Load from %d, limit %d.", offset, limit);
     if (myProviderType == ProviderType::Ampache) {
         myLoadOffset = offset;
+        myLimit = limit;
         getDataLoadRequestFinishedEvent() += infrastructure::DELEGATE1(
             (&Repository<T, U>::onDataLoadRequestFinished), std::pair<std::vector<std::unique_ptr<T>>, bool>);
 
@@ -403,11 +414,10 @@ U& Repository<T, U>::get(int filteredOffset) const {
 
 
 template <typename T, typename U>
-U& Repository<T, U>::getById(const std::string& id) const {
-    // SMELL: in case album data is not found, return null?
+U* Repository<T, U>::getById(const std::string& id) const {
     auto dataIter = std::find_if(myData.begin(), myData.end(),
         [&id](const std::unique_ptr<T>& d) {return d != nullptr && d->getId() == id;});
-    return getDomainObject(**dataIter);
+    return dataIter != myData.end() ? &getDomainObject(*dataIter->get()) : nullptr;
 }
 
 
@@ -416,7 +426,7 @@ template <typename T, typename U>
 bool Repository<T, U>::isLoaded(int filteredOffset, int count) const {
     uint end = filteredOffset + count;
     auto filteredData = myFilter->getFilteredData();
-    return (filteredData.size() >= end) && all_of(filteredData.begin() + filteredOffset,
+    return (filteredData.size() >= end) && std::all_of(filteredData.begin() + filteredOffset,
         filteredData.begin() + filteredOffset + count, [](const T& fd) {return &fd != nullptr;});
 }
 
@@ -456,6 +466,7 @@ void Repository<T, U>::setFilter(std::unique_ptr<Filter<T>> filter) {
     myFilter = std::move(filter);
 
     handleFilterSetUnsetOrChanged();
+    filterChanged();
 }
 
 
@@ -498,6 +509,7 @@ void Repository<T, U>::clear() {
     myData.clear();
     myLoadProgress = 0;
     myLoadOffset = -1;
+    myNumberOfUnavailableEntries = 0;
 
     clearIndices();
     myUnfilteredFilter->processUpdatedSourceData();
@@ -509,11 +521,6 @@ void Repository<T, U>::clear() {
 template <typename T, typename U>
 void Repository<T, U>::handleFilterSetUnsetOrChanged() {
     myCachedCount = -1;
-
-    // to the outside world there is no filter to change if not filtered
-    if (isFiltered()) {
-        filterChanged();
-    }
 }
 
 
@@ -522,6 +529,11 @@ template <typename T, typename U>
 void Repository<T, U>::onFilterChanged() {
     infrastructure::LOG_DBG("Processing filter changed event.");
     handleFilterSetUnsetOrChanged();
+
+    // unfiltered data size change is handled in onDataLoadRequestFinished
+    if (isFiltered()) {
+        dataSizeChanged();
+    }
 }
 
 
@@ -565,9 +577,11 @@ void Repository<T, U>::onDataLoadRequestFinished(std::pair<std::vector<std::uniq
     updateIndices(data);
 
     uint offset = myLoadOffset;
-    auto end = offset + data.size();
-    if (end > myData.size()) {
-        myData.resize(end);
+    if (data.size() > 0) {
+        auto end = offset + data.size();
+        if (end > myData.size()) {
+            myData.resize(end);
+        }
     }
     for (auto& dataItem: data) {
         myData[offset] = std::move(dataItem);
@@ -575,13 +589,20 @@ void Repository<T, U>::onDataLoadRequestFinished(std::pair<std::vector<std::uniq
     }
 
     auto offsetAndLimit = std::pair<int, int>{myLoadOffset, data.size()};
+    if (data.size() !=  static_cast<unsigned int>(myLimit)) {
+        myNumberOfUnavailableEntries += myLimit - data.size();
+        dataSizeChanged();
+    }
+
     myUnfilteredFilter->processUpdatedSourceData(myLoadOffset, data.size());
-    myFilter->processUpdatedSourceData(myLoadOffset, data.size());
+    if (isFiltered()) {
+        myFilter->processUpdatedSourceData(myLoadOffset, data.size());
+    }
     myLoadOffset = -1;
     myLoadProgress += data.size();
     infrastructure::LOG_DBG("Load progress: %d.", myLoadProgress);
 
-    bool isFullyLoaded = myLoadProgress >= maxCount();
+    bool isFullyLoaded = myLoadProgress >= maxCount() - myNumberOfUnavailableEntries;
     if (isFullyLoaded) {
         saveDataToCache();
     }
@@ -621,7 +642,7 @@ int Repository<T, U>::computeCount() const {
     if (isFiltered() && myLoadProgress != 0) {
         return myFilter->getFilteredData().size();
     }
-    return maxCount();
+    return maxCount() - myNumberOfUnavailableEntries;
 }
 
 }

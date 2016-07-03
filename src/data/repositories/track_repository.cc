@@ -81,10 +81,14 @@ void TrackRepository::handleLoadedItem(const TrackData& dataItem) const {
     data::Repository<data::TrackData, domain::Track>::handleLoadedItem(dataItem);
 
     auto& track = dataItem.getTrack();
-    auto& artist = myArtistRepository->getById(dataItem.getArtistId());
-    track.setArtist(artist);
-    auto& album = myAlbumRepository->getById(dataItem.getAlbumId());
-    track.setAlbum(album);
+    auto artist = myArtistRepository->getById(dataItem.getArtistId());
+    if (artist != nullptr) {
+        track.setArtist(*artist);
+    }
+    auto album = myAlbumRepository->getById(dataItem.getAlbumId());
+    if (album != nullptr) {
+        track.setAlbum(*album);
+    }
 }
 
 
@@ -94,12 +98,18 @@ void TrackRepository::updateIndices(const vector<unique_ptr<TrackData>>& data) {
     ArtistTracksIndex artistTracks;
     AlbumTracksIndex albumTracks;
     for (auto& dataItem: data) {
-        auto& artist = myArtistRepository->getById(dataItem->getArtistId());
-        auto& albumData = myAlbumRepository->getAlbumDataById(dataItem->getAlbumId());
-        artistAlbums[artist].insert(albumData);
-        artistTracks[artist].insert(*dataItem);
-        auto& album = albumData.getAlbum();
-        albumTracks[album].insert(*dataItem);
+        auto artist = myArtistRepository->getById(dataItem->getArtistId());
+        auto albumData = myAlbumRepository->getAlbumDataById(dataItem->getAlbumId());
+        if (artist != nullptr) {
+            if (albumData != nullptr) {
+                artistAlbums[*artist].insert(*albumData);
+            }
+            artistTracks[*artist].insert(*dataItem);
+        }
+        if (albumData != nullptr) {
+            auto& album = albumData->getAlbum();
+            albumTracks[album].insert(*dataItem);
+        }
     }
 
     myIndices.updateArtistAlbums(artistAlbums);

@@ -47,22 +47,16 @@ public:
 
     /**
      * @brief Gets the identifier.
-     *
-     * @return const std::string
      */
     const std::string getId() const;
 
     /**
      * @brief Gets track's name/title.
-     *
-     * @return const std::string
      */
     const std::string getName() const;
 
     /**
      * @brief Gets the number under which the track is listed on the album.
-     *
-     * @return int
      *
      * @sa getAlbum()
      */
@@ -70,26 +64,20 @@ public:
 
     /**
      * @brief Gets URL to media file with recording of the track.
-     *
-     * @return const std::string
      */
     const std::string getUrl() const;
 
     /**
      * @brief Gets track's artist.
-     *
-     * @return const domain::Artist&
      */
-    const Artist& getArtist() const;
+    const Artist* getArtist() const;
 
     /**
      * @brief Gets track's album.
      *
-     * @return const domain::Album&
-     *
      * @sa setAlbum(), getNumber()
      */
-    const Album& getAlbum() const;
+    const Album* getAlbum() const;
 
     /**
      * @brief Sets track's artist.

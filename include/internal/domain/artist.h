@@ -38,15 +38,11 @@ public:
 
     /**
      * @brief Gets the identifier.
-     *
-     * @return const std::string
      */
     const std::string getId() const;
 
     /**
      * @brief Gets artist's name.
-     *
-     * @return const std::string
      */
     const std::string getName() const;
 

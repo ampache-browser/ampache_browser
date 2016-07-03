@@ -33,7 +33,8 @@ TrackModel::TrackModel(data::TrackRepository* const trackRepository, QObject* pa
 myTrackRepository(trackRepository) {
     myRequests->readyToExecute += DELEGATE1(&TrackModel::onReadyToExecute, RequestGroup);
     myTrackRepository->loaded += DELEGATE1(&TrackModel::onLoaded, pair<int, int>);
-    myTrackRepository->filterChanged += DELEGATE0(&TrackModel::onFilterChanged);
+    myTrackRepository->dataSizeChanged += DELEGATE0(&TrackModel::onDataSizeOrFilterChanged);
+    myTrackRepository->filterChanged += DELEGATE0(&TrackModel::onDataSizeOrFilterChanged);
     myTrackRepository->providerChanged += DELEGATE0(&TrackModel::onProviderChanged);
 }
 
@@ -41,7 +42,8 @@ myTrackRepository(trackRepository) {
 
 TrackModel::~TrackModel() {
     myTrackRepository->providerChanged -= DELEGATE0(&TrackModel::onProviderChanged);
-    myTrackRepository->filterChanged -= DELEGATE0(&TrackModel::onFilterChanged);
+    myTrackRepository->filterChanged -= DELEGATE0(&TrackModel::onDataSizeOrFilterChanged);
+    myTrackRepository->dataSizeChanged -= DELEGATE0(&TrackModel::onDataSizeOrFilterChanged);
     myTrackRepository->loaded -= DELEGATE1(&TrackModel::onLoaded, pair<int, int>);
     myRequests->readyToExecute -= DELEGATE1(&TrackModel::onReadyToExecute, RequestGroup);
 }
@@ -65,10 +67,14 @@ QVariant TrackModel::data(const QModelIndex& index, int role) const {
     switch (column) {
         case 0:
             return QString::fromStdString(track.getName());
-        case 1:
-            return QString::fromStdString(track.getArtist().getName());
-        case 2:
-            return QString::fromStdString(track.getAlbum().getName());
+        case 1: {
+            auto artist = track.getArtist();
+            return artist != nullptr ? QString::fromStdString(artist->getName()) : "";
+        }
+        case 2: {
+            auto album = track.getAlbum();
+            return album != nullptr ? QString::fromStdString(album->getName()) : "";
+        }
         case 3:
             return QString::fromStdString(track.getId());
         default:
@@ -122,7 +128,7 @@ void TrackModel::onLoaded(pair<int, int>) {
 
 
 
-void TrackModel::onFilterChanged() {
+void TrackModel::onDataSizeOrFilterChanged() {
     beginResetModel();
     endResetModel();
 }

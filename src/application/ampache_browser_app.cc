@@ -328,7 +328,7 @@ vector<string> AmpacheBrowserApp::createPlaylistItems(bool error) {
 
     vector<string> playlistUrls;
     for (auto& id: selectedTracks) {
-        auto trackUrl = myAmpache->refreshUrl(myTrackRepository->getById(id).getUrl());
+        auto trackUrl = myAmpache->refreshUrl(myTrackRepository->getById(id)->getUrl());
         playlistUrls.push_back(trackUrl);
     }
 

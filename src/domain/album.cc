@@ -55,8 +55,8 @@ int Album::getMediaNumber() const {
 
 
 
-const Artist& Album::getArtist() const {
-    return *myArtist;
+const Artist* Album::getArtist() const {
+    return myArtist;
 }
 
 

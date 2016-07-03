@@ -11,6 +11,10 @@ namespace data {
 
 template <typename T>
 void UnfilteredFilter<T>::processUpdatedSourceData(int offset, int length) {
+    if (length == 0) {
+        return;
+    }
+
     if (offset != -1) {
         // resize
         for (int idx = this->myFilteredData.size(); idx < offset + length; idx++) {

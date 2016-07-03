@@ -63,11 +63,10 @@ Album& AlbumRepository::getUnfiltered(int offset) const {
 
 
 
-AlbumData& AlbumRepository::getAlbumDataById(const string& id) const {
-    // SMELL: ad can be nullptr; in case album data is not found, return null?
+AlbumData* AlbumRepository::getAlbumDataById(const string& id) const {
     auto albumsDataIter = find_if(myData.begin(), myData.end(),
-        [&id](const unique_ptr<AlbumData>& ad) {return ad->getId() == id;});
-    return **albumsDataIter;
+        [&id](const unique_ptr<AlbumData>& ad) {return ad != nullptr && ad->getId() == id;});
+    return albumsDataIter != myData.end() ? albumsDataIter->get() : nullptr;
 }
 
 
@@ -196,8 +195,10 @@ void AlbumRepository::saveDataToCache() {
 
 void AlbumRepository::handleLoadedItem(const AlbumData& dataItem) const {
     if (dataItem.hasArtist()) {
-        auto& artist = myArtistRepository->getById(dataItem.getArtistId());
-        dataItem.getAlbum().setArtist(artist);
+        auto artist = myArtistRepository->getById(dataItem.getArtistId());
+        if (artist != nullptr) {
+            dataItem.getAlbum().setArtist(*artist);
+        }
     }
 }
 
@@ -213,8 +214,10 @@ void AlbumRepository::updateIndices(const vector<unique_ptr<AlbumData>>& data) {
             // Ampache (3.7.0) seems to ignore Album Artist info.  Only single-artist albums have Artist ID set.  Albums
             // with various artists does not (even if the Album Artist is set in the track's tags).  Therefore
             // this code is redundand; it is kept however in case Ampache is fixed.
-            auto& artist = myArtistRepository->getById(dataItem->getArtistId());
-            artistAlbums[artist].insert(*dataItem);
+            auto artist = myArtistRepository->getById(dataItem->getArtistId());
+            if (artist != nullptr) {
+                artistAlbums[*artist].insert(*dataItem);
+            }
         }
     }
     myIndices.addAlbums(albums);
@@ -332,13 +335,14 @@ pair<map<string, QPixmap>, map<string, string>> AlbumRepository::setArts(const m
         }
     } else {
         for (auto& idAndArt: arts) {
-            auto& albumData = getAlbumDataById(idAndArt.first);
+            auto albumData = getAlbumDataById(idAndArt.first);
             // set the art even if the loaded image is empty (isNull()), otherwise the server would be queried
             // again and again next time
-            albumData.getAlbum().setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
+            // it should not happen that albumData == nullptr because arts are requested only for existing albums
+            albumData->getAlbum().setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
             loadedIdsAndArts.emplace(idAndArt);
             if (idAndArt.second.isNull()) {
-                notLoadedArtIds[idAndArt.first] = albumData.getArtUrl();
+                notLoadedArtIds[idAndArt.first] = albumData->getArtUrl();
             }
         }
     }

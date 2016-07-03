@@ -37,7 +37,8 @@ myAlbumRepository(albumRepository) {
     myAlbumRepository->loaded += DELEGATE1(&AlbumModel::onLoaded, pair<int, int>);
     myArtRequests->readyToExecute += DELEGATE1(&AlbumModel::onReadyToExecuteArts, RequestGroup);
     myAlbumRepository->artsLoaded += DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
-    myAlbumRepository->filterChanged += DELEGATE0(&AlbumModel::onFilterChanged);
+    myAlbumRepository->dataSizeChanged += DELEGATE0(&AlbumModel::onDataSizeOrFilterChanged);
+    myAlbumRepository->filterChanged += DELEGATE0(&AlbumModel::onDataSizeOrFilterChanged);
     myAlbumRepository->providerChanged += DELEGATE0(&AlbumModel::onProviderChanged);
 }
 
@@ -45,7 +46,8 @@ myAlbumRepository(albumRepository) {
 
 AlbumModel::~AlbumModel() {
     myAlbumRepository->providerChanged -= DELEGATE0(&AlbumModel::onProviderChanged);
-    myAlbumRepository->filterChanged -= DELEGATE0(&AlbumModel::onFilterChanged);
+    myAlbumRepository->filterChanged -= DELEGATE0(&AlbumModel::onDataSizeOrFilterChanged);
+    myAlbumRepository->dataSizeChanged -= DELEGATE0(&AlbumModel::onDataSizeOrFilterChanged);
     myAlbumRepository->artsLoaded -= DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
     myArtRequests->readyToExecute -= DELEGATE1(&AlbumModel::onReadyToExecuteArts, RequestGroup);
     myAlbumRepository->loaded -= DELEGATE1(&AlbumModel::onLoaded, pair<int, int>);
@@ -161,7 +163,7 @@ void AlbumModel::onArtsLoaded(pair<int, int> offsetAndCount) {
 
 
 
-void AlbumModel::onFilterChanged() {
+void AlbumModel::onDataSizeOrFilterChanged() {
     beginResetModel();
 
     LOG_DBG("Removing all art requests.");

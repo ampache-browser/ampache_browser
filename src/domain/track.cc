@@ -50,14 +50,14 @@ const string Track::getUrl() const {
 
 
 
-const Artist& Track::getArtist() const {
-    return *myArtist;
+const Artist* Track::getArtist() const {
+    return myArtist;
 }
 
 
 
-const Album& Track::getAlbum() const {
-    return *myAlbum;
+const Album* Track::getAlbum() const {
+    return myAlbum;
 }
 
 

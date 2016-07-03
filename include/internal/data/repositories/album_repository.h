@@ -100,7 +100,7 @@ public:
      *
      * @sa domain::AlbumData::getId()
      */
-    AlbumData& getAlbumDataById(const std::string& id) const;
+    AlbumData* getAlbumDataById(const std::string& id) const;
 
     /**
      * @brief Gets the load status of the given data items.
