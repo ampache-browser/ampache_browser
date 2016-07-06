@@ -41,8 +41,6 @@ myMainWindow{new AmpacheBrowserMainWindow{}} {
     connect(myMainWindow->searchLineEdit, SIGNAL(returnPressed()), this, SLOT(onSearchReturnPressed()));
 
     connect(myMainWindow->settingsDialog, SIGNAL(accepted()), this, SLOT(onSettingsAccepted()));
-
-    myMainWindow->show();
 }
 
 
