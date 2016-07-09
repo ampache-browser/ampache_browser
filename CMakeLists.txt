@@ -124,4 +124,10 @@ install(DIRECTORY include/public/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${libN
 install(FILES ${PROJECT_BINARY_DIR}/${libName}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(FILES ${PROJECT_BINARY_DIR}/${configFileName} ${PROJECT_BINARY_DIR}/${libName}-config-version.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${libName})
+
 install(EXPORT ${exportedLibTargets} DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${libName})
+
+# uninstall target
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.cmakein"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
+add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
