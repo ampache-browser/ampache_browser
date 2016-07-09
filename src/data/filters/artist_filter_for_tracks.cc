@@ -72,8 +72,9 @@ void ArtistFilterForTracks::processUpdatedIndices() {
         auto tracksData = myIndices.getArtistTracks(artist.get());
         filteredUniqueTrackData.insert(tracksData.begin(), tracksData.end());
     }
-    myFilteredData = vector<reference_wrapper<TrackData>>{
-        filteredUniqueTrackData.begin(), filteredUniqueTrackData.end()};
+    for (auto& trackData: filteredUniqueTrackData) {
+        myFilteredData.push_back(&trackData.get());
+    }
 }
 
 }

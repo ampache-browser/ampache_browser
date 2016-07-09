@@ -58,14 +58,14 @@ public:
      *
      * @return Filtered data.
      */
-    const std::vector<std::reference_wrapper<T>>& getFilteredData() const;
+    const std::vector<T*>& getFilteredData() const;
 
 protected:
     // stores source data
     const std::vector<std::unique_ptr<T>>* mySourceData{};
 
     // stores the result of the filter
-    std::vector<std::reference_wrapper<T>> myFilteredData;
+    std::vector<T*> myFilteredData;
 };
 
 }

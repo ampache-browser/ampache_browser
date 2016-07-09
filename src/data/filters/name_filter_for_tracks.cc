@@ -35,7 +35,7 @@ void NameFilterForTracks::processUpdatedSourceData(int offset, int length) {
         if (search(name.begin(), name.end(), myNamePattern.begin(), myNamePattern.end(),
             [](char c1, char c2) {return toupper(c1) == toupper(c2); }) != name.end()) {
 
-            myFilteredData.push_back(*trackData);
+            myFilteredData.push_back(trackData.get());
         }
     }
 

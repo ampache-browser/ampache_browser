@@ -33,6 +33,8 @@ class Indices;
 
 /**
  * @brief Provides albums data filtered by artists.
+ *
+ * Provided filtered data via ::getFilteredData() does not contain uninitialized (null) elements.
  */
 class ArtistFilterForAlbums: public Filter<AlbumData> {
 

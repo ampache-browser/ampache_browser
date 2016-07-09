@@ -407,8 +407,8 @@ bool Repository<T, U>::load(int offset, int limit) {
 
 template <typename T, typename U>
 U& Repository<T, U>::get(int filteredOffset) const {
-    T& data = myFilter->getFilteredData()[filteredOffset];
-    return getDomainObject(data);
+    T* data = myFilter->getFilteredData()[filteredOffset];
+    return getDomainObject(*data);
 }
 
 
@@ -427,7 +427,7 @@ bool Repository<T, U>::isLoaded(int filteredOffset, int count) const {
     uint end = filteredOffset + count;
     auto filteredData = myFilter->getFilteredData();
     return (filteredData.size() >= end) && std::all_of(filteredData.begin() + filteredOffset,
-        filteredData.begin() + filteredOffset + count, [](const T& fd) {return &fd != nullptr;});
+        filteredData.begin() + filteredOffset + count, [](const T* const fd) {return fd != nullptr;});
 }
 
 

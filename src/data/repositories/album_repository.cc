@@ -93,15 +93,15 @@ bool AlbumRepository::loadArts(int filteredOffset, int count) {
     if (myProviderType == ProviderType::Ampache) {
         map<string, string> albumIdsAndUrls;
         for (auto idx = filteredOffset; idx < filteredOffset + count; idx++) {
-            AlbumData& albumData = myFilter->getFilteredData()[idx];
-            albumIdsAndUrls[albumData.getId()] = albumData.getArtUrl();
+            AlbumData* albumData = myFilter->getFilteredData()[idx];
+            albumIdsAndUrls[albumData->getId()] = albumData->getArtUrl();
         }
         myAmpache.requestAlbumArts(albumIdsAndUrls);
     } else if (myProviderType == ProviderType::Cache) {
         vector<string> albumIds;
         for (auto idx = filteredOffset; idx < filteredOffset + count; idx++) {
-            AlbumData& albumData = myFilter->getFilteredData()[idx];
-            albumIds.push_back(albumData.getId());
+            AlbumData* albumData = myFilter->getFilteredData()[idx];
+            albumIds.push_back(albumData->getId());
         }
         myCache.requestAlbumArts(albumIds);
     }
@@ -356,18 +356,18 @@ AlbumData* AlbumRepository::findAlbumDataById(const string& id, int filteredOffs
     auto filteredAlbumsData = myFilter->getFilteredData();
     auto albumDataIter = find_if(filteredAlbumsData.begin() + filteredOffset,
         filteredAlbumsData.begin() + filteredOffset + count,
-        [&id](AlbumData& ad) {return ad.getId() == id;});
+        [&id](AlbumData* ad) {return ad->getId() == id;});
     if (albumDataIter == filteredAlbumsData.begin() + filteredOffset + count) {
         return nullptr;
     }
-    return &albumDataIter->get();
+    return *albumDataIter;
 }
 
 
 
 AlbumData* AlbumRepository::findAlbumDataByIdUnfiltered(const string& id, int offset, int count) const {
     auto albumDataIter = find_if(myData.begin() + offset, myData.begin() + offset + count,
-        [&id](const unique_ptr<AlbumData>& ad) {return ad->getId() == id;});
+        [&id](const unique_ptr<AlbumData>& ad) {return ad != nullptr && ad->getId() == id;});
     if (albumDataIter == myData.begin() + offset + count) {
         return nullptr;
     }

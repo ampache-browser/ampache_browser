@@ -72,8 +72,9 @@ void ArtistFilterForAlbums::processUpdatedIndices() {
         auto albumsData = myIndices.getArtistAlbums(artist.get());
         filteredUniqueAlbumData.insert(albumsData.begin(), albumsData.end());
     }
-    myFilteredData =
-        vector<reference_wrapper<AlbumData>>{filteredUniqueAlbumData.begin(), filteredUniqueAlbumData.end()};
+    for (auto& albumData: filteredUniqueAlbumData) {
+        myFilteredData.push_back(&albumData.get());
+    }
 }
 
 }

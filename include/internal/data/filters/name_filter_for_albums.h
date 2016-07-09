@@ -28,6 +28,8 @@ class AlbumData;
  * @brief Provides albums data filtered by name.
  *
  * Filter is making exact, case insensitive match of the album's name (domain::Album::getName()) with the given pattern.
+ *
+ * Provided filtered data via ::getFilteredData() does not contain uninitialized (null) elements.
  */
 class NameFilterForAlbums: public Filter<AlbumData> {
 

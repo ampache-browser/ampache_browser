@@ -27,6 +27,8 @@ class ArtistData;
  *
  * Filter is making exact, case insensitive match of the artist's name (domain::Album::getName()) with the given
  * pattern.
+ *
+ * Provided filtered data via ::getFilteredData() does not contain uninitialized (null) elements.
  */
 class NameFilterForArtists: public Filter<ArtistData> {
 

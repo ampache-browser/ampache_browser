@@ -33,6 +33,8 @@ class Indices;
 
 /**
  * @brief Provides tracks data filtered by artists.
+ *
+ * Provided filtered data via ::getFilteredData() does not contain uninitialized (null) elements.
  */
 class ArtistFilterForTracks: public Filter<TrackData> {
 

@@ -42,7 +42,7 @@ void Filter<T>::processUpdatedSourceData(int, int) {
 
 
 template <typename T>
-const std::vector<std::reference_wrapper<T>>& Filter<T>::getFilteredData() const {
+const std::vector<T*>& Filter<T>::getFilteredData() const {
     return myFilteredData;
 }
 
