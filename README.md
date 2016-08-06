@@ -23,7 +23,7 @@ is required for building.
 
 Unpack the installation archive and go to the unpacked directory:
 
-    $ tar xf ampache_browser-<version>.tar.xz
+    $ tar xf ampache_browser-<version>.tar.gz
     $ cd ampache_browser-<version>
 
 Configure, build and install the library:
