@@ -105,6 +105,7 @@ target_compile_options(${libTarget} PRIVATE -std=c++11 -Wall -Wextra -Wpedantic 
 
 target_compile_definitions(${libTarget}
     PRIVATE PACKAGE=\"${PROJECT_NAME}\"
+    PRIVATE VERSION=\"${PROJECT_VERSION}\"
     PRIVATE $<$<CONFIG:Debug>:AMPACHE_BROWSER_DEBUG>)
 if (Intl_FOUND)
     target_compile_definitions(${libTarget} PRIVATE ENABLE_NLS)

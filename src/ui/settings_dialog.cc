@@ -7,6 +7,7 @@
 
 
 
+#include <sstream>
 #include <QFormLayout>
 #include <QCheckBox>
 #include <QLabel>
@@ -28,6 +29,11 @@ SettingsDialog::SettingsDialog(): QDialog() {
 
     myFormLayout = new QFormLayout{this};
 
+    ostringstream versionString;
+    versionString << "<small>" << _("Ampache Browser ver. ") << VERSION << "</small>";
+    myVersionLabel = new QLabel{QString::fromStdString(versionString.str())};
+    myVersionLabel->setAlignment(Qt::AlignRight);
+
     myUseDemoServerCheckBox = new QCheckBox{_("Use demo server")};
     myUseDemoServerCheckBox->setToolTip(
         _("When enabled Ampache Browser will connect to a predefined demo server.  Use it to try the plugin if you do not have an Ampache server around."));
@@ -41,6 +47,7 @@ SettingsDialog::SettingsDialog(): QDialog() {
 
     myDialogButtonBox = new QDialogButtonBox{QDialogButtonBox::Ok | QDialogButtonBox::Cancel};
 
+    myFormLayout->addRow(myVersionLabel);
     myFormLayout->addRow(myUseDemoServerCheckBox);
     myFormLayout->addRow(_("Server URL:"), myServerLineEdit);
     myFormLayout->addRow(_("User Name: "), myUserLineEdit);

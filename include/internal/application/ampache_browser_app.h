@@ -23,7 +23,6 @@
 class QWidget;
 
 namespace data {
-class Ampache;
 class Cache;
 class Indices;
 class ArtistRepository;

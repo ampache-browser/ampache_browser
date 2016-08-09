@@ -19,7 +19,7 @@
 #include <memory>
 #include <chrono>
 
-#include <QtCore/QObject>
+#include <QObject>
 #include <QPixmap>
 
 #include "infrastructure/event/event.h"

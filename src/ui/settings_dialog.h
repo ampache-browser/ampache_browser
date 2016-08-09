@@ -69,6 +69,7 @@ private slots:
 
 private:
     QFormLayout* myFormLayout;
+    QLabel* myVersionLabel;
     QCheckBox* myUseDemoServerCheckBox;
     QLineEdit* myServerLineEdit;
     QLineEdit* myUserLineEdit;
