@@ -62,19 +62,7 @@ namespace infrastructure {
  */
 #define LOG_INF QtLogger(__FILE__, __LINE__, Q_FUNC_INFO).info
 
-#ifdef AMPACHE_BROWSER_DEBUG
-
-/**
- * @brief Logs a debug (LogLevel::Debug) message.
- *
- * Usage example:
- * @code
- * LOG_DBG("Value of 'tmp' is '%s'.", tmp);
- * @endcode
- */
-#define LOG_DBG QtLogger(__FILE__, __LINE__, Q_FUNC_INFO).debug
-
-#else
+#ifdef NDEBUG
 
 /**
  * @brief Does nothing (release build)
@@ -85,6 +73,18 @@ namespace infrastructure {
  * @endcode
  */
 #define LOG_DBG __noopLog
+
+#else
+
+/**
+ * @brief Logs a debug (LogLevel::Debug) message.
+ *
+ * Usage example:
+ * @code
+ * LOG_DBG("Value of 'tmp' is '%s'.", tmp);
+ * @endcode
+ */
+#define LOG_DBG QtLogger(__FILE__, __LINE__, Q_FUNC_INFO).debug
 
 #endif
 

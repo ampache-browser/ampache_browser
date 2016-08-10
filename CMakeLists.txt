@@ -9,6 +9,7 @@
 
 cmake_minimum_required(VERSION 3.0)
 project(ampache_browser VERSION 0.0.1)
+set(VERSION_EXTRA "")
 set(soVersion 0)
 
 include(GNUInstallDirs)
@@ -105,8 +106,7 @@ target_compile_options(${libTarget} PRIVATE -std=c++11 -Wall -Wextra -Wpedantic 
 
 target_compile_definitions(${libTarget}
     PRIVATE PACKAGE=\"${PROJECT_NAME}\"
-    PRIVATE VERSION=\"${PROJECT_VERSION}\"
-    PRIVATE $<$<CONFIG:Debug>:AMPACHE_BROWSER_DEBUG>)
+    PRIVATE VERSION=\"${PROJECT_VERSION}$<$<BOOL:${VERSION_EXTRA}>:->${VERSION_EXTRA}\")
 if (Intl_FOUND)
     target_compile_definitions(${libTarget} PRIVATE ENABLE_NLS)
 endif()
