@@ -121,7 +121,9 @@ generate_export_header(${libTarget} EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/inclu
 
 set(exportedLibTargets ${libName}-targets)
 install(TARGETS ${libTarget} EXPORT ${exportedLibTargets} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(DIRECTORY include/public/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${libName} FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY include/public/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${libName}
+    FILES_MATCHING PATTERN "*.h"
+    PATTERN CMakeFiles EXCLUDE)
 install(FILES ${PROJECT_BINARY_DIR}/${libName}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(FILES ${PROJECT_BINARY_DIR}/${configFileName} ${PROJECT_BINARY_DIR}/${libName}-config-version.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${libName})
