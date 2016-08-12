@@ -84,6 +84,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
+option(USE_NLS "Build with native language support." ON)
+
 add_subdirectory(src)
 add_subdirectory(include)
 
@@ -107,8 +109,12 @@ target_compile_options(${libTarget} PRIVATE -std=c++11 -Wall -Wextra -Wpedantic 
 target_compile_definitions(${libTarget}
     PRIVATE PACKAGE=\"${PROJECT_NAME}\"
     PRIVATE VERSION=\"${PROJECT_VERSION}$<$<BOOL:${VERSION_EXTRA}>:->${VERSION_EXTRA}\")
-if (Intl_FOUND)
-    target_compile_definitions(${libTarget} PRIVATE ENABLE_NLS)
+if (${USE_NLS})
+    if (Intl_FOUND)
+        target_compile_definitions(${libTarget} PRIVATE ENABLE_NLS)
+    else()
+        message(WARNING "Missing libintl. Native language support disabled.")
+    endif()
 endif()
 
 target_link_libraries(${libTarget} PRIVATE ${Intl_LIBRARIES} Qt5::Core Qt5::Widgets Qt5Concurrent)
