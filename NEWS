@@ -2,9 +2,12 @@ Ampache Browser User Visible Changes
 ====================================
 
 
-Version 0.0.1 [????-??-??]
--------------------------------
+Version 0.0.1 [2016-08-18]
+--------------------------
 
+* Version is shown in the Settings dialog.
+
+* Small fixes and improvements related to building of the library.
 
 
 Version 0.0.0 [2016-08-06]
