@@ -36,7 +36,7 @@ SettingsDialog::SettingsDialog(): QDialog() {
 
     myUseDemoServerCheckBox = new QCheckBox{_("Use demo server")};
     myUseDemoServerCheckBox->setToolTip(
-        _("When enabled Ampache Browser will connect to a predefined demo server.  Use it to try the plugin if you do not have an Ampache server around."));
+        _("Connect to a predefined demo server.  Enable this option if you want to try Ampache Browser and have no Ampache server around."));
 
     myServerLineEdit = new QLineEdit{};
     myServerLineEdit->setPlaceholderText("http://..., https://...");
