@@ -22,6 +22,7 @@
 #include <QtConcurrent/QtConcurrent>
 
 #include "infrastructure/logging/logging.h"
+#include "infrastructure/filesystem.h"
 #include "domain/artist.h"
 #include "domain/album.h"
 #include "domain/track.h"
@@ -45,24 +46,12 @@ namespace data {
 Cache::Cache(const string& serverUrl, const string& user):
 myCurrentServerUrl{serverUrl},
 myCurrentUser{user} {
+    if (!Filesystem::isDirExisting(ALBUM_ARTS_DIR)) {
+        Filesystem::makePath(ALBUM_ARTS_DIR, 0700);
+        // TODO: Handle errors.
+    }
     ifstream metaStream{META_PATH};
     if (!metaStream) {
-        // TODO: Handle errors.
-        struct stat cacheBaseStat;
-        stat(CACHE_BASE_DIR.c_str(), &cacheBaseStat);
-        if (!S_ISDIR(cacheBaseStat.st_mode)) {
-            mkdir(CACHE_BASE_DIR.c_str(), 0700);
-        }
-        struct stat cacheStat;
-        stat(CACHE_DIR.c_str(), &cacheStat);
-        if (!S_ISDIR(cacheStat.st_mode)) {
-            mkdir(CACHE_DIR.c_str(), 0777);
-        }
-        struct stat albumArtsStat;
-        stat(ALBUM_ARTS_DIR.c_str(), &albumArtsStat);
-        if (!S_ISDIR(albumArtsStat.st_mode)) {
-            mkdir(ALBUM_ARTS_DIR.c_str(), 0777);
-        }
         invalidate();
     } else {
         loadMeta(metaStream);

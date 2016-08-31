@@ -20,6 +20,7 @@
 #include <QPixmap>
 
 #include "infrastructure/event/event.h"
+#include "infrastructure/filesystem.h"
 #include "infrastructure/os_paths.h"
 
 
@@ -161,11 +162,19 @@ private:
     // cache format version
     int const CACHE_VERSION = 0;
 
+#ifdef _WIN32
+    // user cache directory
+    const std::string CACHE_BASE_DIR = infrastructure::OsPaths::getConfigHome();
+
+    // cache directory of Ampache Browser
+    const std::string CACHE_DIR = CACHE_BASE_DIR + "ampache_browser" + PATH_SEP + "cache" + PATH_SEP;
+#else
     // user cache directory
     const std::string CACHE_BASE_DIR = infrastructure::OsPaths::getCacheHome();
 
     // cache directory of Ampache Browser
-    const std::string CACHE_DIR = CACHE_BASE_DIR + "ampache_browser/";
+    const std::string CACHE_DIR = CACHE_BASE_DIR + "ampache_browser" + PATH_SEP;
+#endif
 
     // path to cache meta file
     const std::string META_PATH = CACHE_DIR + "meta";
@@ -180,7 +189,7 @@ private:
     const std::string TRACKS_DATA_PATH = CACHE_DIR + "tracks_data";
 
     // album arts cache directory
-    const std::string ALBUM_ARTS_DIR = CACHE_DIR + "album_arts/";
+    const std::string ALBUM_ARTS_DIR = CACHE_DIR + "album_arts" + PATH_SEP;
 
     // suffix of cached album art file
     const std::string ART_SUFFIX = ".art";

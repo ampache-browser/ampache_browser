@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2016 Róbert Čerňanský
 
 
 
@@ -31,12 +31,14 @@ public:
      */
     static std::string getConfigHome();
 
+#ifndef _WIN32
     /**
      * @brief Path to uder cache directory.
      *
      * @return std::string
      */
     static std::string getCacheHome();
+#endif
 
 private:
     static std::string getHome();

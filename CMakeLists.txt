@@ -20,6 +20,7 @@ include(FindIntl)
 find_package(Qt5 REQUIRED Core Widgets Concurrent)
 
 set(sources
+    src/infrastructure/filesystem.cc
     src/infrastructure/os_paths.cc
     src/infrastructure/event/delegate_void.cc
     src/infrastructure/event/event_void.cc
@@ -126,7 +127,10 @@ configure_file(${libTarget}.pc.cmakein ${libName}.pc @ONLY)
 generate_export_header(${libTarget} EXPORT_FILE_NAME ${PROJECT_SOURCE_DIR}/include/public/ampache_browser/export.h)
 
 set(exportedLibTargets ${libName}-targets)
-install(TARGETS ${libTarget} EXPORT ${exportedLibTargets} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS ${libTarget} EXPORT ${exportedLibTargets}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY include/public/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${libName}
     FILES_MATCHING PATTERN "*.h"
     PATTERN CMakeFiles EXCLUDE)
