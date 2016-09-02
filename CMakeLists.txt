@@ -84,6 +84,7 @@ qt5_wrap_cpp(mocs ${headersWithMo})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+set(CMAKE_CXX_STANDARD 11)
 
 option(USE_NLS "Build with native language support." ON)
 
@@ -104,8 +105,10 @@ target_include_directories(${libTarget}
     PRIVATE include/internal
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/public> $<INSTALL_INTERFACE:include/${libName}>)
 
-target_compile_options(${libTarget} PRIVATE -std=c++11 -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual
-    -Wformat-security)
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+    target_compile_options(${libTarget} PRIVATE -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual
+        -Wformat-security)
+endif()
 
 target_compile_definitions(${libTarget}
     PRIVATE PACKAGE=\"${PROJECT_NAME}\"
@@ -118,7 +121,7 @@ if (${USE_NLS})
     endif()
 endif()
 
-target_link_libraries(${libTarget} PRIVATE ${Intl_LIBRARIES} Qt5::Core Qt5::Widgets Qt5Concurrent)
+target_link_libraries(${libTarget} PRIVATE ${Intl_LIBRARIES} Qt5::Core Qt5::Widgets Qt5::Concurrent)
 
 set(configFileName ${libName}-config.cmake)
 write_basic_package_version_file(${libName}-config-version.cmake COMPATIBILITY SameMajorVersion)

@@ -17,7 +17,6 @@
 #include <pwd.h>
 #endif
 
-#include <cstdlib>
 #include <string>
 #include "infrastructure/filesystem.h"
 #include "infrastructure/os_paths.h"

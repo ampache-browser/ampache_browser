@@ -7,9 +7,7 @@
 
 
 
-#include <sys/stat.h>
 #include <stdio.h>
-#include <dirent.h>
 #include <vector>
 #include <memory>
 #include <fstream>
@@ -322,16 +320,7 @@ void Cache::saveMeta(system_clock::time_point lastUpdate) {
 
 
 void Cache::invalidate() {
-    auto albumArtsDir = opendir(ALBUM_ARTS_DIR.c_str());
-    dirent* file;
-    while ((file = readdir(albumArtsDir)) != nullptr) {
-        string fileName{file->d_name};
-        if (fileName != "." && fileName != "..")
-        {
-            remove((ALBUM_ARTS_DIR + fileName).c_str());
-        }
-    }
-    closedir(albumArtsDir);
+    Filesystem::removeAllFiles(ALBUM_ARTS_DIR);
 
     myServerUrl = myCurrentServerUrl;
     myUser = myCurrentUser;

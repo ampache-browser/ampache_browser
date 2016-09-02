@@ -12,7 +12,12 @@
 
 
 
+#ifdef _WIN32
+#include <direct.h>
+#else
 #include <sys/stat.h>
+#endif
+
 #include <string>
 
 
@@ -20,7 +25,7 @@
 namespace infrastructure {
 
 #ifdef _WIN32
-#define MKDIR(pathName, mode) mkdir(pathName)
+#define MKDIR(pathName, mode) _mkdir(pathName)
 #define PATH_SEP "\\"
 #else
 #define MKDIR(pathName, mode) mkdir(pathName, mode)
@@ -35,9 +40,30 @@ namespace infrastructure {
 class Filesystem {
 
 public:
-    static bool makePath(const std::string& path, mode_t mode = 0700);
+    /**
+     * @brief Creates a directory specified by path, creating all parent directories if necessary.
+     *
+     * @param path Path consisting from directories that shall be created.
+     * @param mode Mode that shall be used when creating directories (see 'stat' documentation). Ignored on Windows.
+     * @return true if the directory was created, false otherwise (e. g. if it already existed or some error occured).
+     */
+    static bool makePath(const std::string& path, unsigned int mode = 0700);
 
+    /**
+     * @brief Checks whether the given directory exists.
+     *
+     * @param path Path to the tested directory.
+     * @return true if the directory exists, false otherwise.
+     */
     static bool isDirExisting(const std::string& path);
+
+    /**
+     * @brief Removes all files from the give directory. Does not remove nor traverse subdirectories.
+     *
+     * @param path Path to the directory to remove all files from.  Must end with PATH_SEP.
+     * @return true if removal was successful, false otherwise.
+     */
+    static bool removeAllFiles(const std::string& path);
 };
 
 }
