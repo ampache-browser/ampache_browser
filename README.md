@@ -15,24 +15,6 @@ Please see [Ampache Browser Audacious plugin](https://github.com/audacious-media
 for the reference usage.
 
 
-## Installation
-
-Download the latest version from the [releases page](https://github.com/ampache-browser/ampache_browser/releases/).
-Additionally, following Qt 5 modules are required prior to the installation: Core, Widgets, Concurrent.  Finally, CMake
-is required for building.
-
-Unpack the installation archive and go to the unpacked directory:
-
-    $ tar xf ampache_browser-<version>.tar.gz
-    $ cd ampache_browser-<version>
-
-Configure, build and install the library:
-
-    $ cmake .
-    $ make
-    $ sudo make install
-
-
 ## Home
 
 http://ampache-browser.org

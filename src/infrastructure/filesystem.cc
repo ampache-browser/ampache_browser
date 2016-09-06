@@ -79,8 +79,7 @@ bool Filesystem::removeAllFiles(const string& path) {
     dirent* file;
     while ((file = readdir(dir)) != nullptr) {
         string fileName{file->d_name};
-        if (fileName != "." && fileName != "..")
-        {
+        if (fileName != "." && fileName != "..") {
             remove((path + fileName).c_str());
         }
     }

@@ -1,1 +1,90 @@
-Please see README.md for installation instructions.
+Ampache Browser Installation Instructions
+=========================================
+
+
+Linux/General
+-------------
+
+1. Install dependencies: Qt 5 (modules Core, Widgets, Concurrent) and CMake.
+
+2. Install Ampache Browser:
+
+   Download the latest Ampache Browser version from the release page
+   (https://github.com/ampache-browser/ampache_browser/releases/).
+
+   Unpack the installation archive and go to the unpacked directory:
+
+       $ tar xf ampache_browser-<version>.tar.gz
+       $ cd ampache_browser-<version>
+
+   Configure, build and install the library:
+
+       $ cmake .
+       $ make
+       $ sudo make install
+
+
+
+Windows
+-------
+
+Using MSYS2 and MinGW-w64
+.........................
+
+
+1. Install MSYS2 and dependencies:
+
+   Download and install MSYS2 according to https://msys2.github.io.
+
+   Start MSYS2 shell.
+
+   Install development packages (replace i686 with x86_64 for 64 bit):
+
+       $ pacman -S base-devel mingw-w64-i686-toolchain
+
+   Install dependencies:
+
+       $ pacman -S mingw-w64-i686-qt5 mingw-w64-i686-cmake
+
+2. Install Ampache Browser:
+
+   Start MinGW32 or MinGW64 shell.
+
+   Download the latest Ampache Browser version as described in Linux/General section.
+
+   Unpack the installation archive and go to the unpacked directory:
+
+       $ tar xf ampache_browser-<version>.tar.gz
+       $ cd ampache_browser-<version>
+
+   Configure, build and install the library:
+
+       $ cmake -G "MSYS Makefiles" .
+       $ make
+       $ make install
+
+
+
+Using Visual Studio
+...................
+
+1. Install Qt 5 for VS and CMake.
+
+2. Download and unpack the latest Ampache Browser version as described in Linux/General section.
+
+3. Configure and generate solution via CMake:
+
+   Start CMake (GUI).  Select Ampache Browser sources ("Where is the source code:") and choose a build directory
+   ("Where to build the binaries:").
+
+   Add Qt5_DIR configuration variable:
+
+   Click "Add Entry" and fill the dialog:
+
+       Name: Qt5_DIR
+       Type: PATH
+       Value: <path_to_your_qt5_installation>/Qt.../msvc2015_64/lib/cmake/Qt5
+
+   Click "Configure", choose generator for your Visual Studio version and "Finish".  Click "Generate".
+
+4. Open ampache_browser.sln solution (from the build directory) in Visual Studio and build it.
