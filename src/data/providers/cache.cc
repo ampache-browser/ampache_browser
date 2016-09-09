@@ -97,7 +97,7 @@ int Cache::numberOfTracks() const {
 vector<unique_ptr<ArtistData>> Cache::loadArtistsData() const {
     vector<unique_ptr<ArtistData>> artistsData{};
 
-    ifstream artistsDataStream{ARTISTS_DATA_PATH};
+    ifstream artistsDataStream{ARTISTS_DATA_PATH, ios::binary};
     int count = 0;
     artistsDataStream.read(reinterpret_cast<char*>(&count), sizeof count);
     for (int idx = 0; idx < count; idx++) {
@@ -121,7 +121,7 @@ vector<unique_ptr<ArtistData>> Cache::loadArtistsData() const {
 vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() const {
     vector<unique_ptr<AlbumData>> albumsData{};
 
-    ifstream albumsDataStream{ALBUMS_DATA_PATH};
+    ifstream albumsDataStream{ALBUMS_DATA_PATH, ios::binary};
     int count = 0;
     albumsDataStream.read(reinterpret_cast<char*>(&count), sizeof count);
     for (int idx = 0; idx < count; idx++) {
@@ -150,7 +150,7 @@ vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() const {
 vector<unique_ptr<TrackData>> Cache::loadTracksData() const {
     vector<unique_ptr<TrackData>> tracksData{};
 
-    ifstream tracksDataStream{TRACKS_DATA_PATH};
+    ifstream tracksDataStream{TRACKS_DATA_PATH, ios::binary};
     int count = 0;
     tracksDataStream.read(reinterpret_cast<char*>(&count), sizeof count);
     for (int idx = 0; idx < count; idx++) {
@@ -184,7 +184,7 @@ void Cache::requestAlbumArts(const vector<string>& ids) {
 
 
 void Cache::saveArtistsData(vector<unique_ptr<ArtistData>>& artistsData) {
-    ofstream artistsDataStream{ARTISTS_DATA_PATH, ofstream::binary | ofstream::trunc};
+    ofstream artistsDataStream{ARTISTS_DATA_PATH, ios::binary | ios::trunc};
     int count = artistsData.size();
     artistsDataStream.write(reinterpret_cast<char*>(&count), sizeof count);
     for (auto& artistData: artistsData) {
@@ -208,7 +208,7 @@ void Cache::saveArtistsData(vector<unique_ptr<ArtistData>>& artistsData) {
 
 
 void Cache::saveAlbumsData(vector<unique_ptr<AlbumData>>& albumsData) {
-    ofstream albumsDataStream{ALBUMS_DATA_PATH, ofstream::binary | ofstream::trunc};
+    ofstream albumsDataStream{ALBUMS_DATA_PATH, ios::binary | ios::trunc};
     int count = albumsData.size();
     albumsDataStream.write(reinterpret_cast<char*>(&count), sizeof count);
     for (auto& albumData: albumsData) {
@@ -238,7 +238,7 @@ void Cache::saveAlbumsData(vector<unique_ptr<AlbumData>>& albumsData) {
 
 
 void Cache::saveTracksData(vector<unique_ptr<TrackData>>& tracksData) {
-    ofstream tracksDataStream{TRACKS_DATA_PATH, ofstream::binary | ofstream::trunc};
+    ofstream tracksDataStream{TRACKS_DATA_PATH, ios::binary | ios::trunc};
     int count = tracksData.size();
     tracksDataStream.write(reinterpret_cast<char*>(&count), sizeof count);
     for (auto& trackData: tracksData) {
@@ -305,7 +305,7 @@ void Cache::loadMeta(ifstream& metaStream) {
 
 
 void Cache::saveMeta(system_clock::time_point lastUpdate) {
-    ofstream metaStream{META_PATH, ofstream::binary | ofstream::trunc};
+    ofstream metaStream{META_PATH, ios::binary | ios::trunc};
     int version = CACHE_VERSION;
     metaStream.write(reinterpret_cast<char*>(&version), sizeof version);
     writeString(metaStream, myServerUrl);
