@@ -2,6 +2,17 @@ Ampache Browser User Visible Changes
 ====================================
 
 
+Version 1.0.0 [2017-07-26]
+--------------------------
+
+* Disable single-click activation of items.
+
+  On some platforms single-click on artist, album or track item resulted to its activation and thus to the 'play'
+  action.  With such behavior it is problematic or impossible to select multiple items before trggering 'play' or
+  to browse items without activating them.  This behavior is now overriden and items are activated by double-click
+  on all platforms.
+
+
 Version 0.0.3 [2016-09-09]
 --------------------------
 

@@ -8,8 +8,8 @@
 
 
 cmake_minimum_required(VERSION 3.0)
-project(ampache_browser VERSION 0.0.3)
-set(VERSION_EXTRA "next")
+project(ampache_browser VERSION 1.0.0)
+set(VERSION_EXTRA "")
 set(soVersion 0)
 
 include(GNUInstallDirs)
