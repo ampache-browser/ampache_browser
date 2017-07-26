@@ -14,6 +14,7 @@
 
 #include <QMainWindow>
 
+class CustomProxyStyle;
 class QListView;
 class QTreeView;
 class QLineEdit;
@@ -34,6 +35,8 @@ public:
     explicit AmpacheBrowserMainWindow(QWidget* parent = 0);
 
     ~AmpacheBrowserMainWindow();
+
+    CustomProxyStyle* myCustomProxyStyle = nullptr;
 
     QListView* albumsListView = nullptr;
     QListView* artistsListView = nullptr;

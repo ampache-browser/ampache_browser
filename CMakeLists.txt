@@ -3,13 +3,13 @@
 # Project: Ampache Browser
 # License: GNU GPLv3
 #
-# Copyright (C) 2015 - 2016 Róbert Čerňanský
+# Copyright (C) 2015 - 2017 Róbert Čerňanský
 
 
 
 cmake_minimum_required(VERSION 3.0)
 project(ampache_browser VERSION 0.0.3)
-set(VERSION_EXTRA "")
+set(VERSION_EXTRA "next")
 set(soVersion 0)
 
 include(GNUInstallDirs)
@@ -48,6 +48,7 @@ set(sources
     src/data/repositories/track_repository.cc
     src/data/repositories/artist_repository.cc
     src/data/repositories/album_repository.cc
+    src/ui/custom_proxy_style.cc
     src/ui/settings_dialog.cc
     src/ui/ampache_browser_main_window.cc
     src/ui/selected_items.cc

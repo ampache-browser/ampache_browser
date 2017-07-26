@@ -215,8 +215,6 @@ public:
     /**
      * @brief Extends the session or makes a new one if alread expired.
      *
-     * @return true it the session was successfully extended or created.
-     *
      * @sa ::readySession
      */
     void refreshSession();

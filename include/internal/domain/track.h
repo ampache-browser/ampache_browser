@@ -33,7 +33,7 @@ public:
      * @brief Constructor.
      *
      * @param id Identifier.
-     * @param name Track name/title.
+     * @param title Track name/title.
      * @param number Number under which the track is listed on the album.
      * @param url URL to media file with recording of the track.
      *
@@ -89,7 +89,7 @@ public:
     /**
      * @brief Sets track's album.
      *
-     * @param artist
+     * @param album
      *
      * @sa getAlbum(), getNumber()
      */

@@ -19,6 +19,7 @@
 #include <QDockWidget>
 #include "infrastructure/i18n.h"
 #include "settings_dialog.h"
+#include "custom_proxy_style.h"
 #include "ampache_browser_main_window.h"
 
 using namespace std;
@@ -30,6 +31,8 @@ namespace ui {
 
 AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow(parent) {
     setWindowFlags(Qt::Widget);
+
+    myCustomProxyStyle = new CustomProxyStyle{};
 
     // tool bar
     playAction = new QAction(style()->standardIcon(QStyle::SP_MediaPlay), _("Play"), this);
@@ -71,6 +74,7 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     albumsListView->setIconSize(QSize(100, 100));
     albumsListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     albumsListView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    albumsListView->setStyle(myCustomProxyStyle);
 
     centralLayout->addWidget(albumsListView);
     centralWidget->setLayout(centralLayout);
@@ -84,9 +88,12 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     artistsListView->setUniformItemSizes(true);
     artistsListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     artistsListView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    artistsListView->setStyle(myCustomProxyStyle);
     tracksTreeView = new QTreeView{};
     tracksTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     tracksTreeView->setIndentation(0);
+    tracksTreeView->setStyle(myCustomProxyStyle);
+
 
     artistsDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     artistsDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
@@ -114,6 +121,7 @@ AmpacheBrowserMainWindow::~AmpacheBrowserMainWindow() {
     delete(addToPlaylistAction);
     delete(createPlaylistAction);
     delete(playAction);
+    delete(myCustomProxyStyle);
 }
 
 }
