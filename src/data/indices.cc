@@ -19,8 +19,8 @@ namespace data {
 
 void Indices::addArtists(const vector<reference_wrapper<Artist>>& artists) {
     for (auto& artist: artists) {
-        myArtistAlbums[artist.get()] = move(AlbumDataUnorderedSet{});
-        myArtistTracks[artist.get()] = move(TrackDataUnorderedSet{});
+        myArtistAlbums[artist.get()] = AlbumDataUnorderedSet{};
+        myArtistTracks[artist.get()] = TrackDataUnorderedSet{};
     }
 }
 
@@ -28,7 +28,7 @@ void Indices::addArtists(const vector<reference_wrapper<Artist>>& artists) {
 
 void Indices::addAlbums(const vector<reference_wrapper<Album>>& albums) {
     for (auto& album: albums) {
-        myAlbumTracks[album.get()] = move(TrackDataUnorderedSet{});
+        myAlbumTracks[album.get()] = TrackDataUnorderedSet{};
     }
 }
 
