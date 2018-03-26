@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -90,9 +90,9 @@ void ArtistModel::onReadyToExecute(RequestGroup requestGroup) {
 
 
 
-void ArtistModel::onLoaded(pair<int, int>) {
-    auto finishedRequestGroup = myRequests->setFinished();
-    dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+void ArtistModel::onLoaded(pair<int, int> offsetAndLimit) {
+    myRequests->setFinished(offsetAndLimit.first, offsetAndLimit.second);
+    dataChanged(createIndex(offsetAndLimit.first, 0), createIndex(offsetAndLimit.first + offsetAndLimit.second - 1, 0));
 }
 
 

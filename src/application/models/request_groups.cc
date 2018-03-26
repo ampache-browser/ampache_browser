@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -27,20 +27,15 @@ bool RequestGroups::isEmpty() const {
 
 
 
-void RequestGroups::cutAndPlaceOnTop(RequestGroup requestGroup) {
-    auto intersectingGroupIdxs = findIntersectingGroupIdxs(requestGroup);
-    for (auto idx = intersectingGroupIdxs.size(); idx-- > 0;) {
-        auto intersectingGroupIdx = intersectingGroupIdxs[idx];
-        auto intersectingGroup = myRequestGroups[intersectingGroupIdx];
-        pair<RequestGroup, RequestGroup> remainderGroups = intersectingGroup.substract(requestGroup);
-        myRequestGroups.erase(myRequestGroups.begin() + intersectingGroupIdx);
-        if (!remainderGroups.second.isEmpty()) {
-            myRequestGroups.insert(myRequestGroups.begin() + intersectingGroupIdx, remainderGroups.second);
-        }
-        if (!remainderGroups.first.isEmpty()) {
-            myRequestGroups.insert(myRequestGroups.begin() + intersectingGroupIdx, remainderGroups.first);
-        }
-    }
+void RequestGroups::cut(RequestGroup requestGroup) {
+    cutRequestGroup(requestGroup);
+    chop();
+}
+
+
+
+void RequestGroups::moveOnTop(RequestGroup requestGroup) {
+    cutRequestGroup(requestGroup);
     myRequestGroups.push_back(requestGroup);
     chop();
 }
@@ -86,6 +81,25 @@ RequestGroup RequestGroups::pop() {
 
 void RequestGroups::clear() {
     myRequestGroups.clear();
+}
+
+
+
+void RequestGroups::cutRequestGroup(RequestGroup requestGroup) {
+    auto intersectingGroupIdxs = findIntersectingGroupIdxs(requestGroup);
+    for (auto idx = intersectingGroupIdxs.size(); idx-- > 0;) {
+        auto intersectingGroupIdx = intersectingGroupIdxs[idx];
+        auto intersectingGroup = myRequestGroups[intersectingGroupIdx];
+        pair<RequestGroup, RequestGroup> remainderGroups = intersectingGroup.substract(requestGroup);
+
+        myRequestGroups.erase(myRequestGroups.begin() + intersectingGroupIdx);
+        if (!remainderGroups.second.isEmpty()) {
+            myRequestGroups.insert(myRequestGroups.begin() + intersectingGroupIdx, remainderGroups.second);
+        }
+        if (!remainderGroups.first.isEmpty()) {
+            myRequestGroups.insert(myRequestGroups.begin() + intersectingGroupIdx, remainderGroups.first);
+        }
+    }
 }
 
 

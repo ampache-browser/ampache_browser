@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -56,6 +56,8 @@ public:
 
     Requests& operator=(const Requests& other) = delete;
 
+    // SMELL: Not necesary to expose RequestGroup.  Use just pair<> as parameter and Requests will be the only
+    // "interface" class to request handling.  Same for readyToExecute event.
     /**
      * @brief A group of requests is ready to be executed.
      *
@@ -82,11 +84,15 @@ public:
     /**
      * @brief Inform the instance that the operation started upon ::readyToExecute event has finished.
      *
-     * @return Group of requests for which the operation was previously ready to be executed.
+     * Ready to execute requests which are not reported as finished will be set as finished (will not be
+     * executed again).  Finished requests which were not ready to execute will also be set as finished.
+     *
+     * @param offset The number of first finished request (may be different from what was originally requested).
+     * @param count The count of finished requests (may be different from what was originally requested).
      *
      * @sa ::readyToExecute
      */
-    RequestGroup setFinished();
+    void setFinished(int offset, int count);
 
     /**
      * @brief Returns true if some operation is being executed.

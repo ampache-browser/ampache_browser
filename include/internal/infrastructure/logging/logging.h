@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -19,7 +19,7 @@
 namespace infrastructure {
 
 /**
- * @brief Sets the maximal loggin level.
+ * @brief Sets the maximal logging level.
  *
  * If a log method with lower level than maxLogLevel is called, no message is logged.
  *

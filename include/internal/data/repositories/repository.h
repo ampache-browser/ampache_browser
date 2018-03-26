@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -588,16 +588,27 @@ void Repository<T, U>::onDataLoadRequestFinished(std::pair<std::vector<std::uniq
         offset++;
     }
 
-    auto offsetAndLimit = std::pair<int, int>{myLoadOffset, data.size()};
-    if (data.size() !=  static_cast<unsigned int>(myLimit)) {
+    // if the server returns less entries than requested, we assume the missing ones are lost (theoretically they
+    // could be deleted sooner than we were able to load them); in that case we store the number of lost entries and
+    // inform that total number of entries has changed (SMELL: we still report the original total
+    // number of entries in maxCount() though); however if happens that the server returns more entries than requested,
+    // we assume that the server ignores 'limit' in the load request and work with returned entries as if they were
+    // requested
+    if (data.size() < static_cast<unsigned int>(myLimit)) {
         myNumberOfUnavailableEntries += myLimit - data.size();
         dataSizeChanged();
+    } else if (data.size() > static_cast<unsigned int>(myLimit)) {
+        infrastructure::LOG_WARN(
+            "Server does not respect 'limit' parameter. Performance during loading may be degraded.");
     }
 
     myUnfilteredFilter->processUpdatedSourceData(myLoadOffset, data.size());
     if (isFiltered()) {
         myFilter->processUpdatedSourceData(myLoadOffset, data.size());
     }
+
+    auto offsetAndLimit = std::pair<int, int>{myLoadOffset, data.size()};
+
     myLoadOffset = -1;
     myLoadProgress += data.size();
     infrastructure::LOG_DBG("Load progress: %d.", myLoadProgress);

@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -202,7 +202,7 @@ public:
     /**
      * @brief Request album arts from the server.
      *
-     * @note If this method is called before the the ::initialized event it immediately raises ::readyAlbumArts with
+     * @note If this method is called before ::initialized event it immediately raises ::readyAlbumArts with
      * zero loaded arts.
      *
      * @param idsAndUrls Identifiers of the album art images that shall be requested paired with their URLs.  IDs are
@@ -290,6 +290,7 @@ private:
     std::vector<std::unique_ptr<ArtistData>> createArtists(QXmlStreamReader& xmlStreamReader) const;
     void processTracks(QXmlStreamReader& xmlStreamReader, bool error);
     std::vector<std::unique_ptr<TrackData>> createTracks(QXmlStreamReader& xmlStreamReader) const;
+    void IfNoPendingClearFinishedAlbumArtsAndRaiseReady();
     std::string assembleUrlBase() const;
 };
 
