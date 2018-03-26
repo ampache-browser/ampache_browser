@@ -5,6 +5,20 @@ Ampache Browser User Visible Changes
 Version 1.0.1 [????-??-??]
 --------------------------
 
+* Fix issues when Nextcloud's Music app is used as Ampache server.
+
+  Fix crash if server ignores 'limit' parameter and sends more data than it was requested.
+
+  Fix crash when server returns empty album art URL for not available album arts.
+
+  Fix crash when album art URL can not be parsed.
+
+* Ensure the loading error status message is not overwritten.
+
+  If error occures during loading an error message is shown in status line.  Sometimes happened that this message
+  was later overwritten by "Loaded" message when loading finished.  This is now fixed so that the error message always
+  stays displayed after loading has finished.
+
 
 
 Version 1.0.0 [2017-07-26]
