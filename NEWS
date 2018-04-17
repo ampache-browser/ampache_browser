@@ -2,7 +2,7 @@ Ampache Browser User Visible Changes
 ====================================
 
 
-Version 1.0.1 [????-??-??]
+Version 1.0.1 [2018-04-17]
 --------------------------
 
 * Fix issues when Nextcloud's Music app is used as Ampache server.
