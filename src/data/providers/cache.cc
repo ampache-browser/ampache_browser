@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -175,7 +175,7 @@ vector<unique_ptr<TrackData>> Cache::loadTracksData() const {
 void Cache::requestAlbumArts(const vector<string>& ids) {
     LOG_DBG("Getting %d album arts.", ids.size());
     myRequestedAlbumArtIds = ids;
-    auto artsLoadFutureWatcher = new QFutureWatcher<pair<string, QPixmap>>();
+    auto artsLoadFutureWatcher = new QFutureWatcher<pair<string, QImage>>();
     connect(artsLoadFutureWatcher, SIGNAL(finished()), this, SLOT(onArtsLoadFinished()));
     artsLoadFutureWatcher->setFuture(QtConcurrent::mapped(myRequestedAlbumArtIds,
         bind(&Cache::loadAlbumArt, this, placeholders::_1)));
@@ -275,14 +275,14 @@ void Cache::updateAlbumArts(const map<string, QPixmap>& arts) const {
 
 void Cache::onArtsLoadFinished() {
     LOG_DBG("Album art request has returned.");
-    auto artsLoadFutureWatcher = reinterpret_cast<QFutureWatcher<pair<string, QPixmap>>*>(sender());
+    auto artsLoadFutureWatcher = reinterpret_cast<QFutureWatcher<pair<string, QImage>>*>(sender());
     artsLoadFutureWatcher->deleteLater();
 
-    QFutureIterator<pair<string, QPixmap>> results{artsLoadFutureWatcher->future()};
+    QFutureIterator<pair<string, QImage>> results{artsLoadFutureWatcher->future()};
     map<string, QPixmap> arts;
     while (results.hasNext()) {
         auto result = results.next();
-        arts[result.first] = result.second;
+        arts[result.first] = QPixmap::fromImage(result.second);
     }
 
     myRequestedAlbumArtIds.clear();
@@ -330,8 +330,8 @@ void Cache::invalidate() {
 
 
 
-pair<string, QPixmap> Cache::loadAlbumArt(const string& id) const {
-    QPixmap art;
+pair<string, QImage> Cache::loadAlbumArt(const string& id) const {
+    QImage art;
     art.load(QString::fromStdString(ALBUM_ARTS_DIR + id + ART_SUFFIX), "PNG");
     return make_pair(id, art);
 }

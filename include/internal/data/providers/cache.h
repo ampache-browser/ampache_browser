@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -224,7 +224,7 @@ private:
     void loadMeta(std::ifstream& metaStream);
     void saveMeta(std::chrono::system_clock::time_point lastUpdate);
     void invalidate();
-    std::pair<std::string, QPixmap> loadAlbumArt(const std::string& id) const;
+    std::pair<std::string, QImage> loadAlbumArt(const std::string& id) const;
     std::string readString(std::ifstream& stream) const;
     void writeString(std::ofstream& stream, const std::string& str) const;
     void updateLastUpdateInfo();
