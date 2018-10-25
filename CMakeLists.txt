@@ -8,7 +8,7 @@
 
 
 cmake_minimum_required(VERSION 3.0)
-project(ampache_browser VERSION 1.0.1)
+project(ampache_browser VERSION 1.0.2)
 set(VERSION_EXTRA "")
 set(soVersion 0)
 
