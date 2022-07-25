@@ -2,8 +2,11 @@ Ampache Browser User Visible Changes
 ====================================
 
 
-Version 1.0.4 [????-??-??]
+Version 1.0.4 [2022-07-25]
 --------------------------
+
+* Fix One Definition Rule violation (-Wodr) when building with -flto.
+
 
 
 Version 1.0.3 [2020-10-02]
