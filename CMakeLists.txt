@@ -3,12 +3,12 @@
 # Project: Ampache Browser
 # License: GNU GPLv3
 #
-# Copyright (C) 2015 - 2020 Róbert Čerňanský
+# Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
 cmake_minimum_required(VERSION 3.0)
-project(ampache_browser VERSION 1.0.4)
+project(ampache_browser VERSION 1.0.5)
 set(VERSION_EXTRA "")
 set(soVersion 0)
 
