@@ -17,7 +17,10 @@ include(GenerateExportHeader)
 include(CMakePackageConfigHelpers)
 include(FindIntl)
 
-find_package(Qt5 REQUIRED Core Widgets Concurrent)
+find_package(Qt6 QUIET COMPONENTS Core Widgets Concurrent)
+if (NOT Qt6_FOUND)
+    find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent)
+endif()
 
 set(sources
     src/infrastructure/filesystem.cc
@@ -80,12 +83,12 @@ set(headersWithMo
     src/ui/settings_dialog.h
     src/ui/ampache_browser_main_window.h
     include/internal/ui/ui.h)
-qt5_wrap_cpp(mocs ${headersWithMo})
+qt_wrap_cpp(mocs ${headersWithMo})
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 option(USE_NLS "Build with native language support." ON)
 
@@ -122,7 +125,7 @@ if (${USE_NLS})
     endif()
 endif()
 
-target_link_libraries(${libTarget} PRIVATE ${Intl_LIBRARIES} Qt5::Core Qt5::Widgets Qt5::Concurrent)
+target_link_libraries(${libTarget} PRIVATE ${Intl_LIBRARIES} Qt::Core Qt::Widgets Qt::Concurrent)
 
 set(configFileName ${libName}-config.cmake)
 write_basic_package_version_file(${libName}-config-version.cmake COMPATIBILITY SameMajorVersion)

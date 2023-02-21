@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2018 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
@@ -91,11 +91,11 @@ QVariant TrackModel::headerData(int section, Qt::Orientation, int role) const {
 
     switch (section) {
         case 0:
-            return _("Track");
+            return QString(_("Track"));
         case 1:
-            return _("Artist");
+            return QString(_("Artist"));
         case 2:
-            return _("Album");
+            return QString(_("Album"));
         default:
             return QVariant{};
     }

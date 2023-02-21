@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2018 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
@@ -259,7 +259,7 @@ bool Ampache::isError(QXmlStreamReader& xmlStreamReader) {
     bool error = false;
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
-        auto xmlElement = xmlStreamReader.name();
+        auto xmlElement = xmlStreamReader.name().toString();
         if (!xmlStreamReader.isStartElement() || xmlElement == "root") {
             continue;
         }
@@ -331,7 +331,7 @@ void Ampache::readHandshakeData(QXmlStreamReader& xmlStreamReader) {
     QDateTime add{};
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
-        auto xmlElement = xmlStreamReader.name();
+        auto xmlElement = xmlStreamReader.name().toString();
         if (!xmlStreamReader.isStartElement() || xmlElement == "root") {
             continue;
         }
