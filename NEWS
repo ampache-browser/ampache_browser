@@ -2,8 +2,18 @@ Ampache Browser User Visible Changes
 ====================================
 
 
-Version 1.0.6 [20??-??-??]
+Version 1.0.6 [2023-09-01]
 --------------------------
+
+* Do not autodetect Qt version during build.
+
+  Introduces build option USE_QT6 for controlling whether Ampache Browser should be build with Qt 6 or Qt 5.
+  Previous behavior was to autodetect whether Qt6 is installed and use it if yes, otherwse use Qt5.
+
+  It also fixes build failures in case both Qt 6 and Qt 5 were present but some of the required Qt 6 modules were
+  missing.
+
+  Default value of USE_QT6 is ON.
 
 
 

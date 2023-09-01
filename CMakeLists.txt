@@ -17,8 +17,10 @@ include(GenerateExportHeader)
 include(CMakePackageConfigHelpers)
 include(FindIntl)
 
-find_package(Qt6 QUIET COMPONENTS Core Widgets Concurrent)
-if (NOT Qt6_FOUND)
+option(USE_QT6 "Use Qt6 instead of Qt5" ON)
+if (${USE_QT6})
+    find_package(Qt6 REQUIRED COMPONENTS Core Widgets Concurrent)
+else()
     find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent)
 endif()
 

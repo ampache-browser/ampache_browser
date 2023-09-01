@@ -5,7 +5,7 @@ Ampache Browser Installation Instructions
 Linux/General
 -------------
 
-1. Install dependencies: Qt 5 (modules Core, Widgets, Concurrent) and CMake.
+1. Install dependencies: Qt 5 or Qt 6 (modules Core, Widgets, Concurrent) and CMake.
 
 2. Install Ampache Browser:
 
@@ -22,6 +22,12 @@ Linux/General
        $ cmake .
        $ make
        $ sudo make install
+
+    In case of Qt5 build use:
+
+       $ cmake -D USE_QT6=OFF .
+
+    instead of 'cmake .' command in the command sequence above.
 
 
 
@@ -59,7 +65,7 @@ Using MSYS2 and MinGW-w64
 
    Configure, build and install the library:
 
-       $ cmake -G "MSYS Makefiles" .
+       $ cmake -G "MSYS Makefiles" -D USE_QT6=OFF .
        $ make
        $ make install
 
@@ -84,6 +90,8 @@ Using Visual Studio
        Name: Qt5_DIR
        Type: PATH
        Value: <path_to_your_qt5_installation>/Qt.../msvc2015_64/lib/cmake/Qt5
+
+   Uncheck USE_QT6 option.
 
    Click "Configure", choose generator for your Visual Studio version and "Finish".  Click "Generate".
 
