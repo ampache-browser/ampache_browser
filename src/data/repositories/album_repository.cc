@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
@@ -141,7 +141,7 @@ bool AlbumRepository::loadArtsUnfiltered(int offset, int count) {
 
 
 
-int AlbumRepository::maxCount() const {
+int AlbumRepository::dataProviderCount() const {
     if (myProviderType == ProviderType::Ampache) {
         return myAmpache.numberOfAlbums();
     };
@@ -243,8 +243,8 @@ void AlbumRepository::clearIndices() {
 
 
 
-void AlbumRepository::handleFilterSetUnsetOrChanged() {
-    Repository<AlbumData, Album>::handleFilterSetUnsetOrChanged();
+void AlbumRepository::handleDataSizeChanged() {
+    Repository<AlbumData, Album>::handleDataSizeChanged();
 
     // SMELL: Not necessary if unfiltered filter has changed.
     myArtsLoadOffset = -1;

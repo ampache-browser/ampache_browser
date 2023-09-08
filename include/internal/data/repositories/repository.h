@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2018 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
@@ -41,6 +41,9 @@ class Indices;
  * @brief Base class for a repository.
  *
  * Stores data, provides means to trigger their load from Ampache server or a cache; supports indices update.
+ *
+ * @param T Data object
+ * @param U Domain object
  */
 template <typename T, typename U>
 class Repository {
@@ -102,7 +105,7 @@ public:
     /**
      * @brief Sets the which provider should be used to load data.
      *
-     * @note maxCount() can change when setting the provider type.
+     * @note dataProviderCount() can change when setting the provider type.
      *
      * @param providerType The type of provider that shall be used to load data.
      *
@@ -154,18 +157,18 @@ public:
      * If no filter is set it is the same as maxCount().  Otherwise it is the number of data items after applying
      * the filter.
      *
-     * @sa maxCount()
+     * @sa maxCount(), dataProviderCount(), ::dataSizeChanged
      */
     int count();
 
     /**
-     * @brief Gets maximal number of data items as reported by data provider.
+     * @brief Gets the total number of data items (loaded and not loaded).
      *
      * The number does not depend on filter.
      *
-     * @sa count();
+     * @sa count(), dataProviderCount(), ::dataSizeChanged
      */
-    virtual int maxCount() const = 0;
+    int maxCount() const;
 
     /**
      * @brief Disables furher loading.
@@ -236,6 +239,13 @@ protected:
     std::shared_ptr<Filter<T>> myFilter = nullptr;
 
     /**
+     * @brief Gets number of items as reported by data provider.
+     *
+     * @sa count(), maxCount()
+     */
+    virtual int dataProviderCount() const = 0;
+
+    /**
      * @brief Requests data loading from Ampache.
      *
      * @param offset Starting offset.
@@ -299,11 +309,11 @@ protected:
     virtual void clearIndices() = 0;
 
     /**
-     * @brief Called when filter has been set, unset or has changed.
+     * @brief Called when value of count() has changed.
      *
-     * @sa Filter<T>::changed, setFilter(), unsetFilter(), filterChanged
+     * @sa count(), maxCount(), Filter<T>::changed, setFilter(), unsetFilter(), filterChanged
      */
-    virtual void handleFilterSetUnsetOrChanged();
+    virtual void handleDataSizeChanged();
 
 private:
     // number of loaded data items so far
@@ -321,7 +331,7 @@ private:
     // true if a filter is set (other than myUnfilteredFilter)
     bool myIsFilterSet = false;
 
-    // cached value for maxCount() method
+    // cached value for count() method
     int myCachedCount = -1;
 
     // number of data entries that were not able to be loaded
@@ -443,6 +453,13 @@ int Repository<T, U>::count() {
 
 
 template <typename T, typename U>
+int Repository<T, U>::maxCount() const {
+    return dataProviderCount() - myNumberOfUnavailableEntries;
+}
+
+
+
+template <typename T, typename U>
 void Repository<T, U>::disableLoading() {
     myLoadingEnabled = false;
     myCachedCount = -1;
@@ -465,7 +482,7 @@ void Repository<T, U>::setFilter(std::unique_ptr<Filter<T>> filter) {
     filter->changed += infrastructure::DELEGATE0((&Repository<T, U>::onFilterChanged));
     myFilter = std::move(filter);
 
-    handleFilterSetUnsetOrChanged();
+    handleDataSizeChanged();
     filterChanged();
 }
 
@@ -484,7 +501,7 @@ void Repository<T, U>::unsetFilter() {
     myUnfilteredFilter->changed += infrastructure::DELEGATE0((&Repository<T, U>::onFilterChanged));
     myFilter = myUnfilteredFilter;
 
-    handleFilterSetUnsetOrChanged();
+    handleDataSizeChanged();
     filterChanged();
 }
 
@@ -510,6 +527,7 @@ void Repository<T, U>::clear() {
     myLoadProgress = 0;
     myLoadOffset = -1;
     myNumberOfUnavailableEntries = 0;
+    myCachedCount = -1;
 
     clearIndices();
     myUnfilteredFilter->processUpdatedSourceData();
@@ -519,8 +537,9 @@ void Repository<T, U>::clear() {
 
 
 template <typename T, typename U>
-void Repository<T, U>::handleFilterSetUnsetOrChanged() {
+void Repository<T, U>::handleDataSizeChanged() {
     myCachedCount = -1;
+    dataSizeChanged();
 }
 
 
@@ -528,12 +547,7 @@ void Repository<T, U>::handleFilterSetUnsetOrChanged() {
 template <typename T, typename U>
 void Repository<T, U>::onFilterChanged() {
     infrastructure::LOG_DBG("Processing filter changed event.");
-    handleFilterSetUnsetOrChanged();
-
-    // unfiltered data size change is handled in onDataLoadRequestFinished
-    if (isFiltered()) {
-        dataSizeChanged();
-    }
+    handleDataSizeChanged();
 }
 
 
@@ -590,13 +604,12 @@ void Repository<T, U>::onDataLoadRequestFinished(std::pair<std::vector<std::uniq
 
     // if the server returns less entries than requested, we assume the missing ones are lost (theoretically they
     // could be deleted sooner than we were able to load them); in that case we store the number of lost entries and
-    // inform that total number of entries has changed (SMELL: we still report the original total
-    // number of entries in maxCount() though); however if happens that the server returns more entries than requested,
-    // we assume that the server ignores 'limit' in the load request and work with returned entries as if they were
-    // requested
+    // inform that total number of entries has changed; however if happens that the server returns more entries than
+    // requested, we assume that the server ignores 'limit' in the load request and work with returned entries as if
+    // they were requested
     if (data.size() < static_cast<unsigned int>(myLimit)) {
         myNumberOfUnavailableEntries += myLimit - data.size();
-        dataSizeChanged();
+        handleDataSizeChanged();
     } else if (data.size() > static_cast<unsigned int>(myLimit)) {
         infrastructure::LOG_WARN(
             "Server does not respect 'limit' parameter. Performance during loading may be degraded.");
@@ -613,7 +626,7 @@ void Repository<T, U>::onDataLoadRequestFinished(std::pair<std::vector<std::uniq
     myLoadProgress += data.size();
     infrastructure::LOG_DBG("Load progress: %d.", myLoadProgress);
 
-    bool isFullyLoaded = myLoadProgress >= maxCount() - myNumberOfUnavailableEntries;
+    bool isFullyLoaded = myLoadProgress >= maxCount();
     if (isFullyLoaded) {
         saveDataToCache();
     }
@@ -653,7 +666,7 @@ int Repository<T, U>::computeCount() const {
     if (isFiltered() && myLoadProgress != 0) {
         return myFilter->getFilteredData().size();
     }
-    return maxCount() - myNumberOfUnavailableEntries;
+    return maxCount();
 }
 
 }

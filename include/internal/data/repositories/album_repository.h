@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
@@ -134,7 +134,7 @@ public:
      */
     bool loadArtsUnfiltered(int offset, int count);
 
-    int maxCount() const override;
+    int dataProviderCount() const override;
 
     void disableLoading() override;
 
@@ -157,7 +157,7 @@ protected:
 
     void clearIndices() override;
 
-    void handleFilterSetUnsetOrChanged() override;
+    void handleDataSizeChanged() override;
 
 private:
     const ArtistRepository* const myArtistRepository = nullptr;

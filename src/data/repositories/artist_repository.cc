@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
@@ -31,7 +31,7 @@ Repository<ArtistData, Artist>(ampache, cache, indices) {
 
 
 
-int ArtistRepository::maxCount() const {
+int ArtistRepository::dataProviderCount() const {
     if (myProviderType == ProviderType::Ampache) {
         return myAmpache.numberOfArtists();
     };
