@@ -5,6 +5,32 @@ Ampache Browser User Visible Changes
 Version 1.0.7 [20??-??-??]
 --------------------------
 
+* Fix infite 'Loading...' state.
+
+  If Ampache declares higher number of Albums than really available (for example, when it groups multi-disk
+  albums to a single albums) then 'Loading...' state never finished in Ampache Browser.  This is now fixed.
+
+* Fix sorting of tracks on albums with multiple disks.
+
+  Since version 6 Ampache started to serve multiple disk albums as one album instead of each disk separately.  Ampache
+  Browser ordered tracks by track number regardless of the disk number.  This lead to wrong ordering if tracks were
+  numbered on each disk from "1".  The track order in such case was:
+
+  1. track 1 (from disk 1)
+  2. track 1 (from disk 2)
+  ...
+
+  After the fix the order is correct:
+
+  1. track 1 (from disk 1)
+  2. track 2 (from disk 1)
+  ...
+
+* Required API version was increased to 440001.
+
+  Ampache Browser now uses Ampache API 440001 instead of 350001.  This is because of previous fix of tracks sorting
+  as the older APIs does not contain information about disk number.
+
 
 
 Version 1.0.6 [2023-09-01]
