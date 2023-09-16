@@ -230,7 +230,7 @@ void Ampache::connectToServer() {
 
     ostringstream urlStream;
     urlStream << assembleUrlBase() << Method.Handshake << "&auth=" << passphrase.constData() << "&timestamp=" << currentTime
-      << "&version=350001&user=" << myConnectionInfo.getUserName();
+      << "&version=440001&user=" << myConnectionInfo.getUserName();
 
     myNetworkRequestFn(urlStream.str(), myNetworkRequestCb);
 }
@@ -557,6 +557,7 @@ vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamR
 
     string id = "";
     string title = "";
+    string disk = "";
     int number = 0;
     string url = "";
     string artistId = "";
@@ -568,7 +569,7 @@ vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamR
         if (xmlStreamReader.isEndElement()) {
             if (xmlElement == "song") {
                 tracksData.emplace_back(new TrackData{
-                    id, artistId, albumId, unique_ptr<Track>{new Track{id, title, number, url}}});
+                    id, artistId, albumId, unique_ptr<Track>{new Track{id, title, disk, number, url}}});
             }
         }
 
@@ -597,6 +598,8 @@ vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamR
 
             if (xmlElement == "title") {
                 title = value;
+            } else if (xmlElement == "disk") {
+                disk = value;
             } else if (xmlElement == "track") {
                 number = 0;
                 try {
