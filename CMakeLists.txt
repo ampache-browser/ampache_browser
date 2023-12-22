@@ -17,12 +17,21 @@ include(GenerateExportHeader)
 include(CMakePackageConfigHelpers)
 include(FindIntl)
 
+# because we want to support Qt <5.15 the versionless targets and functions can not be used; so disable them for all
+# Qt versions in order minimize variability of environments and reduce risk of mistakes
+set(QT_NO_CREATE_VERSIONLESS_TARGETS ON)
+set(QT_NO_CREATE_VERSIONLESS_FUNCTIONS ON)
+
 option(USE_QT6 "Use Qt6 instead of Qt5" ON)
+
+# determine major version of Qt and store it to qt_VERSION_MAJOR variable
 if (${USE_QT6})
     find_package(qt NAMES Qt6 REQUIRED COMPONENTS Core)
 else()
     find_package(qt NAMES Qt5 REQUIRED COMPONENTS Core)
 endif()
+message(STATUS "Using Qt major version: " ${qt_VERSION_MAJOR})
+
 find_package(Qt${qt_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Concurrent)
 
 set(sources
