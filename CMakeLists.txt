@@ -19,9 +19,11 @@ include(FindIntl)
 
 option(USE_QT6 "Use Qt6 instead of Qt5" ON)
 if (${USE_QT6})
-    find_package(Qt6 REQUIRED COMPONENTS Core Widgets Concurrent)
+    find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core)
+    find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Concurrent)
 else()
-    find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent)
+    find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core)
+    find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Concurrent)
 endif()
 
 set(sources
@@ -127,7 +129,8 @@ if (${USE_NLS})
     endif()
 endif()
 
-target_link_libraries(${libTarget} PRIVATE ${Intl_LIBRARIES} Qt::Core Qt::Widgets Qt::Concurrent)
+target_link_libraries(${libTarget} PRIVATE ${Intl_LIBRARIES} Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Concurrent)
 
 set(configFileName ${libName}-config.cmake)
 write_basic_package_version_file(${libName}-config-version.cmake COMPATIBILITY SameMajorVersion)
