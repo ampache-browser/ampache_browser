@@ -7,7 +7,7 @@
 
 
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.13)
 project(ampache_browser VERSION 1.0.7)
 set(VERSION_EXTRA "")
 set(soVersion 0)
@@ -124,6 +124,7 @@ target_include_directories(${libTarget}
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     target_compile_options(${libTarget} PRIVATE -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual
         -Wformat-security)
+    target_link_options(${libTarget} PRIVATE "LINKER:--no-undefined")
 endif()
 
 target_compile_definitions(${libTarget}
