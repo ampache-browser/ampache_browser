@@ -95,7 +95,6 @@ set(headersWithMo
     src/ui/settings_dialog.h
     src/ui/ampache_browser_main_window.h
     include/internal/ui/ui.h)
-qt_wrap_cpp(mocs ${headersWithMo})
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -110,12 +109,13 @@ add_subdirectory(include)
 set(libTarget ampache_browser)
 set(libName ${libTarget}_${PROJECT_VERSION_MAJOR})
 
-add_library(${libTarget} SHARED ${sources} ${mocs})
+add_library(${libTarget} SHARED ${sources} ${headersWithMo})
 
 set_target_properties(${libTarget} PROPERTIES
     OUTPUT_NAME ${libName}
     VERSION ${soVersion}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
-    SOVERSION ${soVersion})
+    SOVERSION ${soVersion}
+    AUTOMOC ON)
 
 target_include_directories(${libTarget}
     PRIVATE include/internal
