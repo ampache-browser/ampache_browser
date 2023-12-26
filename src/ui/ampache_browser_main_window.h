@@ -14,16 +14,19 @@
 
 #include <QMainWindow>
 
-class CustomProxyStyle;
 class QListView;
 class QTreeView;
 class QLineEdit;
 class QAction;
-class SettingsDialog;
 
 
 
 namespace ui {
+
+class CustomProxyStyle;
+class SettingsDialog;
+
+
 
 /**
  * @brief Application (plugin) main window.

@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -25,6 +25,12 @@ myUrl{url} {
 
 string AmpacheUrl::parseIdValue() const {
     return parseValue(PARAM_ID);
+}
+
+
+
+string AmpacheUrl::parseFilterValue() const {
+    return parseValue(PARAM_FILTER);
 }
 
 
@@ -92,6 +98,7 @@ pair<string::size_type, string::size_type> AmpacheUrl::findParameterValue(const 
 const string AmpacheUrl::PARAM_SSID = "ssid";
 const string AmpacheUrl::PARAM_AUTH = "auth";
 const string AmpacheUrl::PARAM_ID = "id";
+const string AmpacheUrl::PARAM_FILTER = "filter";
 const string AmpacheUrl::PARAM_ACTION = "action";
 
 }

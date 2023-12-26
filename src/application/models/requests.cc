@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -38,9 +38,9 @@ void Requests::add(int offset) {
     }
 
     if (offset < myLastEnqueuedOffset) {
-        myRequestGroups->cutAndPlaceOnTop(RequestGroup{offset, offset});
+        myRequestGroups->moveOnTop(RequestGroup{offset, offset});
     } else if (offset > myLastEnqueuedOffset + 1) {
-        myRequestGroups->cutAndPlaceOnTop(RequestGroup{offset, offset});
+        myRequestGroups->moveOnTop(RequestGroup{offset, offset});
     } else {
         myRequestGroups->extend(offset);
     }
@@ -55,10 +55,15 @@ void Requests::removeAll() {
 
 
 
-// SMELL: Not necesary to expose RequestGroup.  Return just pair and Requests will be the only
-// "interface" class to request handling.  Same for readyToExecute event.
-RequestGroup Requests::setFinished() {
-    auto finishedRequestGroup = myCurrentRequestGroup;
+void Requests::setFinished(int offset, int count) {
+    auto finishedRequestGroup = RequestGroup{offset, offset + count - 1};
+
+    // finished requests may be different from what was ready to execution; if there were some requests finished which
+    // were not ready remainderGroups will contain them; they have to be cut from myRequestGroups
+    auto remainderGroups = finishedRequestGroup.substract(myCurrentRequestGroup);
+    myRequestGroups->cut(remainderGroups.first);
+    myRequestGroups->cut(remainderGroups.second);
+
     if (!myRequestGroups->isEmpty()) {
         myCurrentRequestGroup = myRequestGroups->pop();
         readyToExecute(myCurrentRequestGroup);
@@ -66,7 +71,6 @@ RequestGroup Requests::setFinished() {
         myCurrentRequestGroup = RequestGroup{};
         myLastEnqueuedOffset = numeric_limits<int>::max();
     }
-    return finishedRequestGroup;
 }
 
 

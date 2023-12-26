@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
@@ -125,11 +125,24 @@ void Ampache::requestAlbumArts(const map<string, string>& idsAndUrls) {
         return;
     }
 
+    // SMELL: size specified on multiple places
+    QPixmap notAvailablePixmap{100, 100};
+    notAvailablePixmap.fill(QColor(230, 225, 220));
+
     LOG_DBG("Getting %d album arts.", idsAndUrls.size());
     for (auto& idAndUrl: idsAndUrls) {
-        myPendingAlbumArts.insert(idAndUrl.first);
-        myNetworkRequestFn(idAndUrl.second, myAlbumArtsNetworkRequestCb);
+        if (idAndUrl.second.empty()) {
+            // SMELL: If the server did not provide any Art URL then it would be better if client (frontend/model)
+            // created the replacement Art (with the "Not Available" image of its choice). Currently, Ampache (3.8.3)
+            // provides URLs for not available Arts as well; Nextcloud's Music app (0.5.6) sends empty URLs for
+            // not available Arts.
+            myFinishedAlbumArts.emplace(idAndUrl.first, notAvailablePixmap);
+        } else {
+            myPendingAlbumArts.insert(idAndUrl.first);
+            myNetworkRequestFn(idAndUrl.second, myAlbumArtsNetworkRequestCb);
+        }
     }
+    IfNoPendingClearFinishedAlbumArtsAndRaiseReady();
 }
 
 
@@ -168,8 +181,20 @@ void Ampache::onNetworkRequestFinished(const string& url, const char* content, i
 void Ampache::onAlbumArtsNetworkRequestFinished(const string& artUrl, const char* content, int contentSize) {
     LOG_DBG("Album art request has returned with network content of length %d.", contentSize);
 
-    auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(AmpacheUrl{artUrl}.parseIdValue(),
-        QByteArray{content, contentSize});
+    // SMELL: Format of Album Art URL is not server's public API. Entire url should be the ID (mapped to album ID).
+    // Ampache (3.8.3) passes the album ID in parameter 'id'; Nextcloud's Music app (0.5.6) in parameter 'filter'
+    auto id = AmpacheUrl{artUrl}.parseIdValue();
+    id = id.empty() ? AmpacheUrl{artUrl}.parseFilterValue() : id;
+
+    // give up if we could not parse ID
+    if (id.empty()) {
+        myFinishedAlbumArts.clear(); // returning empty finished album arts list means error
+        myPendingAlbumArts.clear();
+        IfNoPendingClearFinishedAlbumArtsAndRaiseReady();
+        return;
+    }
+
+    auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(id, QByteArray{content, contentSize});
     scaleAlbumArtRunnable->setAutoDelete(false);
     connect(scaleAlbumArtRunnable, SIGNAL(finished(ScaleAlbumArtRunnable*)), this,
         SLOT(onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable*)));
@@ -190,12 +215,7 @@ void Ampache::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumA
     myFinishedAlbumArts.emplace(albumId, art);
     myPendingAlbumArts.erase(albumId);
 
-    if (myPendingAlbumArts.empty()) {
-        auto finishedAlbumArts = myFinishedAlbumArts;
-        myFinishedAlbumArts.clear();
-
-        readyAlbumArts(finishedAlbumArts);
-    }
+    IfNoPendingClearFinishedAlbumArtsAndRaiseReady();
 }
 
 
@@ -210,7 +230,7 @@ void Ampache::connectToServer() {
 
     ostringstream urlStream;
     urlStream << assembleUrlBase() << Method.Handshake << "&auth=" << passphrase.constData() << "&timestamp=" << currentTime
-      << "&version=350001&user=" << myConnectionInfo.getUserName();
+      << "&version=440001&user=" << myConnectionInfo.getUserName();
 
     myNetworkRequestFn(urlStream.str(), myNetworkRequestCb);
 }
@@ -239,7 +259,7 @@ bool Ampache::isError(QXmlStreamReader& xmlStreamReader) {
     bool error = false;
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
-        auto xmlElement = xmlStreamReader.name();
+        auto xmlElement = xmlStreamReader.name().toString();
         if (!xmlStreamReader.isStartElement() || xmlElement == "root") {
             continue;
         }
@@ -311,7 +331,7 @@ void Ampache::readHandshakeData(QXmlStreamReader& xmlStreamReader) {
     QDateTime add{};
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
-        auto xmlElement = xmlStreamReader.name();
+        auto xmlElement = xmlStreamReader.name().toString();
         if (!xmlStreamReader.isStartElement() || xmlElement == "root") {
             continue;
         }
@@ -387,16 +407,16 @@ vector<unique_ptr<AlbumData>> Ampache::createAlbums(QXmlStreamReader& xmlStreamR
         if (xmlElement == "album") {
             QXmlStreamAttributes attributes = xmlStreamReader.attributes();
             if (attributes.hasAttribute("id")) {
-                id = attributes.value("id").toString().toStdString();
+                id = attributes.value("id").toString().trimmed().toStdString();
             }
         } else if (xmlElement == "artist") {
             QXmlStreamAttributes attributes = xmlStreamReader.attributes();
             if (attributes.hasAttribute("id")) {
-                artistId = attributes.value("id").toString().toStdString();
+                artistId = attributes.value("id").toString().trimmed().toStdString();
             }
         }
         else {
-            auto value = xmlStreamReader.readElementText().toStdString();
+            auto value = xmlStreamReader.readElementText().trimmed().toStdString();
 
             if (xmlElement == "name") {
                 albumName = value;
@@ -419,6 +439,7 @@ vector<unique_ptr<AlbumData>> Ampache::createAlbums(QXmlStreamReader& xmlStreamR
                 } catch (const invalid_argument& ex) {}
                 catch (const out_of_range& ex) {}
             } else if (xmlElement == "art") {
+                // TODO: Sanitize URL.
                 artUrl = value;
             }
         }
@@ -478,11 +499,11 @@ vector<unique_ptr<ArtistData>> Ampache::createArtists(QXmlStreamReader& xmlStrea
         if (xmlElement == "artist") {
             QXmlStreamAttributes attributes = xmlStreamReader.attributes();
             if (attributes.hasAttribute("id")) {
-                id = attributes.value("id").toString().toStdString();
+                id = attributes.value("id").toString().trimmed().toStdString();
             }
         }
         else {
-            auto value = xmlStreamReader.readElementText().toStdString();
+            auto value = xmlStreamReader.readElementText().trimmed().toStdString();
 
             if (xmlElement == "name") {
                 artistName = value;
@@ -536,6 +557,7 @@ vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamR
 
     string id = "";
     string title = "";
+    string disk = "";
     int number = 0;
     string url = "";
     string artistId = "";
@@ -547,7 +569,7 @@ vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamR
         if (xmlStreamReader.isEndElement()) {
             if (xmlElement == "song") {
                 tracksData.emplace_back(new TrackData{
-                    id, artistId, albumId, unique_ptr<Track>{new Track{id, title, number, url}}});
+                    id, artistId, albumId, unique_ptr<Track>{new Track{id, title, disk, number, url}}});
             }
         }
 
@@ -558,24 +580,26 @@ vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamR
         if (xmlElement == "song") {
             QXmlStreamAttributes attributes = xmlStreamReader.attributes();
             if (attributes.hasAttribute("id")) {
-                id = attributes.value("id").toString().toStdString();
+                id = attributes.value("id").toString().trimmed().toStdString();
             }
         } else if (xmlElement == "artist") {
             QXmlStreamAttributes attributes = xmlStreamReader.attributes();
             if (attributes.hasAttribute("id")) {
-                artistId = attributes.value("id").toString().toStdString();
+                artistId = attributes.value("id").toString().trimmed().toStdString();
             }
         } else if (xmlElement == "album") {
             QXmlStreamAttributes attributes = xmlStreamReader.attributes();
             if (attributes.hasAttribute("id")) {
-                albumId = attributes.value("id").toString().toStdString();
+                albumId = attributes.value("id").toString().trimmed().toStdString();
             }
         }
         else {
-            auto value = xmlStreamReader.readElementText().toStdString();
+            auto value = xmlStreamReader.readElementText().trimmed().toStdString();
 
             if (xmlElement == "title") {
                 title = value;
+            } else if (xmlElement == "disk") {
+                disk = value;
             } else if (xmlElement == "track") {
                 number = 0;
                 try {
@@ -583,6 +607,7 @@ vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamR
                 } catch (const invalid_argument& ex) {}
                 catch (const out_of_range& ex) {}
             } else if (xmlElement == "url") {
+                // TODO: Sanitize URL.
                 url = value;
             }
         }
@@ -593,6 +618,17 @@ vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamR
     }
 
     return tracksData;
+}
+
+
+
+void Ampache::IfNoPendingClearFinishedAlbumArtsAndRaiseReady() {
+    if (myPendingAlbumArts.empty()) {
+        auto finishedAlbumArts = myFinishedAlbumArts;
+        myFinishedAlbumArts.clear();
+
+        readyAlbumArts(finishedAlbumArts);
+    }
 }
 
 

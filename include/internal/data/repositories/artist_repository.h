@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
@@ -45,7 +45,7 @@ public:
 
     ArtistRepository& operator=(const ArtistRepository& other) = delete;
 
-    int maxCount() const override;
+    int dataProviderCount() const override;
 
 protected:
     void requestDataLoad(int offset, int limit) override;

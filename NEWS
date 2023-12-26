@@ -7,6 +7,101 @@ Version 1.0.0-next [????-??-??]
 
 
 
+Version 1.0.7 [20??-??-??]
+--------------------------
+
+* Fix infite 'Loading...' state.
+
+  If Ampache declares higher number of Albums than really available (for example, when it groups multi-disk
+  albums to a single albums) then 'Loading...' state never finished in Ampache Browser.  This is now fixed.
+
+* Fix sorting of tracks on albums with multiple disks.
+
+  Since version 6 Ampache started to serve multiple disk albums as one album instead of each disk separately.  Ampache
+  Browser ordered tracks by track number regardless of the disk number.  This lead to wrong ordering if tracks were
+  numbered on each disk from "1".  The track order in such case was:
+
+  1. track 1 (from disk 1)
+  2. track 1 (from disk 2)
+  ...
+
+  After the fix the order is correct:
+
+  1. track 1 (from disk 1)
+  2. track 2 (from disk 1)
+  ...
+
+* Required API version was increased to 440001.
+
+  Ampache Browser now uses Ampache API 440001 instead of 350001.  This is because of previous fix of tracks sorting
+  as the older APIs does not contain information about disk number.
+  
+* Fix building with Qt <5.15 (Robert Scheck).
+
+
+
+Version 1.0.6 [2023-09-01]
+--------------------------
+
+* Do not autodetect Qt version during build.
+
+  Introduces build option USE_QT6 for controlling whether Ampache Browser should be build with Qt 6 or Qt 5.
+  Previous behavior was to autodetect whether Qt6 is installed and use it if yes, otherwse use Qt5.
+
+  It also fixes build failures in case both Qt 6 and Qt 5 were present but some of the required Qt 6 modules were
+  missing.
+
+  Default value of USE_QT6 is ON.
+
+
+
+Version 1.0.5 [2023-02-22]
+--------------------------
+
+* Add compatibilty with Qt 6.
+
+
+
+Version 1.0.4 [2022-07-25]
+--------------------------
+
+* Fix One Definition Rule violation (-Wodr) when building with -flto.
+
+
+
+Version 1.0.3 [2020-10-02]
+--------------------------
+
+* Fix building with gcc 10.
+
+
+
+Version 1.0.2 [2018-10-25]
+--------------------------
+
+* Fix random crashes during loading of album arts in some environments.
+
+
+
+Version 1.0.1 [2018-04-17]
+--------------------------
+
+* Fix issues when Nextcloud's Music app is used as Ampache server.
+
+  Fix crash if server ignores 'limit' parameter and sends more data than it was requested.
+
+  Fix crash when server returns empty album art URL for not available album arts.
+
+  Fix crash when album art URL can not be parsed.
+
+* Ensure the loading error status message is not overwritten.
+
+  If error occures during loading an error message is shown in status line.  Sometimes happened that this message
+  was later overwritten by "Loaded" message when loading finished.  This is now fixed so that the error message always
+  stays displayed after loading has finished.
+
+
+
 Version 1.0.0 [2017-07-26]
 --------------------------
 

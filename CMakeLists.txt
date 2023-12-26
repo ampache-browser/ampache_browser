@@ -3,11 +3,11 @@
 # Project: Ampache Browser
 # License: GNU GPLv3
 #
-# Copyright (C) 2015 - 2018 Róbert Čerňanský
+# Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.13)
 project(ampache_browser VERSION 1.0.0)
 set(VERSION_EXTRA "next")
 set(soVersion 0)
@@ -17,7 +17,22 @@ include(GenerateExportHeader)
 include(CMakePackageConfigHelpers)
 include(FindIntl)
 
-find_package(Qt5 REQUIRED Core Widgets Concurrent)
+# because we want to support Qt <5.15 the versionless targets and functions can not be used; so disable them for all
+# Qt versions in order minimize variability of environments and reduce risk of mistakes
+set(QT_NO_CREATE_VERSIONLESS_TARGETS ON)
+set(QT_NO_CREATE_VERSIONLESS_FUNCTIONS ON)
+
+option(USE_QT6 "Use Qt6 instead of Qt5" ON)
+
+# determine major version of Qt and store it to qt_VERSION_MAJOR variable
+if (${USE_QT6})
+    find_package(qt NAMES Qt6 REQUIRED COMPONENTS Core)
+else()
+    find_package(qt NAMES Qt5 REQUIRED COMPONENTS Core)
+endif()
+message(STATUS "Using Qt major version: " ${qt_VERSION_MAJOR})
+
+find_package(Qt${qt_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Concurrent)
 
 set(sources
     src/infrastructure/filesystem.cc
@@ -80,12 +95,11 @@ set(headersWithMo
     src/ui/settings_dialog.h
     src/ui/ampache_browser_main_window.h
     include/internal/ui/ui.h)
-qt5_wrap_cpp(mocs ${headersWithMo})
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 option(USE_NLS "Build with native language support." ON)
 
@@ -95,12 +109,13 @@ add_subdirectory(include)
 set(libTarget ampache_browser)
 set(libName ${libTarget}_${PROJECT_VERSION_MAJOR})
 
-add_library(${libTarget} SHARED ${sources} ${mocs})
+add_library(${libTarget} SHARED ${sources} ${headersWithMo})
 
 set_target_properties(${libTarget} PROPERTIES
     OUTPUT_NAME ${libName}
     VERSION ${soVersion}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
-    SOVERSION ${soVersion})
+    SOVERSION ${soVersion}
+    AUTOMOC ON)
 
 target_include_directories(${libTarget}
     PRIVATE include/internal
@@ -109,6 +124,7 @@ target_include_directories(${libTarget}
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     target_compile_options(${libTarget} PRIVATE -Wall -Wextra -Wpedantic -Wtype-limits -Woverloaded-virtual
         -Wformat-security)
+    target_link_options(${libTarget} PRIVATE "LINKER:--no-undefined")
 endif()
 
 target_compile_definitions(${libTarget}
@@ -122,7 +138,8 @@ if (${USE_NLS})
     endif()
 endif()
 
-target_link_libraries(${libTarget} PRIVATE ${Intl_LIBRARIES} Qt5::Core Qt5::Widgets Qt5::Concurrent)
+target_link_libraries(${libTarget} PRIVATE ${Intl_LIBRARIES} Qt${qt_VERSION_MAJOR}::Core Qt${qt_VERSION_MAJOR}::Widgets
+    Qt${qt_VERSION_MAJOR}::Concurrent)
 
 set(configFileName ${libName}-config.cmake)
 write_basic_package_version_file(${libName}-config-version.cmake COMPATIBILITY SameMajorVersion)

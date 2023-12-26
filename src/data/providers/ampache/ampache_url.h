@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -38,6 +38,14 @@ public:
      * @return std::string
      */
     std::string parseIdValue() const;
+
+
+    /**
+     * @brief Gets value of parameter 'filter'.
+     *
+     * @return std::string
+     */
+    std::string parseFilterValue() const;
 
     /**
      * @brief Gets value of parameter 'action'.
@@ -74,6 +82,7 @@ private:
     static const std::string PARAM_SSID;
     static const std::string PARAM_AUTH;
     static const std::string PARAM_ID;
+    static const std::string PARAM_FILTER;
     static const std::string PARAM_ACTION;
 
     // arguments from the constructor

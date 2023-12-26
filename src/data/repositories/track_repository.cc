@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
@@ -35,7 +35,7 @@ myAlbumRepository(albumRepository) {
 
 
 
-int TrackRepository::maxCount() const {
+int TrackRepository::dataProviderCount() const {
     if (myProviderType == ProviderType::Ampache) {
         return myAmpache.numberOfTracks();
     };

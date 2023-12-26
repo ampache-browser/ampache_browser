@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -241,6 +241,10 @@ void DataLoader::possiblyFireFinishedOrAborted() {
 
 
 void DataLoader::fireFinished(LoadingResult loadingResult) {
+    if (myState == Idle) {
+        return;
+    }
+
     LOG_INF("Data loader finished with result %d.", loadingResult);
     myState = Idle;
     finished(loadingResult);

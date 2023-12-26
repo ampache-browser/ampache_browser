@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
@@ -18,9 +18,11 @@ using namespace std;
 
 namespace domain {
 
-Track::Track(const std::string& id, const std::string& name, int number, const std::string& url):
+Track::Track(const std::string& id, const std::string& name, const std::string& disk,
+             int number, const std::string& url):
 myId{id},
 myName{name},
+myDisk{disk},
 myNumber{number},
 myUrl{url} { }
 
@@ -34,6 +36,12 @@ const string Track::getId() const {
 
 const string Track::getName() const {
     return myName;
+}
+
+
+
+const string Track::getDisk() const {
+    return myDisk;
 }
 
 
@@ -95,6 +103,13 @@ bool operator<(const Track& lhs, const Track& rhs) {
         return true;
     }
     if (lhs.getAlbum() > rhs.getAlbum()) {
+        return false;
+    }
+
+    if (lhs.getDisk() < rhs.getDisk()) {
+        return true;
+    }
+    if (lhs.getDisk() > rhs.getDisk()) {
         return false;
     }
 

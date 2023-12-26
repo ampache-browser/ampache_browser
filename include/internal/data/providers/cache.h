@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
@@ -160,7 +160,7 @@ private slots:
 
 private:
     // cache format version
-    int const CACHE_VERSION = 0;
+    int const CACHE_VERSION = 1;
 
 #ifdef _WIN32
     // user cache directory
@@ -221,10 +221,10 @@ private:
     // identifiers of requested album arts which was not loaded yet
     std::vector<std::string> myRequestedAlbumArtIds;
 
-    void loadMeta(std::ifstream& metaStream);
+    bool loadMeta(std::ifstream& metaStream);
     void saveMeta(std::chrono::system_clock::time_point lastUpdate);
     void invalidate();
-    std::pair<std::string, QPixmap> loadAlbumArt(const std::string& id) const;
+    std::pair<std::string, QImage> loadAlbumArt(const std::string& id) const;
     std::string readString(std::ifstream& stream) const;
     void writeString(std::ofstream& stream, const std::string& str) const;
     void updateLastUpdateInfo();

@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -44,18 +44,30 @@ public:
      */
     bool isEmpty() const;
 
+
+    /**
+     * @brief Cuts @p requestGroup from the set.
+     *
+     * The operation modifies/removes affected groups as needed.  For example if @p requestGroup is big, spreading
+     * over (intersecting with) several groups in the set, inner intersecting groups are removed and groups
+     * intersecting on bounds are shrinked accordingly.
+     *
+     * @note The entire set is then modified so that no group is bigger than the set granularity.
+     *
+     * @param requestGroup Group that shall be cut.
+     */
+    void cut(RequestGroup requestGroup);
+
     /**
      * @brief Cuts @p requestGroup from the set and places it on top.
      *
-     * The operation modifies/removes affected groups as needed.  For example of @p requestGroup is big, spreading
-     * over (intersecting with) several groups in the set, those are removed and groups intersecting on bounds are
-     * shrinked accordingly.
-     *
-     * The entire set is then modified so that no group is bigger than the set granularity.
+     * @note The entire set is then modified so that no group is bigger than the set granularity.
      *
      * @param requestGroup The group that shall be cut and moved.
+     *
+     * @sa cut()
      */
-    void cutAndPlaceOnTop(RequestGroup requestGroup);
+    void moveOnTop(RequestGroup requestGroup);
 
     /**
      * @brief Make grup determined by @p offset bigger by one.
@@ -88,6 +100,7 @@ private:
     // stored groups
     std::vector<RequestGroup> myRequestGroups;
 
+    void cutRequestGroup(RequestGroup requestGroup);
     void chop();
     void appendOnTop(std::vector<RequestGroup>& groups, RequestGroup groupToPlace);
     int findOwningGroupIdx(int offset) const;

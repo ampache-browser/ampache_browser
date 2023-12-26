@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2018 Róbert Čerňanský
 
 
 
@@ -125,9 +125,9 @@ void AlbumModel::onReadyToExecuteAlbums(RequestGroup requestGroup) {
 
 
 
-void AlbumModel::onLoaded(pair<int, int>) {
-    auto finishedRequestGroup = myAlbumRequests->setFinished();
-    dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+void AlbumModel::onLoaded(pair<int, int> offsetAndLimit) {
+    myAlbumRequests->setFinished(offsetAndLimit.first, offsetAndLimit.second);
+    dataChanged(createIndex(offsetAndLimit.first, 0), createIndex(offsetAndLimit.first + offsetAndLimit.second - 1, 0));
 }
 
 
@@ -143,13 +143,14 @@ void AlbumModel::onReadyToExecuteArts(RequestGroup requestGroup) {
 
 
 void AlbumModel::onArtsLoaded(pair<int, int> offsetAndCount) {
-    auto finishedRequestGroup = myArtRequests->setFinished();
+    myArtRequests->setFinished(offsetAndCount.first, offsetAndCount.second);
     if (myIsInUnfilteredArtsLoadMode) {
         return;
     }
 
     if (offsetAndCount.second != 0) {
-        dataChanged(createIndex(finishedRequestGroup.getLower(), 0), createIndex(finishedRequestGroup.getUpper(), 0));
+        dataChanged(createIndex(offsetAndCount.first, 0),
+                    createIndex(offsetAndCount.first + offsetAndCount.second - 1, 0));
     }
 
     if (!myArtRequests->isInProgress()) {
