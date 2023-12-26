@@ -30,6 +30,8 @@ Version 1.0.7 [20??-??-??]
 
   Ampache Browser now uses Ampache API 440001 instead of 350001.  This is because of previous fix of tracks sorting
   as the older APIs does not contain information about disk number.
+  
+* Fix building with Qt <5.15 (Robert Scheck).
 
 
 
