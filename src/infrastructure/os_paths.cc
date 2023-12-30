@@ -3,15 +3,13 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
 #ifdef _WIN32
 #include <Shlobj.h>
-#include <locale>
-#include <codecvt>
-#include <sstream>
+#include "infrastructure/string_encoding.h"
 #else
 #include <unistd.h>
 #include <pwd.h>
@@ -55,11 +53,13 @@ string OsPaths::getCacheHome() {
 
 string OsPaths::getHome() {
 #ifdef _WIN32
-    TCHAR localAppData[MAX_PATH];
-    SHGetFolderPath(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, localAppData);
-    wstringstream localAppDataWStream;
-    localAppDataWStream << localAppData;
-    return wstring_convert<codecvt_utf8<wchar_t>>().to_bytes(localAppDataWStream.str()) + PATH_SEP;
+    PWSTR localAppDataPWSTR = NULL;
+    SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_DONT_VERIFY, nullptr, &localAppDataPWSTR);
+
+    string localAppData = StringEncoding::wideToUtf8(localAppDataPWSTR);
+    CoTaskMemFree(localAppDataPWSTR);
+
+    return localAppData + PATH_SEP;
 #else
     const char* home;
     if ((home = getenv("HOME")) && home[0] == PATH_SEP[0]) {

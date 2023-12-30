@@ -7,7 +7,7 @@ Version 1.0.0-next [????-??-??]
 
 
 
-Version 1.0.7 [20??-??-??]
+Version 1.0.7 [2023-12-30]
 --------------------------
 
 * Fix infite 'Loading...' state.
@@ -37,6 +37,14 @@ Version 1.0.7 [20??-??-??]
   as the older APIs does not contain information about disk number.
   
 * Fix building with Qt <5.15 (Robert Scheck).
+
+* [Windows] Fix caching for non-ASCII profile paths.
+
+  If path for cache directory contained non-ASCII characters then the cache was not being created.  This could
+  happen in case user name contained such characters or a windows user profile related environment variable pointed
+  to such path.
+
+* [Windows] Fix build failure with Qt 6.
 
 
 

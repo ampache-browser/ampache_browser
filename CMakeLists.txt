@@ -37,6 +37,7 @@ find_package(Qt${qt_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Concurrent)
 set(sources
     src/infrastructure/filesystem.cc
     src/infrastructure/os_paths.cc
+    src/infrastructure/string_encoding.cc
     src/infrastructure/event/delegate_void.cc
     src/infrastructure/event/event_void.cc
     src/infrastructure/logging/logging.cc
