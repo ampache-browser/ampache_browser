@@ -3,12 +3,11 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
 #ifdef _WIN32
-#include <direct.h>
 #include <windows.h>
 #else
 #include <dirent.h>
@@ -46,29 +45,37 @@ bool Filesystem::makePath(const string& path, unsigned int mode) {
 
 
 bool Filesystem::isDirExisting(const string& path) {
+#ifdef _WIN32
+    struct _stat dirStat;
+    _wstat(StringEncoding::utf8ToWide(path).c_str(), &dirStat);
+#else
     struct stat dirStat;
     stat(path.c_str(), &dirStat);
+#endif
     return dirStat.st_mode & S_IFDIR;
+
 }
 
 
 
 bool Filesystem::removeAllFiles(const string& path) {
 #ifdef _WIN32
-    WIN32_FIND_DATA findData;
-    auto findHandle = FindFirstFile((path + "*").c_str(), &findData);
+    wstring pathW = StringEncoding::utf8ToWide(path);
+
+    WIN32_FIND_DATAW findData;
+    HANDLE findHandle = FindFirstFileW((pathW + L"*").c_str(), &findData);
     if (findHandle == INVALID_HANDLE_VALUE) {
         return false;
     }
 
     do {
-        string fileName = findData.cFileName;
-        if (fileName != "." && fileName != "..") {
-            auto filePath = path + fileName;
-            SetFileAttributes(filePath.c_str(), FILE_ATTRIBUTE_NORMAL);
-            DeleteFile(filePath.c_str());
+        wstring fileName = findData.cFileName;
+        if (fileName != L"." && fileName != L"..") {
+            wstring filePath = pathW + fileName;
+            SetFileAttributesW(filePath.c_str(), FILE_ATTRIBUTE_NORMAL);
+            DeleteFileW(filePath.c_str());
         }
-    } while (FindNextFile(findHandle, &findData) == TRUE);
+    } while (FindNextFileW(findHandle, &findData) == TRUE);
     FindClose(findHandle);
 #else
     auto dir = opendir(path.c_str());

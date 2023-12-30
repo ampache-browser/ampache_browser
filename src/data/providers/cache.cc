@@ -12,6 +12,7 @@
 #include <memory>
 #include <fstream>
 #include <chrono>
+#include <filesystem>
 
 #include <QString>
 #include <QPixmap>
@@ -38,6 +39,14 @@ using namespace domain;
 
 namespace data {
 
+#ifdef _WIN32
+#define FSPATH(pathName) filesystem::path{StringEncoding::utf8ToWide(pathName)}
+#else
+#define FSPATH(pathName) filesystem::path{pathName}
+#endif
+
+
+
 /**
  * @warning Class expects that all save* methods will be called subsequently.
  */
@@ -48,7 +57,7 @@ myCurrentUser{user} {
         Filesystem::makePath(ALBUM_ARTS_DIR, 0700);
         // TODO: Handle errors.
     }
-    ifstream metaStream{META_PATH};
+    ifstream metaStream{FSPATH(META_PATH)};
     if (!metaStream) {
         invalidate();
     } else {
@@ -98,8 +107,7 @@ int Cache::numberOfTracks() const {
 
 vector<unique_ptr<ArtistData>> Cache::loadArtistsData() const {
     vector<unique_ptr<ArtistData>> artistsData{};
-
-    ifstream artistsDataStream{ARTISTS_DATA_PATH, ios::binary};
+    ifstream artistsDataStream{FSPATH(ARTISTS_DATA_PATH), ios::binary };
     int count = 0;
     artistsDataStream.read(reinterpret_cast<char*>(&count), sizeof count);
     for (int idx = 0; idx < count; idx++) {
@@ -123,7 +131,7 @@ vector<unique_ptr<ArtistData>> Cache::loadArtistsData() const {
 vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() const {
     vector<unique_ptr<AlbumData>> albumsData{};
 
-    ifstream albumsDataStream{ALBUMS_DATA_PATH, ios::binary};
+    ifstream albumsDataStream{FSPATH(ALBUMS_DATA_PATH), ios::binary };
     int count = 0;
     albumsDataStream.read(reinterpret_cast<char*>(&count), sizeof count);
     for (int idx = 0; idx < count; idx++) {
@@ -152,7 +160,7 @@ vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() const {
 vector<unique_ptr<TrackData>> Cache::loadTracksData() const {
     vector<unique_ptr<TrackData>> tracksData{};
 
-    ifstream tracksDataStream{TRACKS_DATA_PATH, ios::binary};
+    ifstream tracksDataStream{FSPATH(TRACKS_DATA_PATH), ios::binary };
     int count = 0;
     tracksDataStream.read(reinterpret_cast<char*>(&count), sizeof count);
     for (int idx = 0; idx < count; idx++) {
@@ -187,7 +195,7 @@ void Cache::requestAlbumArts(const vector<string>& ids) {
 
 
 void Cache::saveArtistsData(vector<unique_ptr<ArtistData>>& artistsData) {
-    ofstream artistsDataStream{ARTISTS_DATA_PATH, ios::binary | ios::trunc};
+    ofstream artistsDataStream{FSPATH(ARTISTS_DATA_PATH), ios::binary | ios::trunc };
     int count = artistsData.size();
     artistsDataStream.write(reinterpret_cast<char*>(&count), sizeof count);
     for (auto& artistData: artistsData) {
@@ -211,7 +219,7 @@ void Cache::saveArtistsData(vector<unique_ptr<ArtistData>>& artistsData) {
 
 
 void Cache::saveAlbumsData(vector<unique_ptr<AlbumData>>& albumsData) {
-    ofstream albumsDataStream{ALBUMS_DATA_PATH, ios::binary | ios::trunc};
+    ofstream albumsDataStream{FSPATH(ALBUMS_DATA_PATH), ios::binary | ios::trunc };
     int count = albumsData.size();
     albumsDataStream.write(reinterpret_cast<char*>(&count), sizeof count);
     for (auto& albumData: albumsData) {
@@ -241,7 +249,7 @@ void Cache::saveAlbumsData(vector<unique_ptr<AlbumData>>& albumsData) {
 
 
 void Cache::saveTracksData(vector<unique_ptr<TrackData>>& tracksData) {
-    ofstream tracksDataStream{TRACKS_DATA_PATH, ios::binary | ios::trunc};
+    ofstream tracksDataStream{FSPATH(TRACKS_DATA_PATH), ios::binary | ios::trunc };
     int count = tracksData.size();
     tracksDataStream.write(reinterpret_cast<char*>(&count), sizeof count);
     for (auto& trackData: tracksData) {
@@ -316,7 +324,7 @@ bool Cache::loadMeta(ifstream& metaStream) {
 
 
 void Cache::saveMeta(system_clock::time_point lastUpdate) {
-    ofstream metaStream{META_PATH, ios::binary | ios::trunc};
+    ofstream metaStream{FSPATH(META_PATH), ios::binary | ios::trunc };
     int version = CACHE_VERSION;
     metaStream.write(reinterpret_cast<char*>(&version), sizeof version);
     writeString(metaStream, myServerUrl);

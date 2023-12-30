@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2023 Róbert Čerňanský
 
 
 
@@ -13,7 +13,7 @@
 
 
 #ifdef _WIN32
-#include <direct.h>
+#include "infrastructure/string_encoding.h"
 #else
 #include <sys/stat.h>
 #endif
@@ -25,7 +25,7 @@
 namespace infrastructure {
 
 #ifdef _WIN32
-#define MKDIR(pathName, mode) _mkdir(pathName)
+#define MKDIR(pathName, mode) _wmkdir(StringEncoding::utf8ToWide(pathName).c_str())
 #define PATH_SEP "\\"
 #else
 #define MKDIR(pathName, mode) mkdir(pathName, mode)
