@@ -44,17 +44,17 @@ Using MSYS2 and MinGW-w64
 
    Start MSYS2 shell.
 
-   Install development packages (replace i686 with x86_64 for 64 bit):
+   Install development packages:
 
-       $ pacman -S base-devel mingw-w64-i686-toolchain
+       $ pacman -S base-devel mingw-w64-x86_64-toolchain
 
    Install dependencies:
 
-       $ pacman -S mingw-w64-i686-qt5 mingw-w64-i686-cmake
+       $ pacman -S mingw-w64-x86_64-qt6-base mingw-w64-x86_64-cmake
 
 2. Install Ampache Browser:
 
-   Start MinGW32 or MinGW64 shell.
+   Start MinGW64 shell.
 
    Download the latest Ampache Browser version as described in Linux/General section.
 
@@ -65,16 +65,18 @@ Using MSYS2 and MinGW-w64
 
    Configure, build and install the library:
 
-       $ cmake -G "MSYS Makefiles" -D USE_QT6=OFF .
+       $ cmake -G "MSYS Makefiles" .
        $ make
        $ make install
+
+In case of Qt 5 build install Qt 5 instead of Qt 6 and use option -D USE_QT6=OFF in the 'cmake' call.
 
 
 
 Using Visual Studio
 ...................
 
-1. Install Qt 5 for VS and CMake.
+1. Install dependencies: Qt 5 or Qt 6 for VS and CMake.
 
 2. Download and unpack the latest Ampache Browser version as described in Linux/General section.
 
@@ -83,15 +85,15 @@ Using Visual Studio
    Start CMake (GUI).  Select Ampache Browser sources ("Where is the source code:") and choose a build directory
    ("Where to build the binaries:").
 
-   Add Qt5_DIR configuration variable:
+   Add CMAKE_PREFIX_PATH configuration variable:
 
    Click "Add Entry" and fill the dialog:
 
-       Name: Qt5_DIR
+       Name: CMAKE_PREFIX_PATH
        Type: PATH
-       Value: <path_to_your_qt5_installation>/Qt.../msvc2015_64/lib/cmake/Qt5
+       Value: <path_to_your_qt_installation>/Qt.../msvc.../lib/cmake/Qt...
 
-   Uncheck USE_QT6 option.
+   In case of Qt 5 add USE_QT6 configuration variable of type BOOL and do not enable it.
 
    Click "Configure", choose generator for your Visual Studio version and "Finish".  Click "Generate".
 
