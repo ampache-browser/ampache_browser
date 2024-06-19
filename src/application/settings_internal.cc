@@ -3,11 +3,13 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
-#include "application/data_loader.h"
+#include <functional>
+#include <string>
+
 #include "application/settings_internal.h"
 
 using namespace std;

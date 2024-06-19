@@ -3,16 +3,20 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
 #include <sstream>
+
+#include <Qt>
 #include <QFormLayout>
 #include <QCheckBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QDialogButtonBox>
+#include <QString>
+
 #include "infrastructure/i18n.h"
 #include "settings_dialog.h"
 

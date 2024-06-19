@@ -3,13 +3,15 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
 #include "application/ampache_browser_app.h"
 #include "application/application.h"
 #include "application/application_qt_internal.h"
+
+class QWidget;
 
 using namespace std;
 using namespace ampache_browser;

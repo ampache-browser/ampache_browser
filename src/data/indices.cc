@@ -3,11 +3,16 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
+
+#include <functional>
+#include <utility>
+#include <vector>
 
 #include "domain/artist.h"
+#include "domain/album.h"
 #include "data/indices.h"
 
 using namespace std;

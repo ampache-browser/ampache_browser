@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2018 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -11,6 +11,8 @@
 #define LOGGING_H
 
 
+
+#include <QtGlobal>
 
 #include "infrastructure/logging/qt_logger/qt_logger.h"
 

@@ -3,10 +3,15 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
+#include <functional>
+#include <memory>
+#include <tuple>
+#include <utility>
+#include <vector>
 #include <string>
 
 #include <QCryptographicHash>
@@ -22,15 +27,17 @@
 #include "data/repositories/artist_repository.h"
 #include "data/repositories/track_repository.h"
 #include "ui/ui.h"
+#include "ui/selected_items.h"
 #include "application/models/artist_model.h"
 #include "application/models/album_model.h"
 #include "application/models/track_model.h"
 #include "application/data_loader.h"
 #include "application/settings_internal.h"
 #include "ampache_browser/settings.h"
-#include "ampache_browser/ampache_browser.h"
 #include "filtering.h"
 #include "application/ampache_browser_app.h"
+
+class QWidget;
 
 using namespace std;
 using namespace ampache_browser;

@@ -3,12 +3,17 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
 #include <vector>
+#include <string>
+#include <tuple>
+#include <utility>
+
 #include <QObject>
+#include <QString>
 #include <QStatusBar>
 #include <QListView>
 #include <QTreeView>
@@ -17,10 +22,13 @@
 #include <QItemSelection>
 #include <QLineEdit>
 #include <QCompleter>
+
 #include "settings_dialog.h"
 #include "ampache_browser_main_window.h"
 #include "ui/selected_items.h"
 #include "ui/ui.h"
+
+class QWidget;
 
 using namespace std;
 

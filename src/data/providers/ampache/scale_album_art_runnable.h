@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -14,6 +14,7 @@
 
 #include <string>
 
+#include <QByteArray>
 #include <QObject>
 #include <QRunnable>
 #include <QImage>
@@ -21,12 +22,6 @@
 
 
 namespace data {
-
-class AlbumData;
-class ArtistData;
-class TrackData;
-
-
 
 /**
  * @brief Scales the given image to a predefined size.

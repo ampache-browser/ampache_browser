@@ -3,21 +3,24 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
 #include <vector>
 #include <set>
 #include <memory>
+#include <algorithm>
+#include <functional>
+
 #include "infrastructure/event/delegate.h"
 #include "domain/artist.h"
 #include "../data_objects/album_data.h"
 #include "data/indices.h"
+#include "data/filters/filter.h"
 #include "data/filters/artist_filter_for_albums.h"
 
 using namespace std;
-using namespace placeholders;
 using namespace infrastructure;
 using namespace domain;
 

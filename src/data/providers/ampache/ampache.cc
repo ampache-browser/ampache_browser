@@ -3,20 +3,27 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2023 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
 #include <sstream>
 #include <chrono>
+#include <map>
 #include <memory>
 #include <utility>
+#include <algorithm>
+#include <functional>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include <QObject>
+#include <QByteArray>
 #include <QString>
-#include <QUrl>
 #include <QDateTime>
 #include <QThreadPool>
+#include <QColor>
 #include <QPixmap>
 #include <QXmlStreamReader>
 #include <QCryptographicHash>

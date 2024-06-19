@@ -3,24 +3,32 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2023 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
+#include <utility>
+
+#include <Qt>
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
 #include <QtCore/QAbstractTableModel>
+#include <QString>
 
 #include "infrastructure/event/delegate.h"
 #include "infrastructure/logging/logging.h"
 #include "infrastructure/i18n.h"
 #include "domain/track.h"
+#include "domain/album.h"
+#include "domain/artist.h"
 #include "data/repositories/track_repository.h"
+#include "request_group.h"
 #include "requests.h"
 #include "application/models/track_model.h"
 
+class QObject;
+
 using namespace std;
-using namespace placeholders;
 using namespace infrastructure;
 using namespace data;
 using namespace domain;

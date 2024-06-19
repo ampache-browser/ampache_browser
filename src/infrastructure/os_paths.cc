@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2023 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -13,6 +13,7 @@
 #else
 #include <unistd.h>
 #include <pwd.h>
+#include <cstdlib>
 #endif
 
 #include <string>

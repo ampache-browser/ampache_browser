@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2023 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -13,8 +13,14 @@
 #include <fstream>
 #include <chrono>
 #include <filesystem>
+#include <utility>
+#include <functional>
+#include <map>
+#include <string>
 
+#include <QObject>
 #include <QString>
+#include <QImage>
 #include <QPixmap>
 #include <QFutureWatcher>
 #include <QFutureIterator>

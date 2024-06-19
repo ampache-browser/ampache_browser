@@ -3,12 +3,14 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
+#include <utility>
 #include <string>
 #include <vector>
+
 #include "ui/selected_items.h"
 
 using namespace std;
