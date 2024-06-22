@@ -2,6 +2,13 @@ Ampache Browser User Visible Changes
 ====================================
 
 
+Version 1.0.8 [20??-??-??]
+--------------------------
+
+* Fix building on MacOS.
+
+
+
 Version 1.0.7 [2023-12-30]
 --------------------------
 
