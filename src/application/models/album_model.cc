@@ -3,26 +3,32 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2018 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
 #include <memory>
+#include <utility>
 
+#include <Qt>
 #include <QtCore/QVariant>
 #include <QtCore/QModelIndex>
 #include <QtGui/QIcon>
+#include <QString>
+#include <QPixmap>
 
 #include "infrastructure/event/delegate.h"
 #include "infrastructure/logging/logging.h"
 #include "infrastructure/i18n.h"
 #include "domain/album.h"
 #include "data/repositories/album_repository.h"
+#include "request_group.h"
 #include "requests.h"
 #include "application/models/album_model.h"
 
+class QObject;
+
 using namespace std;
-using namespace placeholders;
 using namespace infrastructure;
 using namespace data;
 using namespace domain;

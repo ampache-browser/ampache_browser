@@ -3,26 +3,35 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2023 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
 #include <string>
 #include <vector>
+#include <algorithm>
+#include <functional>
+#include <map>
+#include <memory>
+#include <utility>
+
+#include <QPixmap>
 
 #include "infrastructure/logging/logging.h"
 #include "infrastructure/event/delegate.h"
+#include "infrastructure/event/event.h"
 #include "domain/artist.h"
+#include "domain/album.h"
 #include "data/provider_type.h"
 #include "data/providers/ampache.h"
 #include "data/providers/cache.h"
 #include "../data_objects/album_data.h"
 #include "data/indices.h"
+#include "data/repositories/repository.h"
 #include "data/repositories/artist_repository.h"
 #include "data/repositories/album_repository.h"
 
 using namespace std;
-using namespace placeholders;
 using namespace infrastructure;
 using namespace domain;
 

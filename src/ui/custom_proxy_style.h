@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2017 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -13,6 +13,10 @@
 
 
 #include <QProxyStyle>
+
+class QStyleHintReturn;
+class QStyleOption;
+class QWidget;
 
 
 

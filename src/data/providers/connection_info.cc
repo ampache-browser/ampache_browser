@@ -3,12 +3,12 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
 #include <string>
-#include <QCryptographicHash>
+
 #include "data/providers/connection_info.h"
 
 using namespace std;

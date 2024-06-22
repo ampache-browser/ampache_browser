@@ -3,15 +3,17 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
+#include <cstddef>
+#include <memory>
 #include <string>
-#include <deque>
+#include <utility>
+
 #include <QtGui/QPixmap>
-#include "domain/artist.h"
-#include "domain/track.h"
+
 #include "domain/album.h"
 
 using namespace std;
@@ -19,6 +21,8 @@ using namespace std;
 
 
 namespace domain {
+
+class Artist;
 
 
 

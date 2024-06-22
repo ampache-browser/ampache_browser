@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2023 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -11,9 +11,11 @@
 #include <windows.h>
 #else
 #include <dirent.h>
+#include <cstdio>
 #endif
 
 #include <sys/stat.h>
+#include <cerrno>
 #include <string>
 #include "infrastructure/filesystem.h"
 

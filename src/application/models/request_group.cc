@@ -3,11 +3,10 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
-#include <algorithm>
 #include "request_group.h"
 
 using namespace std;

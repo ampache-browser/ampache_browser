@@ -3,16 +3,19 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
+
+#include <cctype>
+#include <algorithm>
+#include <string>
 
 #include "../data_objects/track_data.h"
+#include "data/filters/filter.h"
 #include "data/filters/name_filter_for_tracks.h"
 
 using namespace std;
-using namespace placeholders;
-using namespace infrastructure;
 
 
 

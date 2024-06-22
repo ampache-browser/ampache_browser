@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -12,8 +12,10 @@
 
 
 
+#include <cstddef>
 #include <string>
 #include <memory>
+
 #include "domain/artist.h"
 
 

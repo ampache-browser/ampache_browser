@@ -3,22 +3,28 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2023 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
+
+#include <memory>
+#include <utility>
+#include <vector>
 
 #include "domain/track.h"
+#include "infrastructure/event/event.h"
 #include "data/provider_type.h"
 #include "data/providers/ampache.h"
 #include "data/providers/cache.h"
 #include "../data_objects/track_data.h"
+#include "../data_objects/album_data.h"
 #include "data/indices.h"
+#include "data/repositories/repository.h"
 #include "data/repositories/artist_repository.h"
 #include "data/repositories/album_repository.h"
 #include "data/repositories/track_repository.h"
 
 using namespace std;
-using namespace placeholders;
 using namespace infrastructure;
 using namespace domain;
 

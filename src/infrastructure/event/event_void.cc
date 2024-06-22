@@ -3,12 +3,14 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
-#include <functional>
 #include <algorithm>
+#include <vector>
+
+#include "infrastructure/event/delegate.h"
 #include "infrastructure/event/event.h"
 
 

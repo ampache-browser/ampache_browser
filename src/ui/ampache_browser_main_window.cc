@@ -3,11 +3,14 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
-#include <memory>
+#include <Qt>
+#include <QSize>
+#include <QSizePolicy>
+#include <QWidget>
 #include <QToolBar>
 #include <QStatusBar>
 #include <QStyle>
@@ -17,6 +20,8 @@
 #include <QTreeView>
 #include <QHBoxLayout>
 #include <QDockWidget>
+#include <QAbstractItemView>
+
 #include "infrastructure/i18n.h"
 #include "settings_dialog.h"
 #include "custom_proxy_style.h"

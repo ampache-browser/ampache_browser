@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -12,7 +12,9 @@
 
 
 
-#include <memory>
+#include <string>
+
+#include <QObject>
 #include <QDialog>
 
 class QFormLayout;

@@ -3,20 +3,25 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2023 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
+#include <cstddef>
 #include <string>
-#include <domain/artist.h>
-#include <domain/album.h>
-#include <domain/track.h>
+
+#include "domain/track.h"
 
 using namespace std;
 
 
 
 namespace domain {
+
+class Album;
+class Artist;
+
+
 
 Track::Track(const std::string& id, const std::string& name, const std::string& disk,
              int number, const std::string& url):

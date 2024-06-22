@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2018 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -13,7 +13,6 @@
 
 
 #include <limits>
-#include <vector>
 #include <memory>
 #include "infrastructure/event/event.h"
 #include "request_group.h"

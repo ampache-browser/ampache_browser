@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2018 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -14,13 +14,11 @@
 
 #include <vector>
 
+#include "request_group.h"
+
 
 
 namespace application {
-
-class RequestGroup;
-
-
 
 /**
  * @brief Set of size bounded RequestGroup() objects.

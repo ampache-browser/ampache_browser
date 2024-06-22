@@ -3,17 +3,17 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
 #include <memory>
 #include <functional>
-#include <QWidget>
+
 #include "application/application_qt_internal.h"
-#include "ampache_browser/settings.h"
-#include "ampache_browser/ampache_browser.h"
 #include "ampache_browser/application_qt.h"
+
+class QtWidget;
 
 using namespace std;
 using namespace application;
@@ -21,6 +21,11 @@ using namespace application;
 
 
 namespace ampache_browser {
+
+class AmpacheBrowser;
+class Settings;
+
+
 
 ApplicationQt::ApplicationQt(): myApplicationQtInternal(new ApplicationQtInternal{}) {
 }
