@@ -7,6 +7,12 @@ Version 1.0.8 [20??-??-??]
 
 * Fix building on MacOS.
 
+* Fix creation of cache directory.
+
+  Directory for caching lists of artists, albums and tracks (by defaut '~/.cache/ampache_browser' on Linux) was
+  sometimes not created.  In such case these data were not cached and thus read again from Ampache server upon
+  ApplicationQt::run() call.
+
 
 
 Version 1.0.7 [2023-12-30]

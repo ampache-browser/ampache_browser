@@ -49,13 +49,12 @@ bool Filesystem::makePath(const string& path, unsigned int mode) {
 bool Filesystem::isDirExisting(const string& path) {
 #ifdef _WIN32
     struct _stat dirStat;
-    _wstat(StringEncoding::utf8ToWide(path).c_str(), &dirStat);
+    int statResult = _wstat(StringEncoding::utf8ToWide(path).c_str(), &dirStat);
 #else
     struct stat dirStat;
-    stat(path.c_str(), &dirStat);
+    int statResult = stat(path.c_str(), &dirStat);
 #endif
-    return dirStat.st_mode & S_IFDIR;
-
+    return statResult == 0 && dirStat.st_mode & S_IFDIR;
 }
 
 
