@@ -53,6 +53,9 @@ public:
     QAction* addToPlaylistAction = nullptr;
 
     SettingsDialog* settingsDialog = nullptr;
+
+private:
+    QSize sizeHint() const override;
 };
 
 }

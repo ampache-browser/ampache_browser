@@ -129,4 +129,10 @@ AmpacheBrowserMainWindow::~AmpacheBrowserMainWindow() {
     delete(myCustomProxyStyle);
 }
 
+
+
+QSize AmpacheBrowserMainWindow::sizeHint() const {
+    return QSize(560, 400);
+}
+
 }
