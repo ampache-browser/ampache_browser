@@ -41,8 +41,6 @@ public:
 
     ~AmpacheBrowserMainWindow();
 
-    CustomProxyStyle* myCustomProxyStyle = nullptr;
-
     QListView* albumsListView = nullptr;
     QListView* artistsListView = nullptr;
     QTreeView* tracksTreeView = nullptr;
@@ -55,7 +53,14 @@ public:
     SettingsDialog* settingsDialog = nullptr;
 
 private:
+    CustomProxyStyle* myCustomProxyStyle = nullptr;
+
     QSize sizeHint() const override;
+    
+    void createAndSetupToolBar();
+    void createAndSetupAlbumsWidget();
+    void createAndSetupArtistsWidget();
+    void createAndSetupTracksWidget();
 };
 
 }

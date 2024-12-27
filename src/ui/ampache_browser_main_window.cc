@@ -39,7 +39,38 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
 
     myCustomProxyStyle = new CustomProxyStyle{};
 
-    // tool bar
+    createAndSetupToolBar();
+    createAndSetupAlbumsWidget();
+    createAndSetupArtistsWidget();
+    createAndSetupTracksWidget();
+
+    statusBar()->setSizeGripEnabled(false);
+}
+
+
+
+AmpacheBrowserMainWindow::~AmpacheBrowserMainWindow() {
+    delete(settingsDialog);
+    delete(tracksTreeView);
+    delete(artistsListView);
+    delete(albumsListView);
+    delete(searchLineEdit);
+    delete(addToPlaylistAction);
+    delete(createPlaylistAction);
+    delete(playAction);
+    delete(myCustomProxyStyle);
+}
+
+
+
+QSize AmpacheBrowserMainWindow::sizeHint() const {
+    return QSize(560, 400);
+}
+
+
+
+void AmpacheBrowserMainWindow::createAndSetupToolBar()
+{
     playAction = new QAction(style()->standardIcon(QStyle::SP_MediaPlay), _("Play"), this);
     playAction->setEnabled(false);
     createPlaylistAction = new QAction(style()->standardIcon(QStyle::SP_FileIcon), _("Create Playlist"), this);
@@ -67,9 +98,15 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     mainToolBar->addWidget(searchLineEdit);
     mainToolBar->addSeparator();
     mainToolBar->addAction(settingsAction);
+    
+    settingsDialog = new SettingsDialog{};
+    connect(settingsAction, SIGNAL(triggered()), settingsDialog, SLOT(open()));
+}
 
-    // central widget
-    auto centralWidget = new QWidget{};
+
+
+void AmpacheBrowserMainWindow::createAndSetupAlbumsWidget() {
+    auto albumsWidget = new QWidget{};
     auto centralLayout = new QHBoxLayout{};
     albumsListView = new QListView{};
     albumsListView->setViewMode(QListView::ViewMode::IconMode);
@@ -82,57 +119,40 @@ AmpacheBrowserMainWindow::AmpacheBrowserMainWindow(QWidget* parent): QMainWindow
     albumsListView->setStyle(myCustomProxyStyle);
 
     centralLayout->addWidget(albumsListView);
-    centralWidget->setLayout(centralLayout);
-    setCentralWidget(centralWidget);
+    albumsWidget->setLayout(centralLayout);
+    setCentralWidget(albumsWidget);
+}
 
-    // docks
+
+
+void AmpacheBrowserMainWindow::createAndSetupArtistsWidget() {
     auto artistsDockWidget = new QDockWidget(_("Artists"));
-    auto tracksDockWidget = new QDockWidget(_("Tracks"));
     artistsListView = new QListView{};
     artistsListView->setResizeMode(QListView::ResizeMode::Adjust);
     artistsListView->setUniformItemSizes(true);
     artistsListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     artistsListView->setSelectionBehavior(QAbstractItemView::SelectRows);
     artistsListView->setStyle(myCustomProxyStyle);
+
+    artistsDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
+    artistsDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
+    artistsDockWidget->setWidget(artistsListView);
+    addDockWidget(Qt::RightDockWidgetArea, artistsDockWidget);
+}
+
+
+
+void AmpacheBrowserMainWindow::createAndSetupTracksWidget() {
+    auto tracksDockWidget = new QDockWidget(_("Tracks"));
     tracksTreeView = new QTreeView{};
     tracksTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     tracksTreeView->setIndentation(0);
     tracksTreeView->setStyle(myCustomProxyStyle);
 
-
-    artistsDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
-    artistsDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
-    artistsDockWidget->setWidget(artistsListView);
     tracksDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     tracksDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
     tracksDockWidget->setWidget(tracksTreeView);
-    addDockWidget(Qt::RightDockWidgetArea, artistsDockWidget);
     addDockWidget(Qt::RightDockWidgetArea, tracksDockWidget);
-
-    statusBar()->setSizeGripEnabled(false);
-
-    settingsDialog = new SettingsDialog{};
-    connect(settingsAction, SIGNAL(triggered()), settingsDialog, SLOT(open()));
-}
-
-
-
-AmpacheBrowserMainWindow::~AmpacheBrowserMainWindow() {
-    delete(settingsDialog);
-    delete(tracksTreeView);
-    delete(artistsListView);
-    delete(albumsListView);
-    delete(searchLineEdit);
-    delete(addToPlaylistAction);
-    delete(createPlaylistAction);
-    delete(playAction);
-    delete(myCustomProxyStyle);
-}
-
-
-
-QSize AmpacheBrowserMainWindow::sizeHint() const {
-    return QSize(560, 400);
 }
 
 }
