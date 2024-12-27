@@ -11,6 +11,7 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <cmath>
 
 #include <QObject>
 #include <QString>
@@ -55,6 +56,12 @@ myMainWindow{new AmpacheBrowserMainWindow{}} {
 
 QWidget* Ui::getMainWidget() const {
     return myMainWindow;
+}
+
+
+
+int Ui::getAlbumThumbnailSize() const {
+    return (int)rint(AmpacheBrowserMainWindow::ALBUM_THUMBNAIL_SIZE * myMainWindow->devicePixelRatio());
 }
 
 

@@ -240,7 +240,8 @@ void AmpacheBrowserApp::initializeAndLoad() {
         ConnectionInfo{serverUrl, userName, passwordHash, mySettingsInternal.getString(Settings::PROXY_HOST),
             static_cast<unsigned short>(mySettingsInternal.getInt(Settings::PROXY_PORT)),
             mySettingsInternal.getString(Settings::PROXY_USER), mySettingsInternal.getString(Settings::PROXY_PASSWORD)},
-        myNetworkRequestFn}};
+        myNetworkRequestFn,
+        myUi->getAlbumThumbnailSize()}};
     myCache = unique_ptr<Cache>{new Cache{serverUrl, userName}};
     myIndices = unique_ptr<Indices>{new Indices{}};
 
@@ -260,7 +261,7 @@ void AmpacheBrowserApp::initializeDependencies() {
         myArtistRepository.get(), myAlbumRepository.get()}};
 
     myArtistModel = unique_ptr<ArtistModel>{new ArtistModel{myArtistRepository.get()}};
-    myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel{myAlbumRepository.get()}};
+    myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel{myAlbumRepository.get(), myUi->getAlbumThumbnailSize()}};
     myTrackModel = unique_ptr<TrackModel>{new TrackModel{myTrackRepository.get()}};
 
     myUi->setArtistModel(*myArtistModel);

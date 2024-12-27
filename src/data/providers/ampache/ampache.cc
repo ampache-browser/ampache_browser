@@ -50,9 +50,11 @@ using namespace domain;
 
 namespace data {
 
-Ampache::Ampache(const ConnectionInfo& connectionInfo, const Ampache::NetworkRequestFn& networkRequestFn):
+Ampache::Ampache(
+    const ConnectionInfo& connectionInfo, const Ampache::NetworkRequestFn& networkRequestFn, int albumThumbnailSize):
 myConnectionInfo{connectionInfo},
 myNetworkRequestFn{networkRequestFn},
+myAlbumThumbnailSize{albumThumbnailSize},
 myNetworkRequestCb{bind(&Ampache::onNetworkRequestFinished, this, _1, _2, _3)},
 myAlbumArtsNetworkRequestCb{bind(&Ampache::onAlbumArtsNetworkRequestFinished, this, _1, _2, _3)} {
 }
@@ -132,8 +134,7 @@ void Ampache::requestAlbumArts(const map<string, string>& idsAndUrls) {
         return;
     }
 
-    // SMELL: size specified on multiple places
-    QPixmap notAvailablePixmap{100, 100};
+    QPixmap notAvailablePixmap{myAlbumThumbnailSize, myAlbumThumbnailSize};
     notAvailablePixmap.fill(QColor(230, 225, 220));
 
     LOG_DBG("Getting %d album arts.", idsAndUrls.size());
@@ -201,7 +202,7 @@ void Ampache::onAlbumArtsNetworkRequestFinished(const string& artUrl, const char
         return;
     }
 
-    auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(id, QByteArray{content, contentSize});
+    auto scaleAlbumArtRunnable = new ScaleAlbumArtRunnable(id, QByteArray{content, contentSize}, myAlbumThumbnailSize);
     scaleAlbumArtRunnable->setAutoDelete(false);
     connect(scaleAlbumArtRunnable, SIGNAL(finished(ScaleAlbumArtRunnable*)), this,
         SLOT(onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable*)));

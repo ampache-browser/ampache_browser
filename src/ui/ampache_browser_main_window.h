@@ -37,6 +37,8 @@ class AmpacheBrowserMainWindow: public QMainWindow {
    Q_OBJECT
 
 public:
+    static constexpr int ALBUM_THUMBNAIL_SIZE = 100;
+
     explicit AmpacheBrowserMainWindow(QWidget* parent = 0);
 
     ~AmpacheBrowserMainWindow();

@@ -15,12 +15,12 @@
 using namespace std;
 
 
-
 namespace data {
 
-ScaleAlbumArtRunnable::ScaleAlbumArtRunnable(const string id, const QByteArray imageData):
+ScaleAlbumArtRunnable::ScaleAlbumArtRunnable(const string id, const QByteArray imageData, int size):
 myId{id},
-myImageData{imageData} { }
+myImageData{imageData},
+mySize{size} { }
 
 
 
@@ -39,8 +39,7 @@ QImage ScaleAlbumArtRunnable::getResult() const {
 void ScaleAlbumArtRunnable::run() {
     QImage art{};
     art.loadFromData(myImageData);
-    // SMELL: Image size is specified here.
-    myScaledAlbumArt = art.scaled(100, 100, Qt::AspectRatioMode::IgnoreAspectRatio,
+    myScaledAlbumArt = art.scaled(mySize, mySize, Qt::AspectRatioMode::IgnoreAspectRatio,
         Qt::TransformationMode::SmoothTransformation);
     emit finished(this);
 }

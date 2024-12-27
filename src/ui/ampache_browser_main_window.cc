@@ -112,8 +112,8 @@ void AmpacheBrowserMainWindow::createAndSetupAlbumsWidget() {
     albumsListView->setViewMode(QListView::ViewMode::IconMode);
     albumsListView->setResizeMode(QListView::ResizeMode::Adjust);
     albumsListView->setWordWrap(true);
-    albumsListView->setGridSize(QSize(128, 192));
-    albumsListView->setIconSize(QSize(100, 100));
+    albumsListView->setGridSize(QSize(ALBUM_THUMBNAIL_SIZE + 28, ALBUM_THUMBNAIL_SIZE + 92));
+    albumsListView->setIconSize(QSize(ALBUM_THUMBNAIL_SIZE, ALBUM_THUMBNAIL_SIZE));
     albumsListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     albumsListView->setSelectionBehavior(QAbstractItemView::SelectRows);
     albumsListView->setStyle(myCustomProxyStyle);

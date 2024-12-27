@@ -40,8 +40,9 @@ public:
      *
      * @param id Identifier of the scaled image.
      * @param imageData The image which shall be scaled.
+     * @param size Number of pixels the image shall be scaled to.
      */
-    explicit ScaleAlbumArtRunnable(const std::string id, const QByteArray imageData);
+    explicit ScaleAlbumArtRunnable(const std::string id, const QByteArray imageData, int size);
 
     /**
      * @brief Gets the identifier of the scaled image (which was passed to the constructor).
@@ -61,6 +62,7 @@ private:
     // arguments from the constructor
     const std::string myId;
     const QByteArray myImageData;
+    const int mySize = 0;
 
     // scaled image
     QImage myScaledAlbumArt;

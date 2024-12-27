@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2018 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -64,7 +64,8 @@ public:
      * @param networkRequestFn Function that will be called to retrieve data from network.  Usage of this function
      *        is workaround for segfault on exit when QNetworkAccessManager is used together with Audacious.
      */
-    explicit Ampache(const ConnectionInfo& connectionInfo, const NetworkRequestFn& networkRequestFn);
+    explicit Ampache(
+        const ConnectionInfo& connectionInfo, const NetworkRequestFn& networkRequestFn, int albumThumbnailSize);
 
     Ampache(const Ampache& other) = delete;
 
@@ -248,6 +249,7 @@ private:
     // arguments from the constructor
     const ConnectionInfo myConnectionInfo;
     const NetworkRequestFn myNetworkRequestFn;
+    const int myAlbumThumbnailSize = 0;
 
     // network communication callback functions
     NetworkRequestCb myNetworkRequestCb;

@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 -2016 Róbert Čerňanský
+// Copyright (C) 2015 -2024 Róbert Čerňanský
 
 
 
@@ -40,8 +40,9 @@ public:
      *
      * @param albumRepository Provides albums and means to trigger their loading from an external source.
      * @param parent
+     * @param thumbnailSize Size of thumbnails of albums (one side of a square).
      */
-    explicit AlbumModel(data::AlbumRepository* const albumRepository, QObject* parent = 0);
+    explicit AlbumModel(data::AlbumRepository* const albumRepository, int thumbnailSize, QObject* parent = 0);
 
     virtual ~AlbumModel();
 
@@ -63,6 +64,8 @@ public:
 private:
     // stores album repository provided in the constuctor
     data::AlbumRepository* const myAlbumRepository = nullptr;
+    
+    int const myThumbnailSize = 0;
 
     // requests to load albums from an external source
     const std::unique_ptr<Requests> myAlbumRequests{new Requests{60}};
