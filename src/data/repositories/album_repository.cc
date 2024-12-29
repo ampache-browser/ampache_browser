@@ -31,7 +31,6 @@
 #include "data/repositories/artist_repository.h"
 #include "data/repositories/album_repository.h"
 
-using namespace std;
 using namespace infrastructure;
 using namespace domain;
 
@@ -42,15 +41,15 @@ namespace data {
 AlbumRepository::AlbumRepository(Ampache& ampache, Cache& cache, Indices& indices,
     const ArtistRepository* const artistRepository): Repository<AlbumData, Album>(ampache, cache, indices),
 myArtistRepository(artistRepository) {
-    myAmpache.readyAlbumArts += DELEGATE1(&AlbumRepository::onAmpacheReadyArts, map<string, QPixmap>);
-    myCache.readyAlbumArts += DELEGATE1(&AlbumRepository::onCacheReadyArts, map<string, QPixmap>);
+    myAmpache.readyAlbumArts += DELEGATE1(&AlbumRepository::onAmpacheReadyArts, std::map<std::string, QPixmap>);
+    myCache.readyAlbumArts += DELEGATE1(&AlbumRepository::onCacheReadyArts, std::map<std::string, QPixmap>);
 }
 
 
 
 AlbumRepository::~AlbumRepository() {
-    myCache.readyAlbumArts -= DELEGATE1(&AlbumRepository::onCacheReadyArts, map<string, QPixmap>);
-    myAmpache.readyAlbumArts -= DELEGATE1(&AlbumRepository::onAmpacheReadyArts, map<string, QPixmap>);
+    myCache.readyAlbumArts -= DELEGATE1(&AlbumRepository::onCacheReadyArts, std::map<std::string, QPixmap>);
+    myAmpache.readyAlbumArts -= DELEGATE1(&AlbumRepository::onAmpacheReadyArts, std::map<std::string, QPixmap>);
 }
 
 
@@ -72,9 +71,9 @@ Album& AlbumRepository::getUnfiltered(int offset) const {
 
 
 
-AlbumData* AlbumRepository::getAlbumDataById(const string& id) const {
+AlbumData* AlbumRepository::getAlbumDataById(const std::string& id) const {
     auto albumsDataIter = find_if(myData.begin(), myData.end(),
-        [&id](const unique_ptr<AlbumData>& ad) {return ad != nullptr && ad->getId() == id;});
+        [&id](const std::unique_ptr<AlbumData>& ad) {return ad != nullptr && ad->getId() == id;});
     return albumsDataIter != myData.end() ? albumsDataIter->get() : nullptr;
 }
 
@@ -100,14 +99,14 @@ bool AlbumRepository::loadArts(int filteredOffset, int count) {
     myArtsLoadOffset = filteredOffset;
     myArtsLoadCount = count;
     if (myProviderType == ProviderType::Ampache) {
-        map<string, string> albumIdsAndUrls;
+        std::map<std::string, std::string> albumIdsAndUrls;
         for (auto idx = filteredOffset; idx < filteredOffset + count; idx++) {
             AlbumData* albumData = myFilter->getFilteredData()[idx];
             albumIdsAndUrls[albumData->getId()] = albumData->getArtUrl();
         }
         myAmpache.requestAlbumArts(albumIdsAndUrls);
     } else if (myProviderType == ProviderType::Cache) {
-        vector<string> albumIds;
+        std::vector<std::string> albumIds;
         for (auto idx = filteredOffset; idx < filteredOffset + count; idx++) {
             AlbumData* albumData = myFilter->getFilteredData()[idx];
             albumIds.push_back(albumData->getId());
@@ -131,14 +130,14 @@ bool AlbumRepository::loadArtsUnfiltered(int offset, int count) {
     myArtsLoadOffsetUnfiltered = offset;
     myArtsLoadCount = count;
     if (myProviderType == ProviderType::Ampache) {
-        map<string, string> albumIdsAndUrls;
+        std::map<std::string, std::string> albumIdsAndUrls;
         for (auto idx = offset; idx < offset + count; idx++) {
             auto& albumData = myData[idx];
             albumIdsAndUrls[albumData->getId()] = albumData->getArtUrl();
         }
         myAmpache.requestAlbumArts(albumIdsAndUrls);
     } else if (myProviderType == ProviderType::Cache) {
-        vector<string> albumIds;
+        std::vector<std::string> albumIds;
         for (auto idx = offset; idx < offset + count; idx++) {
             auto& albumData = myData[idx];
             albumIds.push_back(albumData->getId());
@@ -184,7 +183,7 @@ Album& AlbumRepository::getDomainObject(const AlbumData& dataItem) const {
 
 
 
-Event<pair<vector<unique_ptr<AlbumData>>, bool>>& AlbumRepository::getDataLoadRequestFinishedEvent() {
+Event<std::pair<std::vector<std::unique_ptr<AlbumData>>, bool>>& AlbumRepository::getDataLoadRequestFinishedEvent() {
     return myAmpache.readyAlbums;
 }
 
@@ -213,8 +212,8 @@ void AlbumRepository::handleLoadedItem(const AlbumData& dataItem) const {
 
 
 
-void AlbumRepository::updateIndices(const vector<unique_ptr<AlbumData>>& data) {
-    vector<reference_wrapper<Album>> albums;
+void AlbumRepository::updateIndices(const std::vector<std::unique_ptr<AlbumData>>& data) {
+    std::vector<std::reference_wrapper<Album>> albums;
     ArtistAlbumsIndex artistAlbums;
     for (auto& dataItem: data) {
         albums.push_back(dataItem->getAlbum());
@@ -261,7 +260,7 @@ void AlbumRepository::handleDataSizeChanged() {
 
 
 
-void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
+void AlbumRepository::onAmpacheReadyArts(const std::map<std::string, QPixmap>& arts) {
     LOG_DBG("Ready %d art entries from filtered offset %d; offset %d; requested count was %d.", arts.size(),
         myArtsLoadOffset, myArtsLoadOffsetUnfiltered, myArtsLoadCount);
 
@@ -287,7 +286,7 @@ void AlbumRepository::onAmpacheReadyArts(const map<string, QPixmap>& arts) {
 
 
 
-void AlbumRepository::onCacheReadyArts(const map<string, QPixmap>& arts) {
+void AlbumRepository::onCacheReadyArts(const std::map<std::string, QPixmap>& arts) {
     LOG_DBG("Ready %d art entries from filtered offset %d; offset %d; requested count was %d.", arts.size(),
         myArtsLoadOffset, myArtsLoadOffsetUnfiltered, myArtsLoadCount);
 
@@ -298,7 +297,9 @@ void AlbumRepository::onCacheReadyArts(const map<string, QPixmap>& arts) {
     // increase progress by number of 'loaded IDs' which are not in 'not loaded IDs'
     for (auto& loadedIdAndArt: loadedIdsAndArts) {
         auto notLoadedIdsIter = find_if(notLoadedIdsAndUrls.begin(), notLoadedIdsAndUrls.end(),
-            [&loadedIdAndArt](const pair<string, string>& nliu) {return nliu.first == loadedIdAndArt.first;});
+            [&loadedIdAndArt](const std::pair<std::string, std::string>& nliu) {
+                return nliu.first == loadedIdAndArt.first;
+            });
         if (notLoadedIdsIter == notLoadedIdsAndUrls.end()) {
             myArtsLoadProgress++;
         }
@@ -313,16 +314,18 @@ void AlbumRepository::onCacheReadyArts(const map<string, QPixmap>& arts) {
 
 
 
-pair<map<string, QPixmap>, map<string, string>> AlbumRepository::setArts(const map<string, QPixmap>& arts) {
-    map<string, QPixmap> loadedIdsAndArts;
-    map<string, string> notLoadedArtIds;
+std::pair<std::map<std::string, QPixmap>, std::map<std::string, std::string>> AlbumRepository::setArts(
+    const std::map<std::string, QPixmap>& arts) {
+
+    std::map<std::string, QPixmap> loadedIdsAndArts;
+    std::map<std::string, std::string> notLoadedArtIds;
     if (myArtsLoadOffset != -1) {
         for (auto& idAndArt: arts) {
             auto albumData = findAlbumDataById(idAndArt.first, myArtsLoadOffset, myArtsLoadCount);
             if (albumData != nullptr) {
                 // set the art even if the loaded image is empty (isNull()), otherwise the server would be queried
                 // again and again next time
-                albumData->getAlbum().setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
+                albumData->getAlbum().setArt(std::unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
                 loadedIdsAndArts.emplace(idAndArt);
                 if (idAndArt.second.isNull()) {
                     notLoadedArtIds[idAndArt.first] = albumData->getArtUrl();
@@ -335,7 +338,7 @@ pair<map<string, QPixmap>, map<string, string>> AlbumRepository::setArts(const m
             if (albumData != nullptr) {
                 // set the art even if the loaded image is empty (isNull()), otherwise the server would be queried
                 // again and again next time
-                albumData->getAlbum().setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
+                albumData->getAlbum().setArt(std::unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
                 loadedIdsAndArts.emplace(idAndArt);
                 if (idAndArt.second.isNull()) {
                     notLoadedArtIds[idAndArt.first] = albumData->getArtUrl();
@@ -348,7 +351,7 @@ pair<map<string, QPixmap>, map<string, string>> AlbumRepository::setArts(const m
             // set the art even if the loaded image is empty (isNull()), otherwise the server would be queried
             // again and again next time
             // it should not happen that albumData == nullptr because arts are requested only for existing albums
-            albumData->getAlbum().setArt(unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
+            albumData->getAlbum().setArt(std::unique_ptr<QPixmap>{new QPixmap{idAndArt.second}});
             loadedIdsAndArts.emplace(idAndArt);
             if (idAndArt.second.isNull()) {
                 notLoadedArtIds[idAndArt.first] = albumData->getArtUrl();
@@ -361,7 +364,7 @@ pair<map<string, QPixmap>, map<string, string>> AlbumRepository::setArts(const m
 
 
 
-AlbumData* AlbumRepository::findAlbumDataById(const string& id, int filteredOffset, int count) const {
+AlbumData* AlbumRepository::findAlbumDataById(const std::string& id, int filteredOffset, int count) const {
     auto filteredAlbumsData = myFilter->getFilteredData();
     auto albumDataIter = find_if(filteredAlbumsData.begin() + filteredOffset,
         filteredAlbumsData.begin() + filteredOffset + count,
@@ -374,9 +377,9 @@ AlbumData* AlbumRepository::findAlbumDataById(const string& id, int filteredOffs
 
 
 
-AlbumData* AlbumRepository::findAlbumDataByIdUnfiltered(const string& id, int offset, int count) const {
+AlbumData* AlbumRepository::findAlbumDataByIdUnfiltered(const std::string& id, int offset, int count) const {
     auto albumDataIter = find_if(myData.begin() + offset, myData.begin() + offset + count,
-        [&id](const unique_ptr<AlbumData>& ad) {return ad != nullptr && ad->getId() == id;});
+        [&id](const std::unique_ptr<AlbumData>& ad) {return ad != nullptr && ad->getId() == id;});
     if (albumDataIter == myData.begin() + offset + count) {
         return nullptr;
     }
@@ -387,7 +390,7 @@ AlbumData* AlbumRepository::findAlbumDataByIdUnfiltered(const string& id, int of
 
 void AlbumRepository::fireArtsLoadedEvents() {
     auto offset = myArtsLoadOffset != -1 ? myArtsLoadOffset : myArtsLoadOffsetUnfiltered;
-    auto offsetAndCount = offset != -1 ? pair<int, int>{offset, myArtsLoadCount} : pair<int, int>{0, 0};
+    auto offsetAndCount = offset != -1 ? std::pair<int, int>{offset, myArtsLoadCount} : std::pair<int, int>{0, 0};
     myArtsLoadOffset = -1;
     myArtsLoadOffsetUnfiltered = -1;
     myArtsLoadCount = -1;

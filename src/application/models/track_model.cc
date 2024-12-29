@@ -28,7 +28,6 @@
 
 class QObject;
 
-using namespace std;
 using namespace infrastructure;
 using namespace data;
 using namespace domain;
@@ -40,7 +39,7 @@ namespace application {
 TrackModel::TrackModel(data::TrackRepository* const trackRepository, QObject* parent): QAbstractTableModel(parent),
 myTrackRepository(trackRepository) {
     myRequests->readyToExecute += DELEGATE1(&TrackModel::onReadyToExecute, RequestGroup);
-    myTrackRepository->loaded += DELEGATE1(&TrackModel::onLoaded, pair<int, int>);
+    myTrackRepository->loaded += DELEGATE1(&TrackModel::onLoaded, std::pair<int, int>);
     myTrackRepository->dataSizeChanged += DELEGATE0(&TrackModel::onDataSizeOrFilterChanged);
     myTrackRepository->filterChanged += DELEGATE0(&TrackModel::onDataSizeOrFilterChanged);
     myTrackRepository->providerChanged += DELEGATE0(&TrackModel::onProviderChanged);
@@ -52,7 +51,7 @@ TrackModel::~TrackModel() {
     myTrackRepository->providerChanged -= DELEGATE0(&TrackModel::onProviderChanged);
     myTrackRepository->filterChanged -= DELEGATE0(&TrackModel::onDataSizeOrFilterChanged);
     myTrackRepository->dataSizeChanged -= DELEGATE0(&TrackModel::onDataSizeOrFilterChanged);
-    myTrackRepository->loaded -= DELEGATE1(&TrackModel::onLoaded, pair<int, int>);
+    myTrackRepository->loaded -= DELEGATE1(&TrackModel::onLoaded, std::pair<int, int>);
     myRequests->readyToExecute -= DELEGATE1(&TrackModel::onReadyToExecute, RequestGroup);
 }
 
@@ -129,7 +128,7 @@ void TrackModel::onReadyToExecute(RequestGroup requestGroup) {
 
 
 
-void TrackModel::onLoaded(pair<int, int> offsetAndLimit) {
+void TrackModel::onLoaded(std::pair<int, int> offsetAndLimit) {
     myRequests->setFinished(offsetAndLimit.first, offsetAndLimit.second);
     dataChanged(createIndex(offsetAndLimit.first, 0), createIndex(offsetAndLimit.first + offsetAndLimit.second - 1, 0));
 }

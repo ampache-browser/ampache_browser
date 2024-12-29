@@ -138,16 +138,12 @@ bool operator>=(const Track& lhs, const Track& rhs);
 
 
 
-namespace std {
-
 template<>
-class hash<domain::Track> {
+class std::hash<domain::Track> {
 
 public:
     size_t operator()(const domain::Track& track) const;
 };
-
-}
 
 
 

@@ -19,8 +19,6 @@
 #include <string>
 #include "infrastructure/filesystem.h"
 
-using namespace std;
-
 
 
 namespace infrastructure {
@@ -28,7 +26,7 @@ namespace infrastructure {
 // mode is not used on Windows
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-bool Filesystem::makePath(const string& path, unsigned int mode) {
+bool Filesystem::makePath(const std::string& path, unsigned int mode) {
 #pragma GCC diagnostic pop
     auto mkdirResult = MKDIR(path.c_str(), mode);
     if (mkdirResult == 0) {
@@ -46,7 +44,7 @@ bool Filesystem::makePath(const string& path, unsigned int mode) {
 
 
 
-bool Filesystem::isDirExisting(const string& path) {
+bool Filesystem::isDirExisting(const std::string& path) {
 #ifdef _WIN32
     struct _stat dirStat;
     int statResult = _wstat(StringEncoding::utf8ToWide(path).c_str(), &dirStat);
@@ -59,9 +57,9 @@ bool Filesystem::isDirExisting(const string& path) {
 
 
 
-bool Filesystem::removeAllFiles(const string& path) {
+bool Filesystem::removeAllFiles(const std::string& path) {
 #ifdef _WIN32
-    wstring pathW = StringEncoding::utf8ToWide(path);
+    std::wstring pathW = StringEncoding::utf8ToWide(path);
 
     WIN32_FIND_DATAW findData;
     HANDLE findHandle = FindFirstFileW((pathW + L"*").c_str(), &findData);
@@ -70,9 +68,9 @@ bool Filesystem::removeAllFiles(const string& path) {
     }
 
     do {
-        wstring fileName = findData.cFileName;
+        std::wstring fileName = findData.cFileName;
         if (fileName != L"." && fileName != L"..") {
-            wstring filePath = pathW + fileName;
+            std::wstring filePath = pathW + fileName;
             SetFileAttributesW(filePath.c_str(), FILE_ATTRIBUTE_NORMAL);
             DeleteFileW(filePath.c_str());
         }
@@ -86,7 +84,7 @@ bool Filesystem::removeAllFiles(const string& path) {
 
     dirent* file;
     while ((file = readdir(dir)) != nullptr) {
-        string fileName{file->d_name};
+        std::string fileName{file->d_name};
         if (fileName != "." && fileName != "..") {
             remove((path + fileName).c_str());
         }

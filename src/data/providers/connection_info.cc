@@ -11,15 +11,13 @@
 
 #include "data/providers/connection_info.h"
 
-using namespace std;
-
 
 
 namespace data {
 
 ConnectionInfo::ConnectionInfo(const std::string& serverUrl, const std::string& userName,
-    const std::string& passwordHash, const string& proxyHost, const unsigned short proxyPort, const string& proxyUser,
-    const string& proxyPassword):
+    const std::string& passwordHash, const std::string& proxyHost, const unsigned short proxyPort,
+    const std::string& proxyUser, const std::string& proxyPassword):
 myServerUrl(serverUrl),
 myUserName(userName),
 myPasswordHash{passwordHash},
@@ -31,25 +29,25 @@ myProxyPassword(proxyPassword) {
 
 
 
-string ConnectionInfo::getServerUrl() const {
+std::string ConnectionInfo::getServerUrl() const {
     return myServerUrl;
 }
 
 
 
-string ConnectionInfo::getUserName() const {
+std::string ConnectionInfo::getUserName() const {
     return myUserName;
 }
 
 
 
-string ConnectionInfo::getPasswordHash() const {
+std::string ConnectionInfo::getPasswordHash() const {
     return myPasswordHash;
 }
 
 
 
-string ConnectionInfo::getProxyHost() const {
+std::string ConnectionInfo::getProxyHost() const {
     return myProxyHost;
 }
 
@@ -61,13 +59,13 @@ unsigned short ConnectionInfo::getProxyPort() const {
 
 
 
-string ConnectionInfo::getProxyUser() const {
+std::string ConnectionInfo::getProxyUser() const {
     return myProxyUser;
 }
 
 
 
-string ConnectionInfo::getProxyPassword() const {
+std::string ConnectionInfo::getProxyPassword() const {
     return myProxyPassword;
 }
 

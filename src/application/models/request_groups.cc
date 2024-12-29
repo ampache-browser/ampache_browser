@@ -12,8 +12,6 @@
 #include "request_group.h"
 #include "request_groups.h"
 
-using namespace std;
-
 
 
 namespace application {
@@ -92,7 +90,7 @@ void RequestGroups::cutRequestGroup(RequestGroup requestGroup) {
     for (auto idx = intersectingGroupIdxs.size(); idx-- > 0;) {
         auto intersectingGroupIdx = intersectingGroupIdxs[idx];
         auto intersectingGroup = myRequestGroups[intersectingGroupIdx];
-        pair<RequestGroup, RequestGroup> remainderGroups = intersectingGroup.substract(requestGroup);
+        std::pair<RequestGroup, RequestGroup> remainderGroups = intersectingGroup.substract(requestGroup);
 
         myRequestGroups.erase(myRequestGroups.begin() + intersectingGroupIdx);
         if (!remainderGroups.second.isEmpty()) {
@@ -111,7 +109,7 @@ void RequestGroups::chop() {
         return;
     }
 
-    vector<RequestGroup> choppedGroups;
+    std::vector<RequestGroup> choppedGroups;
     for (auto& group: myRequestGroups) {
         if (group.getSize() > myGranularity) {
             auto split = group.split(group.getUpper() - (myGranularity - 1));
@@ -130,7 +128,7 @@ void RequestGroups::chop() {
 
 
 
-void RequestGroups::appendOnTop(vector<RequestGroup>& groups, RequestGroup groupToPlace) {
+void RequestGroups::appendOnTop(std::vector<RequestGroup>& groups, RequestGroup groupToPlace) {
     if (groups.size() == 0) {
         groups.push_back(groupToPlace);
         return;
@@ -186,8 +184,8 @@ int RequestGroups::findExtensibleGroupIdx(int offset) const {
 
 
 
-vector<int> RequestGroups::findIntersectingGroupIdxs(RequestGroup requestGroup) const {
-    vector<int> intersectingGroups{};
+std::vector<int> RequestGroups::findIntersectingGroupIdxs(RequestGroup requestGroup) const {
+    std::vector<int> intersectingGroups{};
     int idx = 0;
     for (auto& group: myRequestGroups) {
         if (requestGroup.hasIntersection(group)) {

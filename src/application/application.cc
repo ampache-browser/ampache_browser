@@ -19,7 +19,6 @@
 #include "application/ampache_browser_app.h"
 #include "application/application.h"
 
-using namespace std;
 using namespace ampache_browser;
 using namespace infrastructure;
 using namespace data;
@@ -30,10 +29,10 @@ namespace application {
 
 Application::Application() {
     auto settingsInternal = new SettingsInternal{};
-    mySettings = unique_ptr<Settings>{new Settings{unique_ptr<SettingsInternal>{settingsInternal}}};
+    mySettings = std::unique_ptr<Settings>{new Settings{std::unique_ptr<SettingsInternal>{settingsInternal}}};
     myAmpacheBrowserApp = new AmpacheBrowserApp{*settingsInternal};
-    myAmpacheBrowser = unique_ptr<AmpacheBrowser>{
-        new AmpacheBrowser{unique_ptr<AmpacheBrowserApp>{myAmpacheBrowserApp}}};
+    myAmpacheBrowser = std::unique_ptr<AmpacheBrowser>{
+        new AmpacheBrowser{std::unique_ptr<AmpacheBrowserApp>{myAmpacheBrowserApp}}};
 }
 
 
@@ -74,7 +73,7 @@ void Application::run() {
 
 
 
-void Application::finishRequest(function<void()> finishedCb) {
+void Application::finishRequest(std::function<void()> finishedCb) {
     myAmpacheBrowserApp->finishRequest(finishedCb);
 }
 

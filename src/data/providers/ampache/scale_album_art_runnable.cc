@@ -12,19 +12,18 @@
 
 #include "scale_album_art_runnable.h"
 
-using namespace std;
 
 
 namespace data {
 
-ScaleAlbumArtRunnable::ScaleAlbumArtRunnable(const string id, const QByteArray imageData, int size):
+ScaleAlbumArtRunnable::ScaleAlbumArtRunnable(const std::string id, const QByteArray imageData, int size):
 myId{id},
 myImageData{imageData},
 mySize{size} { }
 
 
 
-string ScaleAlbumArtRunnable::getId() const {
+std::string ScaleAlbumArtRunnable::getId() const {
     return myId;
 }
 

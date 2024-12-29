@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2018 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -11,62 +11,58 @@
 
 
 
-using namespace std;
-
-
-
 namespace data {
 
-AmpacheUrl::AmpacheUrl(const string& url):
+AmpacheUrl::AmpacheUrl(const std::string& url):
 myUrl{url} {
 }
 
 
 
-string AmpacheUrl::parseIdValue() const {
+std::string AmpacheUrl::parseIdValue() const {
     return parseValue(PARAM_ID);
 }
 
 
 
-string AmpacheUrl::parseFilterValue() const {
+std::string AmpacheUrl::parseFilterValue() const {
     return parseValue(PARAM_FILTER);
 }
 
 
 
-string AmpacheUrl::parseActionValue() const {
+std::string AmpacheUrl::parseActionValue() const {
     return parseValue(PARAM_ACTION);
 }
 
 
 
-AmpacheUrl AmpacheUrl::replaceSsidValue(const string& newSsidValue) const {
+AmpacheUrl AmpacheUrl::replaceSsidValue(const std::string& newSsidValue) const {
     return replaceValue(PARAM_SSID, newSsidValue);
 }
 
 
 
-AmpacheUrl AmpacheUrl::replaceAuthValue(const string& newAuthValue) const {
+AmpacheUrl AmpacheUrl::replaceAuthValue(const std::string& newAuthValue) const {
     return replaceValue(PARAM_AUTH, newAuthValue);
 }
 
 
 
-string AmpacheUrl::str() const {
+std::string AmpacheUrl::str() const {
     return myUrl;
 }
 
 
 
-string AmpacheUrl::parseValue(const string& parameterName) const {
+std::string AmpacheUrl::parseValue(const std::string& parameterName) const {
     auto valuePositionAndLength = findParameterValue(parameterName);
     return myUrl.substr(valuePositionAndLength.first, valuePositionAndLength.second);
 }
 
 
 
-AmpacheUrl AmpacheUrl::replaceValue(const string& parameterName, const string& newValue) const {
+AmpacheUrl AmpacheUrl::replaceValue(const std::string& parameterName, const std::string& newValue) const {
     auto newUrl = myUrl;
     auto valuePositionAndLength = findParameterValue(parameterName);
     if (valuePositionAndLength.second > 0) {
@@ -77,28 +73,30 @@ AmpacheUrl AmpacheUrl::replaceValue(const string& parameterName, const string& n
 
 
 
-pair<string::size_type, string::size_type> AmpacheUrl::findParameterValue(const string& parameterName) const {
+std::pair<std::string::size_type, std::string::size_type> AmpacheUrl::findParameterValue(
+    const std::string& parameterName) const {
+
     auto paramsStart = myUrl.find("?");
-    if (paramsStart != string::npos) {
+    if (paramsStart != std::string::npos) {
         auto parameterNameStart = myUrl.find(parameterName + "=", paramsStart);
-        if (parameterNameStart != string::npos) {
+        if (parameterNameStart != std::string::npos) {
             auto parameterValueStart = parameterNameStart + parameterName.length() + 1;
             auto parameterValueEnd = myUrl.find("&", parameterValueStart);
-            if (parameterValueEnd == string::npos) {
+            if (parameterValueEnd == std::string::npos) {
                 parameterValueEnd = myUrl.length();
             }
-            return make_pair(parameterValueStart, parameterValueEnd - parameterValueStart);
+            return std::make_pair(parameterValueStart, parameterValueEnd - parameterValueStart);
         }
     }
-    return make_pair(0, 0);
+    return std::make_pair(0, 0);
 }
 
 
 
-const string AmpacheUrl::PARAM_SSID = "ssid";
-const string AmpacheUrl::PARAM_AUTH = "auth";
-const string AmpacheUrl::PARAM_ID = "id";
-const string AmpacheUrl::PARAM_FILTER = "filter";
-const string AmpacheUrl::PARAM_ACTION = "action";
+const std::string AmpacheUrl::PARAM_SSID = "ssid";
+const std::string AmpacheUrl::PARAM_AUTH = "auth";
+const std::string AmpacheUrl::PARAM_ID = "id";
+const std::string AmpacheUrl::PARAM_FILTER = "filter";
+const std::string AmpacheUrl::PARAM_ACTION = "action";
 
 }

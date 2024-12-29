@@ -24,7 +24,6 @@
 
 class QObject;
 
-using namespace std;
 using namespace infrastructure;
 using namespace data;
 using namespace domain;
@@ -36,7 +35,7 @@ namespace application {
 ArtistModel::ArtistModel(ArtistRepository* const artistRepository, QObject* parent): QAbstractTableModel(parent),
 myArtistRepository(artistRepository) {
     myRequests->readyToExecute += DELEGATE1(&ArtistModel::onReadyToExecute, RequestGroup);
-    myArtistRepository->loaded += DELEGATE1(&ArtistModel::onLoaded, pair<int, int>);
+    myArtistRepository->loaded += DELEGATE1(&ArtistModel::onLoaded, std::pair<int, int>);
     myArtistRepository->dataSizeChanged += DELEGATE0(&ArtistModel::onDataSizeOrFilterChanged);
     myArtistRepository->filterChanged += DELEGATE0(&ArtistModel::onDataSizeOrFilterChanged);
     myArtistRepository->providerChanged += DELEGATE0(&ArtistModel::onProviderChanged);
@@ -48,7 +47,7 @@ ArtistModel::~ArtistModel() {
     myArtistRepository->providerChanged -= DELEGATE0(&ArtistModel::onProviderChanged);
     myArtistRepository->filterChanged -= DELEGATE0(&ArtistModel::onDataSizeOrFilterChanged);
     myArtistRepository->dataSizeChanged -= DELEGATE0(&ArtistModel::onDataSizeOrFilterChanged);
-    myArtistRepository->loaded -= DELEGATE1(&ArtistModel::onLoaded, pair<int, int>);
+    myArtistRepository->loaded -= DELEGATE1(&ArtistModel::onLoaded, std::pair<int, int>);
     myRequests->readyToExecute -= DELEGATE1(&ArtistModel::onReadyToExecute, RequestGroup);
 }
 
@@ -96,7 +95,7 @@ void ArtistModel::onReadyToExecute(RequestGroup requestGroup) {
 
 
 
-void ArtistModel::onLoaded(pair<int, int> offsetAndLimit) {
+void ArtistModel::onLoaded(std::pair<int, int> offsetAndLimit) {
     myRequests->setFinished(offsetAndLimit.first, offsetAndLimit.second);
     dataChanged(createIndex(offsetAndLimit.first, 0), createIndex(offsetAndLimit.first + offsetAndLimit.second - 1, 0));
 }

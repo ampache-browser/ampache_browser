@@ -40,9 +40,7 @@
 #include "ampache_url.h"
 #include "data/providers/ampache.h"
 
-using namespace std;
-using namespace placeholders;
-using namespace chrono;
+using namespace std::placeholders;
 using namespace infrastructure;
 using namespace domain;
 
@@ -67,19 +65,19 @@ bool Ampache::getIsInitialized() const {
 
 
 
-string Ampache::getUrl() const {
+std::string Ampache::getUrl() const {
     return myConnectionInfo.getServerUrl();
 }
 
 
 
-string Ampache::getUser() const {
+std::string Ampache::getUser() const {
     return myConnectionInfo.getUserName();
 }
 
 
 
-system_clock::time_point Ampache::getLastUpdate() const {
+std::chrono::system_clock::time_point Ampache::getLastUpdate() const {
     return myLastUpdate;
 }
 
@@ -110,26 +108,26 @@ void Ampache::initialize() {
 
 
 void Ampache::requestAlbums(int offset, int limit) {
-    callMethod(Method.Albums, {{"offset", to_string(offset)}, {"limit", to_string(limit)}});
+    callMethod(Method.Albums, {{"offset", std::to_string(offset)}, {"limit", std::to_string(limit)}});
 }
 
 
 
 void Ampache::requestArtists(int offset, int limit) {
-    callMethod(Method.Artists, {{"offset",  to_string(offset)}, {"limit", to_string(limit)}});
+    callMethod(Method.Artists, {{"offset",  std::to_string(offset)}, {"limit", std::to_string(limit)}});
 }
 
 
 
 void Ampache::requestTracks(int offset, int limit) {
-    callMethod(Method.Tracks, {{"offset", to_string(offset)}, {"limit", to_string(limit)}});
+    callMethod(Method.Tracks, {{"offset", std::to_string(offset)}, {"limit", std::to_string(limit)}});
 }
 
 
 
-void Ampache::requestAlbumArts(const map<string, string>& idsAndUrls) {
+void Ampache::requestAlbumArts(const std::map<std::string, std::string>& idsAndUrls) {
     if (idsAndUrls.empty() || !getIsInitialized()) {
-        auto emptyAlbumArts = map<string, QPixmap>{};
+        auto emptyAlbumArts = std::map<std::string, QPixmap>{};
         readyAlbumArts(emptyAlbumArts);
         return;
     }
@@ -162,7 +160,7 @@ void Ampache::refreshSession() {
 
 
 
-string Ampache::refreshUrl(const string& url) const {
+std::string Ampache::refreshUrl(const std::string& url) const {
     if (getIsInitialized()) {
         // SMELL: We are replacing session ID value with authentication token, which is different, however it works.
         return AmpacheUrl{url}.replaceSsidValue(myAuthToken).replaceAuthValue(myAuthToken).str();
@@ -172,13 +170,13 @@ string Ampache::refreshUrl(const string& url) const {
 
 
 
-void Ampache::onNetworkRequestFinished(const string& url, const char* content, int contentSize) {
+void Ampache::onNetworkRequestFinished(const std::string& url, const char* content, int contentSize) {
     auto qByteArrayContent = QByteArray{content, contentSize};
     QXmlStreamReader errorXmlStreamReader{qByteArrayContent};
     bool error = isError(errorXmlStreamReader);
 
     QXmlStreamReader xmlStreamReader{qByteArrayContent};
-    string methodName = AmpacheUrl{url}.parseActionValue();
+    std::string methodName = AmpacheUrl{url}.parseActionValue();
     LOG_DBG("Server call of method '%s' has returned with content of length %d and error %d.",  methodName.c_str(),
         contentSize, error);
     dispatchToMethodHandler(methodName, xmlStreamReader, error);
@@ -186,7 +184,7 @@ void Ampache::onNetworkRequestFinished(const string& url, const char* content, i
 
 
 
-void Ampache::onAlbumArtsNetworkRequestFinished(const string& artUrl, const char* content, int contentSize) {
+void Ampache::onAlbumArtsNetworkRequestFinished(const std::string& artUrl, const char* content, int contentSize) {
     LOG_DBG("Album art request has returned with network content of length %d.", contentSize);
 
     // SMELL: Format of Album Art URL is not server's public API. Entire url should be the ID (mapped to album ID).
@@ -230,13 +228,13 @@ void Ampache::onScaleAlbumArtRunnableFinished(ScaleAlbumArtRunnable* scaleAlbumA
 
 void Ampache::connectToServer() {
     LOG_DBG("Handshaking with server.");
-    auto currentTime = to_string(chrono::duration_cast<chrono::seconds>(chrono::system_clock::now().
+    auto currentTime = std::to_string(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().
         time_since_epoch()).count());
     QByteArray passphrase = QCryptographicHash::hash(
         QByteArray{currentTime.c_str()} + QByteArray{myConnectionInfo.getPasswordHash().c_str()},
         QCryptographicHash::Sha256).toHex();
 
-    ostringstream urlStream;
+    std::ostringstream urlStream;
     urlStream << assembleUrlBase() << Method.Handshake << "&auth=" << passphrase.constData() << "&timestamp=" << currentTime
       << "&version=440001&user=" << myConnectionInfo.getUserName();
 
@@ -245,7 +243,7 @@ void Ampache::connectToServer() {
 
 
 
-void Ampache::callMethod(const string& name, const map<string, string>& arguments) {
+void Ampache::callMethod(const std::string& name, const std::map<std::string, std::string>& arguments) {
     if (!getIsInitialized()) {
         QXmlStreamReader xmlStreamReader;
         dispatchToMethodHandler(name, xmlStreamReader, true);
@@ -253,7 +251,7 @@ void Ampache::callMethod(const string& name, const map<string, string>& argument
     }
 
     LOG_DBG("Calling server method '%s'.", name.c_str());
-    ostringstream urlStream;
+    std::ostringstream urlStream;
     urlStream << assembleUrlBase() << name << "&auth=" << myAuthToken;
     for (auto nameValuePair: arguments) {
         urlStream << "&" << nameValuePair.first << "=" << nameValuePair.second;
@@ -285,7 +283,7 @@ bool Ampache::isError(QXmlStreamReader& xmlStreamReader) {
 
 
 
-void Ampache::dispatchToMethodHandler(const string& methodName, QXmlStreamReader& xmlStreamReader, bool error) {
+void Ampache::dispatchToMethodHandler(const std::string& methodName, QXmlStreamReader& xmlStreamReader, bool error) {
     if (error) {
         myIsInitialized = false;
     }
@@ -359,7 +357,8 @@ void Ampache::readHandshakeData(QXmlStreamReader& xmlStreamReader) {
             myNumberOfTracks = stoi(value);
         }
     }
-    myLastUpdate = system_clock::time_point{milliseconds{max(update, add).toMSecsSinceEpoch()}};
+    myLastUpdate = std::chrono::system_clock::time_point{
+        std::chrono::milliseconds{std::max(update, add).toMSecsSinceEpoch()}};
 
     if (xmlStreamReader.hasError()) {
       // TODO: handle error
@@ -369,19 +368,19 @@ void Ampache::readHandshakeData(QXmlStreamReader& xmlStreamReader) {
 
 
 void Ampache::processAlbums(QXmlStreamReader& xmlStreamReader, bool error) {
-    vector<unique_ptr<AlbumData>> albumsData{};
+    std::vector<std::unique_ptr<AlbumData>> albumsData{};
     if (!error) {
         albumsData = createAlbums(xmlStreamReader);
     }
 
-    auto dataAndError = make_pair(move(albumsData), error);
+    auto dataAndError = make_pair(std::move(albumsData), error);
     readyAlbums(dataAndError);
 }
 
 
 
-vector<unique_ptr<AlbumData>> Ampache::createAlbums(QXmlStreamReader& xmlStreamReader) const {
-    vector<unique_ptr<AlbumData>> albumData{};
+std::vector<std::unique_ptr<AlbumData>> Ampache::createAlbums(QXmlStreamReader& xmlStreamReader) const {
+    std::vector<std::unique_ptr<AlbumData>> albumData{};
 
     QString xmlElement;
     while ((!xmlStreamReader.atEnd()) && (xmlElement != "root")) {
@@ -391,20 +390,21 @@ vector<unique_ptr<AlbumData>> Ampache::createAlbums(QXmlStreamReader& xmlStreamR
         }
     }
 
-    string id = "";
-    string albumName = "";
+    std::string id = "";
+    std::string albumName = "";
     int year = 0;
     int disk = 0;
     int tracks = 0;
-    string artUrl = "";
-    string artistId = "";
+    std::string artUrl = "";
+    std::string artistId = "";
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
         xmlElement = xmlStreamReader.name().toString();
 
         if (xmlStreamReader.isEndElement()) {
             if (xmlElement == "album") {albumData.emplace_back(
-                new AlbumData{id, artUrl, artistId, tracks, unique_ptr<Album>{new Album{id, albumName, year, disk}}});
+                new AlbumData{
+                    id, artUrl, artistId, tracks, std::unique_ptr<Album>{new Album{id, albumName, year, disk}}});
             }
         }
 
@@ -432,20 +432,20 @@ vector<unique_ptr<AlbumData>> Ampache::createAlbums(QXmlStreamReader& xmlStreamR
                 year = 0;
                 try {
                     year = stoi(value);
-                } catch (const invalid_argument& ex) {}
-                catch (const out_of_range& ex) {}
+                } catch (const std::invalid_argument& ex) {}
+                catch (const std::out_of_range& ex) {}
             } else if (xmlElement == "disk") {
                 disk = 0;
                 try {
                     disk = stoi(value);
-                } catch (const invalid_argument& ex) {}
-                catch (const out_of_range& ex) {}
+                } catch (const std::invalid_argument& ex) {}
+                catch (const std::out_of_range& ex) {}
             } else if (xmlElement == "tracks") {
                 tracks = 0;
                 try {
                     tracks = stoi(value);
-                } catch (const invalid_argument& ex) {}
-                catch (const out_of_range& ex) {}
+                } catch (const std::invalid_argument& ex) {}
+                catch (const std::out_of_range& ex) {}
             } else if (xmlElement == "art") {
                 // TODO: Sanitize URL.
                 artUrl = value;
@@ -463,19 +463,19 @@ vector<unique_ptr<AlbumData>> Ampache::createAlbums(QXmlStreamReader& xmlStreamR
 
 
 void Ampache::processArtists(QXmlStreamReader& xmlStreamReader, bool error) {
-    vector<unique_ptr<ArtistData>> artistsData{};
+    std::vector<std::unique_ptr<ArtistData>> artistsData{};
     if (!error) {
         artistsData = createArtists(xmlStreamReader);
     }
 
-    auto dataAndError = make_pair(move(artistsData), error);
+    auto dataAndError = make_pair(std::move(artistsData), error);
     readyArtists(dataAndError);
 }
 
 
 
-vector<unique_ptr<ArtistData>> Ampache::createArtists(QXmlStreamReader& xmlStreamReader) const {
-    vector<unique_ptr<ArtistData>> artistsData{};
+std::vector<std::unique_ptr<ArtistData>> Ampache::createArtists(QXmlStreamReader& xmlStreamReader) const {
+    std::vector<std::unique_ptr<ArtistData>> artistsData{};
 
     QString xmlElement;
     while ((!xmlStreamReader.atEnd()) && (xmlElement != "root")) {
@@ -485,8 +485,8 @@ vector<unique_ptr<ArtistData>> Ampache::createArtists(QXmlStreamReader& xmlStrea
         }
     }
 
-    string id = "";
-    string artistName = "";
+    std::string id = "";
+    std::string artistName = "";
     int albums = 0;
     int songs = 0;
     while (!xmlStreamReader.atEnd()) {
@@ -496,7 +496,7 @@ vector<unique_ptr<ArtistData>> Ampache::createArtists(QXmlStreamReader& xmlStrea
         if (xmlStreamReader.isEndElement()) {
             if (xmlElement == "artist") {
                 artistsData.emplace_back(new ArtistData{id, albums, songs,
-                    unique_ptr<Artist>{new Artist{id, artistName}}});
+                    std::unique_ptr<Artist>{new Artist{id, artistName}}});
             }
         }
 
@@ -519,14 +519,14 @@ vector<unique_ptr<ArtistData>> Ampache::createArtists(QXmlStreamReader& xmlStrea
                 albums = 0;
                 try {
                     albums = stoi(value);
-                } catch (const invalid_argument& ex) {}
-                catch (const out_of_range& ex) {}
+                } catch (const std::invalid_argument& ex) {}
+                catch (const std::out_of_range& ex) {}
             } else if (xmlElement == "songs") {
                 songs = 0;
                 try {
                     songs = stoi(value);
-                } catch (const invalid_argument& ex) {}
-                catch (const out_of_range& ex) {}
+                } catch (const std::invalid_argument& ex) {}
+                catch (const std::out_of_range& ex) {}
             }
         }
     }
@@ -541,19 +541,19 @@ vector<unique_ptr<ArtistData>> Ampache::createArtists(QXmlStreamReader& xmlStrea
 
 
 void Ampache::processTracks(QXmlStreamReader& xmlStreamReader, bool error) {
-    vector<unique_ptr<TrackData>> tracksData{};
+    std::vector<std::unique_ptr<TrackData>> tracksData{};
     if (!error) {
         tracksData = createTracks(xmlStreamReader);
     }
 
-    auto dataAndError = make_pair(move(tracksData), error);
+    auto dataAndError = make_pair(std::move(tracksData), error);
     readyTracks(dataAndError);
 }
 
 
 
-vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamReader) const {
-    vector<unique_ptr<TrackData>> tracksData{};
+std::vector<std::unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamReader) const {
+    std::vector<std::unique_ptr<TrackData>> tracksData{};
 
     QString xmlElement;
     while ((!xmlStreamReader.atEnd()) && (xmlElement != "root")) {
@@ -563,13 +563,13 @@ vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamR
         }
     }
 
-    string id = "";
-    string title = "";
-    string disk = "";
+    std::string id = "";
+    std::string title = "";
+    std::string disk = "";
     int number = 0;
-    string url = "";
-    string artistId = "";
-    string albumId = "";
+    std::string url = "";
+    std::string artistId = "";
+    std::string albumId = "";
     while (!xmlStreamReader.atEnd()) {
         xmlStreamReader.readNext();
         xmlElement = xmlStreamReader.name().toString();
@@ -577,7 +577,7 @@ vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamR
         if (xmlStreamReader.isEndElement()) {
             if (xmlElement == "song") {
                 tracksData.emplace_back(new TrackData{
-                    id, artistId, albumId, unique_ptr<Track>{new Track{id, title, disk, number, url}}});
+                    id, artistId, albumId, std::unique_ptr<Track>{new Track{id, title, disk, number, url}}});
             }
         }
 
@@ -612,8 +612,8 @@ vector<unique_ptr<TrackData>> Ampache::createTracks(QXmlStreamReader& xmlStreamR
                 number = 0;
                 try {
                     number = stoi(value);
-                } catch (const invalid_argument& ex) {}
-                catch (const out_of_range& ex) {}
+                } catch (const std::invalid_argument& ex) {}
+                catch (const std::out_of_range& ex) {}
             } else if (xmlElement == "url") {
                 // TODO: Sanitize URL.
                 url = value;
@@ -641,7 +641,7 @@ void Ampache::IfNoPendingClearFinishedAlbumArtsAndRaiseReady() {
 
 
 
-string Ampache::assembleUrlBase() const {
+std::string Ampache::assembleUrlBase() const {
     return myConnectionInfo.getServerUrl() + "/server/xml.server.php?action=";
 }
 

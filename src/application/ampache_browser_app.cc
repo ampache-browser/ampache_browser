@@ -39,7 +39,6 @@
 
 class QWidget;
 
-using namespace std;
 using namespace ampache_browser;
 using namespace infrastructure;
 using namespace data;
@@ -60,19 +59,19 @@ AmpacheBrowserApp::~AmpacheBrowserApp() {
 
 
 
-void AmpacheBrowserApp::connectPlay(function<void(const vector<string>&)> callback) {
+void AmpacheBrowserApp::connectPlay(std::function<void(const std::vector<std::string>&)> callback) {
     myPlayCb = callback;
 }
 
 
 
-void AmpacheBrowserApp::connectCreatePlaylist(function<void(const vector<string>&)> callback) {
+void AmpacheBrowserApp::connectCreatePlaylist(std::function<void(const std::vector<std::string>&)> callback) {
     myCreatePlaylistCb = callback;
 }
 
 
 
-void AmpacheBrowserApp::connectAddToPlaylist(function<void(const vector<string>&)> callback) {
+void AmpacheBrowserApp::connectAddToPlaylist(std::function<void(const std::vector<std::string>&)> callback) {
     myAddToPlaylistCb = callback;
 }
 
@@ -93,13 +92,13 @@ void AmpacheBrowserApp::setNetworkRequestFunction(const Ampache::NetworkRequestF
 void AmpacheBrowserApp::run() {
     LOG_INF("Starting...");
 
-    myUi = unique_ptr<Ui>(new Ui{});
+    myUi = std::unique_ptr<Ui>(new Ui{});
     initializeAndLoad();
 }
 
 
 
-void AmpacheBrowserApp::finishRequest(function<void()> finishedCb) {
+void AmpacheBrowserApp::finishRequest(std::function<void()> finishedCb) {
     LOG_INF("Finish request.");
 
     myFinishedCb = finishedCb;
@@ -147,7 +146,7 @@ void AmpacheBrowserApp::onFinishRequestDataLoaderAborted() {
 
 
 void AmpacheBrowserApp::onPlayTriggered(SelectedItems& selectedItems) {
-    myPlayIds = move(selectedItems);
+    myPlayIds = std::move(selectedItems);
     myAmpache->readySession += DELEGATE1(&AmpacheBrowserApp::onPlayTriggeredAmpacheReadySession, bool);
     if (myDataLoader->isLoadingInProgress()) {
         onPlayTriggeredAmpacheReadySession(false);
@@ -159,7 +158,7 @@ void AmpacheBrowserApp::onPlayTriggered(SelectedItems& selectedItems) {
 
 
 void AmpacheBrowserApp::onCreatePlaylistTriggered(SelectedItems& selectedItems) {
-    myPlayIds = move(selectedItems);
+    myPlayIds = std::move(selectedItems);
     myAmpache->readySession += DELEGATE1(&AmpacheBrowserApp::onCreatePlaylistTriggeredAmpacheReadySession, bool);
     if (myDataLoader->isLoadingInProgress()) {
         onCreatePlaylistTriggeredAmpacheReadySession(false);
@@ -172,7 +171,7 @@ void AmpacheBrowserApp::onCreatePlaylistTriggered(SelectedItems& selectedItems) 
 
 
 void AmpacheBrowserApp::onAddToPlaylistTriggered(SelectedItems& selectedItems) {
-    myPlayIds = move(selectedItems);
+    myPlayIds = std::move(selectedItems);
     myAmpache->readySession += DELEGATE1(&AmpacheBrowserApp::onAddToPlaylistTriggeredAmpacheReadySession, bool);
     if (myDataLoader->isLoadingInProgress()) {
         onAddToPlaylistTriggeredAmpacheReadySession(false);
@@ -207,7 +206,7 @@ void AmpacheBrowserApp::onAddToPlaylistTriggeredAmpacheReadySession(bool error) 
 
 
 
-void AmpacheBrowserApp::onSettingsUpdated(tuple<bool, string, string, string> settings) {
+void AmpacheBrowserApp::onSettingsUpdated(std::tuple<bool, std::string, std::string, std::string> settings) {
     mySettingsInternal.beginGroupSet();
     mySettingsInternal.setBool(Settings::USE_DEMO_SERVER, get<0>(settings));
     mySettingsInternal.setString(Settings::SERVER_URL, get<1>(settings));
@@ -236,14 +235,14 @@ void AmpacheBrowserApp::initializeAndLoad() {
         passwordHash = "1b2e48536c91351b5ea0a32a3bbaa0fc1ef9de6bc20b254a9a7e22043a211e33";
     }
 
-    myAmpache = unique_ptr<Ampache>{new Ampache{
+    myAmpache = std::unique_ptr<Ampache>{new Ampache{
         ConnectionInfo{serverUrl, userName, passwordHash, mySettingsInternal.getString(Settings::PROXY_HOST),
             static_cast<unsigned short>(mySettingsInternal.getInt(Settings::PROXY_PORT)),
             mySettingsInternal.getString(Settings::PROXY_USER), mySettingsInternal.getString(Settings::PROXY_PASSWORD)},
         myNetworkRequestFn,
         myUi->getAlbumThumbnailSize()}};
-    myCache = unique_ptr<Cache>{new Cache{serverUrl, userName}};
-    myIndices = unique_ptr<Indices>{new Indices{}};
+    myCache = std::unique_ptr<Cache>{new Cache{serverUrl, userName}};
+    myIndices = std::unique_ptr<Indices>{new Indices{}};
 
     initializeDependencies();
 
@@ -254,30 +253,31 @@ void AmpacheBrowserApp::initializeAndLoad() {
 
 
 void AmpacheBrowserApp::initializeDependencies() {
-    myArtistRepository = unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpache, *myCache, *myIndices}};
-    myAlbumRepository = unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpache, *myCache, *myIndices,
+    myArtistRepository = std::unique_ptr<ArtistRepository>{new ArtistRepository{*myAmpache, *myCache, *myIndices}};
+    myAlbumRepository = std::unique_ptr<AlbumRepository>{new AlbumRepository{*myAmpache, *myCache, *myIndices,
         myArtistRepository.get()}};
-    myTrackRepository = unique_ptr<TrackRepository>{new TrackRepository{*myAmpache, *myCache, *myIndices,
+    myTrackRepository = std::unique_ptr<TrackRepository>{new TrackRepository{*myAmpache, *myCache, *myIndices,
         myArtistRepository.get(), myAlbumRepository.get()}};
 
-    myArtistModel = unique_ptr<ArtistModel>{new ArtistModel{myArtistRepository.get()}};
-    myAlbumModel = unique_ptr<AlbumModel>{new AlbumModel{myAlbumRepository.get(), myUi->getAlbumThumbnailSize()}};
-    myTrackModel = unique_ptr<TrackModel>{new TrackModel{myTrackRepository.get()}};
+    myArtistModel = std::unique_ptr<ArtistModel>{new ArtistModel{myArtistRepository.get()}};
+    myAlbumModel = std::unique_ptr<AlbumModel>{new AlbumModel{myAlbumRepository.get(), myUi->getAlbumThumbnailSize()}};
+    myTrackModel = std::unique_ptr<TrackModel>{new TrackModel{myTrackRepository.get()}};
 
     myUi->setArtistModel(*myArtistModel);
     myUi->setAlbumModel(*myAlbumModel);
     myUi->setTrackModel(*myTrackModel);
 
-    myFiltering = unique_ptr<Filtering>{new Filtering{*myUi, *myArtistRepository, *myAlbumRepository,
+    myFiltering = std::unique_ptr<Filtering>{new Filtering{*myUi, *myArtistRepository, *myAlbumRepository,
       *myTrackRepository, *myIndices}};
-    myDataLoader = unique_ptr<DataLoader>{new DataLoader{myArtistRepository.get(), myAlbumRepository.get(),
+    myDataLoader = std::unique_ptr<DataLoader>{new DataLoader{myArtistRepository.get(), myAlbumRepository.get(),
         myTrackRepository.get(), *myAmpache, *myCache}};
 
     myUi->playTriggered += DELEGATE1(&AmpacheBrowserApp::onPlayTriggered, SelectedItems);
     myUi->createPlaylistTriggered += DELEGATE1(&AmpacheBrowserApp::onCreatePlaylistTriggered, SelectedItems);
     myUi->addToPlaylistTriggered += DELEGATE1(&AmpacheBrowserApp::onAddToPlaylistTriggered, SelectedItems);
 
-    myUi->settingsUpdated += DELEGATE1(&AmpacheBrowserApp::onSettingsUpdated, tuple<bool, string, string, string>);
+    myUi->settingsUpdated += DELEGATE1(
+        &AmpacheBrowserApp::onSettingsUpdated, std::tuple<bool, std::string, std::string, std::string>);
 
     myDataLoader->finished += DELEGATE1(&AmpacheBrowserApp::onDataLoaderFinished, LoadingResult);
 }
@@ -289,7 +289,8 @@ void AmpacheBrowserApp::uninitializeDependencies() {
     // we can not unsubscribe because uninitializeDependencies() is called (also) from within the handler of the event;
     // in that case the unsubscription is postponed and it is called later when myDataLoaded instance is already gone
 
-    myUi->settingsUpdated -= DELEGATE1(&AmpacheBrowserApp::onSettingsUpdated, tuple<bool, string, string, string>);
+    myUi->settingsUpdated -= DELEGATE1(
+        &AmpacheBrowserApp::onSettingsUpdated, std::tuple<bool, std::string, std::string, std::string>);
 
     myUi->addToPlaylistTriggered -= DELEGATE1(&AmpacheBrowserApp::onAddToPlaylistTriggered, SelectedItems);
     myUi->createPlaylistTriggered -= DELEGATE1(&AmpacheBrowserApp::onCreatePlaylistTriggered, SelectedItems);
@@ -319,7 +320,7 @@ void AmpacheBrowserApp::applySettings() {
 
 
 
-vector<string> AmpacheBrowserApp::createPlaylistItems(bool error) {
+std::vector<std::string> AmpacheBrowserApp::createPlaylistItems(bool error) {
     if (error) {
         myUi->showNotification(_("Unable to connect to server."));
         // continue anyway
@@ -334,7 +335,7 @@ vector<string> AmpacheBrowserApp::createPlaylistItems(bool error) {
         }
     }
 
-    vector<string> playlistUrls;
+    std::vector<std::string> playlistUrls;
     for (auto& id: selectedTracks) {
         auto trackUrl = myAmpache->refreshUrl(myTrackRepository->getById(id)->getUrl());
         playlistUrls.push_back(trackUrl);

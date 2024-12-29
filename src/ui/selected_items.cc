@@ -13,13 +13,12 @@
 
 #include "ui/selected_items.h"
 
-using namespace std;
-
 
 
 namespace ui {
 
-SelectedItems::SelectedItems(const vector<string>& artists, const vector<string>& albums, const vector<string>& tracks):
+SelectedItems::SelectedItems(const std::vector<std::string>& artists, const std::vector<std::string>& albums,
+                             const std::vector<std::string>& tracks):
 myArtists{artists},
 myAlbums{albums},
 myTracks{tracks} {
@@ -33,17 +32,17 @@ SelectedItems::SelectedItems() {
 
 
 SelectedItems::SelectedItems(SelectedItems&& other):
-myArtists{move(other.myArtists)},
-myAlbums{move(other.myAlbums)},
-myTracks{move(other.myTracks)} {
+myArtists{std::move(other.myArtists)},
+myAlbums{std::move(other.myAlbums)},
+myTracks{std::move(other.myTracks)} {
 }
 
 
 
 SelectedItems& SelectedItems::operator=(SelectedItems&& other) {
-    myArtists = move(other.myArtists);
-    myAlbums = move(other.myAlbums);
-    myTracks = move(other.myTracks);
+    myArtists = std::move(other.myArtists);
+    myAlbums = std::move(other.myAlbums);
+    myTracks = std::move(other.myTracks);
     return *this;
 }
 

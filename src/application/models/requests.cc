@@ -11,8 +11,6 @@
 #include "request_groups.h"
 #include "requests.h"
 
-using namespace std;
-
 
 
 namespace application {
@@ -71,7 +69,7 @@ void Requests::setFinished(int offset, int count) {
         readyToExecute(myCurrentRequestGroup);
     } else {
         myCurrentRequestGroup = RequestGroup{};
-        myLastEnqueuedOffset = numeric_limits<int>::max();
+        myLastEnqueuedOffset = std::numeric_limits<int>::max();
     }
 }
 

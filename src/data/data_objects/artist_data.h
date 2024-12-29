@@ -95,16 +95,12 @@ bool operator>=(const ArtistData& lhs, const ArtistData& rhs);
 
 
 
-namespace std {
-
 template<>
-class hash<data::ArtistData> {
+class std::hash<data::ArtistData> {
 
 public:
     size_t operator()(const data::ArtistData& artistData) const;
 };
-
-}
 
 
 

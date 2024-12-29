@@ -27,7 +27,6 @@
 #include "custom_proxy_style.h"
 #include "ampache_browser_main_window.h"
 
-using namespace std;
 using namespace infrastructure;
 
 

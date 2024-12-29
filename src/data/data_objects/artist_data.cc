@@ -14,23 +14,22 @@
 #include "domain/artist.h"
 #include "artist_data.h"
 
-using namespace std;
 using namespace domain;
 
 
 
 namespace data {
 
-ArtistData::ArtistData(const string& id, int numberOfAlbums, int numberOfTracks, unique_ptr<Artist> artist):
+ArtistData::ArtistData(const std::string& id, int numberOfAlbums, int numberOfTracks, std::unique_ptr<Artist> artist):
 myId{id},
 myNumberOfAlbums{numberOfAlbums},
 myNumberOfTracks{numberOfTracks},
-myArtist{move(artist)} {
+myArtist{std::move(artist)} {
 }
 
 
 
-string ArtistData::getId() const {
+std::string ArtistData::getId() const {
     return myId;
 }
 
@@ -92,10 +91,6 @@ bool operator>=(const ArtistData& lhs, const ArtistData& rhs) {
 
 
 
-namespace std {
-
-size_t hash<data::ArtistData>::operator()(const data::ArtistData& artistData) const {
-    return hash<string>()(artistData.getId());
-}
-
+size_t std::hash<data::ArtistData>::operator()(const data::ArtistData& artistData) const {
+    return std::hash<string>()(artistData.getId());
 }

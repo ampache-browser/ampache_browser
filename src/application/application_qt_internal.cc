@@ -13,7 +13,6 @@
 
 class QWidget;
 
-using namespace std;
 using namespace ampache_browser;
 
 

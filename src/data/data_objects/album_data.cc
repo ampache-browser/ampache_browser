@@ -14,37 +14,36 @@
 #include "domain/album.h"
 #include "album_data.h"
 
-using namespace std;
 using namespace domain;
 
 
 
 namespace data {
 
-AlbumData::AlbumData(const string& id, const string& artUrl, const string& artistId, int numberOfTracks,
-    unique_ptr<Album> album):
+AlbumData::AlbumData(const std::string& id, const std::string& artUrl, const std::string& artistId, int numberOfTracks,
+    std::unique_ptr<Album> album):
 myId{id},
 myArtUrl{artUrl},
 myArtistId{artistId},
 myNumberOfTracks{numberOfTracks},
-myAlbum{move(album)} {
+myAlbum{std::move(album)} {
 }
 
 
 
-string AlbumData::getId() const {
+std::string AlbumData::getId() const {
     return myId;
 }
 
 
 
-string AlbumData::getArtUrl() const {
+std::string AlbumData::getArtUrl() const {
     return myArtUrl;
 }
 
 
 
-string AlbumData::getArtistId() const {
+std::string AlbumData::getArtistId() const {
     return myArtistId;
 }
 
@@ -106,10 +105,6 @@ bool operator>=(const AlbumData& lhs, const AlbumData& rhs) {
 
 
 
-namespace std {
-
-size_t hash<data::AlbumData>::operator()(const data::AlbumData& albumData) const {
-    return hash<string>()(albumData.getId());
-}
-
+size_t std::hash<data::AlbumData>::operator()(const data::AlbumData& albumData) const {
+    return std::hash<std::string>()(albumData.getId());
 }

@@ -12,8 +12,6 @@
 
 #include "application/settings_internal.h"
 
-using namespace std;
-
 
 
 namespace application {
@@ -24,13 +22,13 @@ SettingsInternal::SettingsInternal() {
 
 
 
-void SettingsInternal::connectChanged(function<void()> callback) {
+void SettingsInternal::connectChanged(std::function<void()> callback) {
     myChangedCb = callback;
 }
 
 
 
-string SettingsInternal::getString(const string& key) const {
+std::string SettingsInternal::getString(const std::string& key) const {
     if (myStrings.count(key) != 0) {
         return myStrings.at(key);
     } else {
@@ -40,7 +38,7 @@ string SettingsInternal::getString(const string& key) const {
 
 
 
-void SettingsInternal::setString(const string& key, const string& value) {
+void SettingsInternal::setString(const std::string& key, const std::string& value) {
     bool isNewKey;
     auto oldValue = (isNewKey = myStrings.count(key) == 0) ? myStrings[key] : "";
 
@@ -53,7 +51,7 @@ void SettingsInternal::setString(const string& key, const string& value) {
 
 
 
-int SettingsInternal::getInt(const string& key) const {
+int SettingsInternal::getInt(const std::string& key) const {
     if (myInts.count(key) != 0) {
         return myInts.at(key);
     } else {
@@ -63,7 +61,7 @@ int SettingsInternal::getInt(const string& key) const {
 
 
 
-void SettingsInternal::setInt(const string& key, int value) {
+void SettingsInternal::setInt(const std::string& key, int value) {
     bool isNewKey;
     auto oldValue = (isNewKey = myInts.count(key) == 0) ? myInts[key] : 0;
 
@@ -76,7 +74,7 @@ void SettingsInternal::setInt(const string& key, int value) {
 
 
 
-bool SettingsInternal::getBool(const string& key) const {
+bool SettingsInternal::getBool(const std::string& key) const {
     if (myBools.count(key) != 0) {
         return myBools.at(key);
     } else {
@@ -86,7 +84,7 @@ bool SettingsInternal::getBool(const string& key) const {
 
 
 
-void SettingsInternal::setBool(const string& key, bool value) {
+void SettingsInternal::setBool(const std::string& key, bool value) {
     bool isNewKey;
     auto oldValue = (isNewKey = myBools.count(key) == 0) ? myBools[key] : false;
 

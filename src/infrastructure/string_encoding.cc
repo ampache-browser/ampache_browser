@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2023 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -13,8 +13,6 @@
 #include <string>
 #include <windows.h>
 #include "infrastructure/string_encoding.h"
-
-using namespace std;
 
 
 

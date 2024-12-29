@@ -36,8 +36,6 @@
 #include "../data_objects/track_data.h"
 #include "data/providers/cache.h"
 
-using namespace std;
-using namespace chrono;
 using namespace infrastructure;
 using namespace domain;
 
@@ -56,14 +54,14 @@ namespace data {
 /**
  * @warning Class expects that all save* methods will be called subsequently.
  */
-Cache::Cache(const string& serverUrl, const string& user):
+Cache::Cache(const std::string& serverUrl, const std::string& user):
 myCurrentServerUrl{serverUrl},
 myCurrentUser{user} {
     if (!Filesystem::isDirExisting(ALBUM_ARTS_DIR)) {
         Filesystem::makePath(ALBUM_ARTS_DIR, 0700);
         // TODO: Handle errors.
     }
-    ifstream metaStream{FSPATH(META_PATH)};
+    std::ifstream metaStream{std::FSPATH(META_PATH)};
     if (!metaStream) {
         invalidate();
     } else {
@@ -75,19 +73,19 @@ myCurrentUser{user} {
 
 
 
-system_clock::time_point Cache::getLastUpdate() const {
+std::chrono::system_clock::time_point Cache::getLastUpdate() const {
     return myLastUpdate;
 }
 
 
 
-string Cache::getServerUrl() const {
+std::string Cache::getServerUrl() const {
     return myServerUrl;
 }
 
 
 
-string Cache::getUser() const {
+std::string Cache::getUser() const {
     return myUser;
 }
 
@@ -111,9 +109,9 @@ int Cache::numberOfTracks() const {
 
 
 
-vector<unique_ptr<ArtistData>> Cache::loadArtistsData() const {
-    vector<unique_ptr<ArtistData>> artistsData{};
-    ifstream artistsDataStream{FSPATH(ARTISTS_DATA_PATH), ios::binary };
+std::vector<std::unique_ptr<ArtistData>> Cache::loadArtistsData() const {
+    std::vector<std::unique_ptr<ArtistData>> artistsData{};
+    std::ifstream artistsDataStream{std::FSPATH(ARTISTS_DATA_PATH), std::ios::binary };
     int count = 0;
     artistsDataStream.read(reinterpret_cast<char*>(&count), sizeof count);
     for (int idx = 0; idx < count; idx++) {
@@ -126,7 +124,7 @@ vector<unique_ptr<ArtistData>> Cache::loadArtistsData() const {
         auto name = readString(artistsDataStream);
 
         artistsData.emplace_back(
-            new ArtistData{id, numberOfAlbums, numberOfTracks, unique_ptr<Artist>{new Artist{id, name}}});
+            new ArtistData{id, numberOfAlbums, numberOfTracks, std::unique_ptr<Artist>{new Artist{id, name}}});
     }
 
     return artistsData;
@@ -134,10 +132,10 @@ vector<unique_ptr<ArtistData>> Cache::loadArtistsData() const {
 
 
 
-vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() const {
-    vector<unique_ptr<AlbumData>> albumsData{};
+std::vector<std::unique_ptr<AlbumData>> Cache::loadAlbumsData() const {
+    std::vector<std::unique_ptr<AlbumData>> albumsData{};
 
-    ifstream albumsDataStream{FSPATH(ALBUMS_DATA_PATH), ios::binary };
+    std::ifstream albumsDataStream{std::FSPATH(ALBUMS_DATA_PATH), std::ios::binary };
     int count = 0;
     albumsDataStream.read(reinterpret_cast<char*>(&count), sizeof count);
     for (int idx = 0; idx < count; idx++) {
@@ -154,7 +152,7 @@ vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() const {
         albumsDataStream.read(reinterpret_cast<char*>(&mediaNumber), sizeof mediaNumber);
 
         albumsData.emplace_back(
-            new AlbumData{id, artUrl, artistId, numberOfTracks, unique_ptr<Album>{
+            new AlbumData{id, artUrl, artistId, numberOfTracks, std::unique_ptr<Album>{
                 new Album{id, name, releaseYear, mediaNumber}}});
     }
 
@@ -163,10 +161,10 @@ vector<unique_ptr<AlbumData>> Cache::loadAlbumsData() const {
 
 
 
-vector<unique_ptr<TrackData>> Cache::loadTracksData() const {
-    vector<unique_ptr<TrackData>> tracksData{};
+std::vector<std::unique_ptr<TrackData>> Cache::loadTracksData() const {
+    std::vector<std::unique_ptr<TrackData>> tracksData{};
 
-    ifstream tracksDataStream{FSPATH(TRACKS_DATA_PATH), ios::binary };
+    std::ifstream tracksDataStream{std::FSPATH(TRACKS_DATA_PATH), std::ios::binary };
     int count = 0;
     tracksDataStream.read(reinterpret_cast<char*>(&count), sizeof count);
     for (int idx = 0; idx < count; idx++) {
@@ -181,7 +179,7 @@ vector<unique_ptr<TrackData>> Cache::loadTracksData() const {
         auto url = readString(tracksDataStream);
 
         tracksData.emplace_back(
-            new TrackData{id, artistId, albumId, unique_ptr<Track>{new Track{id, name, disk, number, url}}});
+            new TrackData{id, artistId, albumId, std::unique_ptr<Track>{new Track{id, name, disk, number, url}}});
     }
 
     return tracksData;
@@ -189,28 +187,28 @@ vector<unique_ptr<TrackData>> Cache::loadTracksData() const {
 
 
 
-void Cache::requestAlbumArts(const vector<string>& ids) {
+void Cache::requestAlbumArts(const std::vector<std::string>& ids) {
     LOG_DBG("Getting %d album arts.", ids.size());
     myRequestedAlbumArtIds = ids;
-    auto artsLoadFutureWatcher = new QFutureWatcher<pair<string, QImage>>();
+    auto artsLoadFutureWatcher = new QFutureWatcher<std::pair<std::string, QImage>>();
     connect(artsLoadFutureWatcher, SIGNAL(finished()), this, SLOT(onArtsLoadFinished()));
     artsLoadFutureWatcher->setFuture(QtConcurrent::mapped(myRequestedAlbumArtIds,
-        bind(&Cache::loadAlbumArt, this, placeholders::_1)));
+        bind(&Cache::loadAlbumArt, this, std::placeholders::_1)));
 }
 
 
 
-void Cache::saveArtistsData(vector<unique_ptr<ArtistData>>& artistsData) {
-    ofstream artistsDataStream{FSPATH(ARTISTS_DATA_PATH), ios::binary | ios::trunc };
+void Cache::saveArtistsData(std::vector<std::unique_ptr<ArtistData>>& artistsData) {
+    std::ofstream artistsDataStream{std::FSPATH(ARTISTS_DATA_PATH), std::ios::binary | std::ios::trunc };
     int count = artistsData.size();
     artistsDataStream.write(reinterpret_cast<char*>(&count), sizeof count);
     for (auto& artistData: artistsData) {
-        string id = artistData->getId();
+        std::string id = artistData->getId();
         int numberOfAlbums = artistData->getNumberOfAlbums();
         int numberOfTracks = artistData->getNumberOfTracks();
 
         auto& artist = artistData->getArtist();
-        string name = artist.getName();
+        std::string name = artist.getName();
 
         writeString(artistsDataStream, id);
         artistsDataStream.write(reinterpret_cast<char*>(&numberOfAlbums), sizeof numberOfAlbums);
@@ -224,18 +222,18 @@ void Cache::saveArtistsData(vector<unique_ptr<ArtistData>>& artistsData) {
 
 
 
-void Cache::saveAlbumsData(vector<unique_ptr<AlbumData>>& albumsData) {
-    ofstream albumsDataStream{FSPATH(ALBUMS_DATA_PATH), ios::binary | ios::trunc };
+void Cache::saveAlbumsData(std::vector<std::unique_ptr<AlbumData>>& albumsData) {
+    std::ofstream albumsDataStream{std::FSPATH(ALBUMS_DATA_PATH), std::ios::binary | std::ios::trunc };
     int count = albumsData.size();
     albumsDataStream.write(reinterpret_cast<char*>(&count), sizeof count);
     for (auto& albumData: albumsData) {
-        string id = albumData->getId();
-        string artUrl = albumData->getArtUrl();
-        string artistId = albumData->getArtistId();
+        std::string id = albumData->getId();
+        std::string artUrl = albumData->getArtUrl();
+        std::string artistId = albumData->getArtistId();
         int numberOfTracks = albumData->getNumberOfTracks();
 
         auto& album = albumData->getAlbum();
-        string name = album.getName();
+        std::string name = album.getName();
         int releaseYear = album.getReleaseYear();
         int mediaNumber = album.getMediaNumber();
 
@@ -254,20 +252,20 @@ void Cache::saveAlbumsData(vector<unique_ptr<AlbumData>>& albumsData) {
 
 
 
-void Cache::saveTracksData(vector<unique_ptr<TrackData>>& tracksData) {
-    ofstream tracksDataStream{FSPATH(TRACKS_DATA_PATH), ios::binary | ios::trunc };
+void Cache::saveTracksData(std::vector<std::unique_ptr<TrackData>>& tracksData) {
+    std::ofstream tracksDataStream{std::FSPATH(TRACKS_DATA_PATH), std::ios::binary | std::ios::trunc };
     int count = tracksData.size();
     tracksDataStream.write(reinterpret_cast<char*>(&count), sizeof count);
     for (auto& trackData: tracksData) {
-        string id = trackData->getId();
-        string artistId = trackData->getArtistId();
-        string albumId = trackData->getAlbumId();
+        std::string id = trackData->getId();
+        std::string artistId = trackData->getArtistId();
+        std::string albumId = trackData->getAlbumId();
 
         auto& track = trackData->getTrack();
-        string name = track.getName();
-        string disk = track.getDisk();
+        std::string name = track.getName();
+        std::string disk = track.getDisk();
         int number = track.getNumber();
-        string url = track.getUrl();
+        std::string url = track.getUrl();
 
         writeString(tracksDataStream, id);
         writeString(tracksDataStream, artistId);
@@ -284,7 +282,7 @@ void Cache::saveTracksData(vector<unique_ptr<TrackData>>& tracksData) {
 
 
 
-void Cache::updateAlbumArts(const map<string, QPixmap>& arts) const {
+void Cache::updateAlbumArts(const std::map<std::string, QPixmap>& arts) const {
     for (auto idAndArt: arts) {
         idAndArt.second.save(QString::fromStdString(ALBUM_ARTS_DIR + idAndArt.first + ART_SUFFIX), "PNG");
     }
@@ -294,11 +292,11 @@ void Cache::updateAlbumArts(const map<string, QPixmap>& arts) const {
 
 void Cache::onArtsLoadFinished() {
     LOG_DBG("Album art request has returned.");
-    auto artsLoadFutureWatcher = reinterpret_cast<QFutureWatcher<pair<string, QImage>>*>(sender());
+    auto artsLoadFutureWatcher = reinterpret_cast<QFutureWatcher<std::pair<std::string, QImage>>*>(sender());
     artsLoadFutureWatcher->deleteLater();
 
-    QFutureIterator<pair<string, QImage>> results{artsLoadFutureWatcher->future()};
-    map<string, QPixmap> arts;
+    QFutureIterator<std::pair<std::string, QImage>> results{artsLoadFutureWatcher->future()};
+    std::map<std::string, QPixmap> arts;
     while (results.hasNext()) {
         auto result = results.next();
         arts[result.first] = QPixmap::fromImage(result.second);
@@ -310,7 +308,7 @@ void Cache::onArtsLoadFinished() {
 
 
 
-bool Cache::loadMeta(ifstream& metaStream) {
+bool Cache::loadMeta(std::ifstream& metaStream) {
     int version = 0;
     metaStream.read(reinterpret_cast<char*>(&version), sizeof version);
     if (version != CACHE_VERSION) {
@@ -329,8 +327,8 @@ bool Cache::loadMeta(ifstream& metaStream) {
 
 
 
-void Cache::saveMeta(system_clock::time_point lastUpdate) {
-    ofstream metaStream{FSPATH(META_PATH), ios::binary | ios::trunc };
+void Cache::saveMeta(std::chrono::system_clock::time_point lastUpdate) {
+    std::ofstream metaStream{std::FSPATH(META_PATH), std::ios::binary | std::ios::trunc };
     int version = CACHE_VERSION;
     metaStream.write(reinterpret_cast<char*>(&version), sizeof version);
     writeString(metaStream, myServerUrl);
@@ -350,12 +348,12 @@ void Cache::invalidate() {
     myServerUrl = myCurrentServerUrl;
     myUser = myCurrentUser;
 
-    saveMeta(system_clock::time_point::min());
+    saveMeta(std::chrono::system_clock::time_point::min());
 }
 
 
 
-pair<string, QImage> Cache::loadAlbumArt(const string& id) const {
+std::pair<std::string, QImage> Cache::loadAlbumArt(const std::string& id) const {
     QImage art;
     art.load(QString::fromStdString(ALBUM_ARTS_DIR + id + ART_SUFFIX), "PNG");
     return make_pair(id, art);
@@ -363,10 +361,10 @@ pair<string, QImage> Cache::loadAlbumArt(const string& id) const {
 
 
 
-string Cache::readString(ifstream& stream) const {
+std::string Cache::readString(std::ifstream& stream) const {
     int length = 0;
     stream.read(reinterpret_cast<char*>(&length), sizeof length);
-    string resultString;
+    std::string resultString;
     resultString.resize(length, ' ');
     char* begin = &*resultString.begin();
     stream.read(begin, length);
@@ -375,7 +373,7 @@ string Cache::readString(ifstream& stream) const {
 
 
 
-void Cache::writeString(ofstream& stream, const string& str) const {
+void Cache::writeString(std::ofstream& stream, const std::string& str) const {
     int length = str.size();
     stream.write(reinterpret_cast<char*>(&length), sizeof length);
     stream << str;
@@ -386,7 +384,7 @@ void Cache::writeString(ofstream& stream, const string& str) const {
 void Cache::updateLastUpdateInfo() {
     if (myArtistsSaved + myAlbumsSaved + myTracksSaved == 1) {
         invalidate();
-        myUpdateBegin = system_clock::now();
+        myUpdateBegin = std::chrono::system_clock::now();
     } else if (myArtistsSaved + myAlbumsSaved + myTracksSaved == 3) {
         myArtistsSaved = false;
         myAlbumsSaved = false;

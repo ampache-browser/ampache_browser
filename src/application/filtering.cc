@@ -37,7 +37,6 @@ class ArtistData;
 class TrackData;
 }
 
-using namespace std;
 using namespace infrastructure;
 using namespace domain;
 using namespace data;
@@ -54,22 +53,24 @@ myArtistRepository(artistRepository),
 myAlbumRepository(albumRepository),
 myTrackRepository(trackRepository),
 myIndices(indices) {
-    myUi.artistsSelected += DELEGATE1(&Filtering::onArtistsSelected, vector<string>);
-    myUi.albumsSelected += DELEGATE1(&Filtering::onAlbumsSelected, pair<vector<string>, vector<string>>);
-    myUi.searchTriggered += DELEGATE1(&Filtering::onSearchTriggered, string);
+    myUi.artistsSelected += DELEGATE1(&Filtering::onArtistsSelected, std::vector<std::string>);
+    myUi.albumsSelected += DELEGATE1(
+        &Filtering::onAlbumsSelected, std::pair<std::vector<std::string>, std::vector<std::string>>);
+    myUi.searchTriggered += DELEGATE1(&Filtering::onSearchTriggered, std::string);
 }
 
 
 
 Filtering::~Filtering() {
-    myUi.searchTriggered -= DELEGATE1(&Filtering::onSearchTriggered, string);
-    myUi.albumsSelected -= DELEGATE1(&Filtering::onAlbumsSelected, pair<vector<string>, vector<string>>);
-    myUi.artistsSelected -= DELEGATE1(&Filtering::onArtistsSelected, vector<string>);
+    myUi.searchTriggered -= DELEGATE1(&Filtering::onSearchTriggered, std::string);
+    myUi.albumsSelected -= DELEGATE1(
+        &Filtering::onAlbumsSelected, std::pair<std::vector<std::string>, std::vector<std::string>>);
+    myUi.artistsSelected -= DELEGATE1(&Filtering::onArtistsSelected, std::vector<std::string>);
 }
 
 
 
-void Filtering::onArtistsSelected(const vector<string>& ids) {
+void Filtering::onArtistsSelected(const std::vector<std::string>& ids) {
     if (ids.empty()) {
         myAlbumRepository.unsetFilter();
         myTrackRepository.unsetFilter();
@@ -80,7 +81,8 @@ void Filtering::onArtistsSelected(const vector<string>& ids) {
 
 
 
-void Filtering::onAlbumsSelected(const pair<vector<string>, vector<string>>& albumAndArtistIds) {
+void Filtering::onAlbumsSelected(const std::pair<std::vector<std::string>,
+                                 std::vector<std::string>>& albumAndArtistIds) {
     if (albumAndArtistIds.first.empty()) {
         if (albumAndArtistIds.second.empty()) {
             myTrackRepository.unsetFilter();
@@ -88,39 +90,39 @@ void Filtering::onAlbumsSelected(const pair<vector<string>, vector<string>>& alb
             setArtistFilters(albumAndArtistIds.second);
         }
     } else {
-        vector<reference_wrapper<const Album>> albums;
+        std::vector<std::reference_wrapper<const Album>> albums;
         for (auto& id: albumAndArtistIds.first) {
             auto album = myAlbumRepository.getById(id);
             albums.push_back(*album);
         }
-        myTrackRepository.setFilter(unique_ptr<Filter<TrackData>>{new AlbumFilterForTracks{albums, myIndices}});
+        myTrackRepository.setFilter(std::unique_ptr<Filter<TrackData>>{new AlbumFilterForTracks{albums, myIndices}});
     }
 }
 
 
 
-void Filtering::onSearchTriggered(const string& searchText) {
+void Filtering::onSearchTriggered(const std::string& searchText) {
     if (searchText.empty()) {
         myArtistRepository.unsetFilter();
         myAlbumRepository.unsetFilter();
         myTrackRepository.unsetFilter();
     } else {
-        myArtistRepository.setFilter(unique_ptr<Filter<ArtistData>>{new NameFilterForArtists{searchText}});
-        myAlbumRepository.setFilter(unique_ptr<Filter<AlbumData>>{new NameFilterForAlbums{searchText}});
-        myTrackRepository.setFilter(unique_ptr<Filter<TrackData>>{new NameFilterForTracks{searchText}});
+        myArtistRepository.setFilter(std::unique_ptr<Filter<ArtistData>>{new NameFilterForArtists{searchText}});
+        myAlbumRepository.setFilter(std::unique_ptr<Filter<AlbumData>>{new NameFilterForAlbums{searchText}});
+        myTrackRepository.setFilter(std::unique_ptr<Filter<TrackData>>{new NameFilterForTracks{searchText}});
     }
 }
 
 
 
-void Filtering::setArtistFilters(const vector<string>& ids) {
-    vector<reference_wrapper<const Artist>> artists;
+void Filtering::setArtistFilters(const std::vector<std::string>& ids) {
+    std::vector<std::reference_wrapper<const Artist>> artists;
     for (auto& id: ids) {
         auto artist = myArtistRepository.getById(id);
         artists.push_back(*artist);
     }
-    myAlbumRepository.setFilter(unique_ptr<Filter<AlbumData>>{new ArtistFilterForAlbums{artists, myIndices}});
-    myTrackRepository.setFilter(unique_ptr<Filter<TrackData>>{new ArtistFilterForTracks{artists, myIndices}});
+    myAlbumRepository.setFilter(std::unique_ptr<Filter<AlbumData>>{new ArtistFilterForAlbums{artists, myIndices}});
+    myTrackRepository.setFilter(std::unique_ptr<Filter<TrackData>>{new ArtistFilterForTracks{artists, myIndices}});
 }
 
 }

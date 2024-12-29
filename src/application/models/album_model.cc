@@ -28,7 +28,6 @@
 
 class QObject;
 
-using namespace std;
 using namespace infrastructure;
 using namespace data;
 using namespace domain;
@@ -42,9 +41,9 @@ AlbumModel::AlbumModel(
 myAlbumRepository(albumRepository),
 myThumbnailSize(thumbnailSize) {
     myAlbumRequests->readyToExecute += DELEGATE1(&AlbumModel::onReadyToExecuteAlbums, RequestGroup);
-    myAlbumRepository->loaded += DELEGATE1(&AlbumModel::onLoaded, pair<int, int>);
+    myAlbumRepository->loaded += DELEGATE1(&AlbumModel::onLoaded, std::pair<int, int>);
     myArtRequests->readyToExecute += DELEGATE1(&AlbumModel::onReadyToExecuteArts, RequestGroup);
-    myAlbumRepository->artsLoaded += DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
+    myAlbumRepository->artsLoaded += DELEGATE1(&AlbumModel::onArtsLoaded, std::pair<int, int>);
     myAlbumRepository->dataSizeChanged += DELEGATE0(&AlbumModel::onDataSizeOrFilterChanged);
     myAlbumRepository->filterChanged += DELEGATE0(&AlbumModel::onDataSizeOrFilterChanged);
     myAlbumRepository->providerChanged += DELEGATE0(&AlbumModel::onProviderChanged);
@@ -56,9 +55,9 @@ AlbumModel::~AlbumModel() {
     myAlbumRepository->providerChanged -= DELEGATE0(&AlbumModel::onProviderChanged);
     myAlbumRepository->filterChanged -= DELEGATE0(&AlbumModel::onDataSizeOrFilterChanged);
     myAlbumRepository->dataSizeChanged -= DELEGATE0(&AlbumModel::onDataSizeOrFilterChanged);
-    myAlbumRepository->artsLoaded -= DELEGATE1(&AlbumModel::onArtsLoaded, pair<int, int>);
+    myAlbumRepository->artsLoaded -= DELEGATE1(&AlbumModel::onArtsLoaded, std::pair<int, int>);
     myArtRequests->readyToExecute -= DELEGATE1(&AlbumModel::onReadyToExecuteArts, RequestGroup);
-    myAlbumRepository->loaded -= DELEGATE1(&AlbumModel::onLoaded, pair<int, int>);
+    myAlbumRepository->loaded -= DELEGATE1(&AlbumModel::onLoaded, std::pair<int, int>);
     myAlbumRequests->readyToExecute -= DELEGATE1(&AlbumModel::onReadyToExecuteAlbums, RequestGroup);
 }
 
@@ -132,7 +131,7 @@ void AlbumModel::onReadyToExecuteAlbums(RequestGroup requestGroup) {
 
 
 
-void AlbumModel::onLoaded(pair<int, int> offsetAndLimit) {
+void AlbumModel::onLoaded(std::pair<int, int> offsetAndLimit) {
     myAlbumRequests->setFinished(offsetAndLimit.first, offsetAndLimit.second);
     dataChanged(createIndex(offsetAndLimit.first, 0), createIndex(offsetAndLimit.first + offsetAndLimit.second - 1, 0));
 }
@@ -149,7 +148,7 @@ void AlbumModel::onReadyToExecuteArts(RequestGroup requestGroup) {
 
 
 
-void AlbumModel::onArtsLoaded(pair<int, int> offsetAndCount) {
+void AlbumModel::onArtsLoaded(std::pair<int, int> offsetAndCount) {
     myArtRequests->setFinished(offsetAndCount.first, offsetAndCount.second);
     if (myIsInUnfilteredArtsLoadMode) {
         return;

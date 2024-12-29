@@ -20,19 +20,17 @@
 #include "infrastructure/filesystem.h"
 #include "infrastructure/os_paths.h"
 
-using namespace std;
-
 
 
 namespace infrastructure {
 
-string OsPaths::getConfigHome() {
+std::string OsPaths::getConfigHome() {
 #ifdef _WIN32
     return getHome();
 #else
     const char* configHome;
     if ((configHome = getenv("XDG_CONFIG_HOME")) && configHome[0] == PATH_SEP[0]) {
-        return string{configHome} + PATH_SEP;
+        return std::string{configHome} + PATH_SEP;
     }
     return getHome() + ".config" + PATH_SEP;
 #endif
@@ -41,10 +39,10 @@ string OsPaths::getConfigHome() {
 
 
 #ifndef _WIN32
-string OsPaths::getCacheHome() {
+std::string OsPaths::getCacheHome() {
     const char* cacheHome;
     if ((cacheHome = getenv("XDG_CACHE_HOME")) && cacheHome[0] == PATH_SEP[0]) {
-        return string{cacheHome} + PATH_SEP;
+        return std::string{cacheHome} + PATH_SEP;
     }
     return getHome() + ".cache" + PATH_SEP;
 }
@@ -52,21 +50,21 @@ string OsPaths::getCacheHome() {
 
 
 
-string OsPaths::getHome() {
+std::string OsPaths::getHome() {
 #ifdef _WIN32
     PWSTR localAppDataPWSTR = NULL;
     SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_DONT_VERIFY, nullptr, &localAppDataPWSTR);
 
-    string localAppData = StringEncoding::wideToUtf8(localAppDataPWSTR);
+    std::string localAppData = StringEncoding::wideToUtf8(localAppDataPWSTR);
     CoTaskMemFree(localAppDataPWSTR);
 
     return localAppData + PATH_SEP;
 #else
     const char* home;
     if ((home = getenv("HOME")) && home[0] == PATH_SEP[0]) {
-        return string{home} + PATH_SEP;
+        return std::string{home} + PATH_SEP;
     }
-    return string{getpwuid(getuid())->pw_dir} + PATH_SEP;
+    return std::string{getpwuid(getuid())->pw_dir} + PATH_SEP;
 #endif
 }
 

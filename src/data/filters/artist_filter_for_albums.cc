@@ -20,7 +20,6 @@
 #include "data/filters/filter.h"
 #include "data/filters/artist_filter_for_albums.h"
 
-using namespace std;
 using namespace infrastructure;
 using namespace domain;
 
@@ -28,25 +27,25 @@ using namespace domain;
 
 namespace data {
 
-ArtistFilterForAlbums::ArtistFilterForAlbums(const vector<reference_wrapper<const Artist>>& artists,
+ArtistFilterForAlbums::ArtistFilterForAlbums(const std::vector<std::reference_wrapper<const Artist>>& artists,
     Indices& indices): Filter<AlbumData>(),
 myArtists(artists),
 myIndices(indices) {
     processUpdatedIndices();
     myIndices.artistAlbumsUpdated += DELEGATE1(&ArtistFilterForAlbums::onArtistAlbumsUpdated,
-        vector<reference_wrapper<const Artist>>);
+        std::vector<std::reference_wrapper<const Artist>>);
 }
 
 
 
 ArtistFilterForAlbums::~ArtistFilterForAlbums() {
     myIndices.artistAlbumsUpdated -= DELEGATE1(&ArtistFilterForAlbums::onArtistAlbumsUpdated,
-        vector<reference_wrapper<const Artist>>);
+        std::vector<std::reference_wrapper<const Artist>>);
 }
 
 
 
-void ArtistFilterForAlbums::setSourceData(const vector<unique_ptr<AlbumData>>&) {
+void ArtistFilterForAlbums::setSourceData(const std::vector<std::unique_ptr<AlbumData>>&) {
     // do not call base since this filter does not use source data, it uses indices instead
 }
 
@@ -57,7 +56,9 @@ void ArtistFilterForAlbums::processUpdatedSourceData(int, int) {
 
 
 
-void ArtistFilterForAlbums::onArtistAlbumsUpdated(const vector<reference_wrapper<const Artist>>& updatedArtists) {
+void ArtistFilterForAlbums::onArtistAlbumsUpdated(
+    const std::vector<std::reference_wrapper<const Artist>>& updatedArtists) {
+
     auto artistsIter = find_first_of(myArtists.begin(), myArtists.end(), updatedArtists.begin(), updatedArtists.end());
     if (artistsIter != myArtists.end()) {
         processUpdatedIndices();
@@ -69,7 +70,7 @@ void ArtistFilterForAlbums::onArtistAlbumsUpdated(const vector<reference_wrapper
 
 void ArtistFilterForAlbums::processUpdatedIndices() {
     myFilteredData.clear();
-    set<reference_wrapper<AlbumData>> filteredUniqueAlbumData;
+    std::set<std::reference_wrapper<AlbumData>> filteredUniqueAlbumData;
 
     for (auto& artist: myArtists) {
         auto albumsData = myIndices.getArtistAlbums(artist.get());

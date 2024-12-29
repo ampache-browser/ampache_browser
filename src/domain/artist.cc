@@ -12,26 +12,24 @@
 
 #include "domain/artist.h"
 
-using namespace std;
-
 
 
 namespace domain {
 
-Artist::Artist(const string& id, const string& name):
+Artist::Artist(const std::string& id, const std::string& name):
 myId{id},
 myName{name} {
 }
 
 
 
-const string Artist::getId() const {
+const std::string Artist::getId() const {
     return myId;
 }
 
 
 
-const string Artist::getName() const {
+const std::string Artist::getName() const {
     return myName;
 }
 
@@ -75,10 +73,6 @@ bool operator>=(const Artist& lhs, const Artist& rhs) {
 
 
 
-namespace std {
-
-size_t hash<domain::Artist>::operator()(const domain::Artist& artist) const {
-    return hash<string>()(artist.getId());
-}
-
+size_t std::hash<domain::Artist>::operator()(const domain::Artist& artist) const {
+    return std::hash<string>()(artist.getId());
 }
