@@ -208,10 +208,10 @@ void AmpacheBrowserApp::onAddToPlaylistTriggeredAmpacheReadySession(bool error) 
 
 void AmpacheBrowserApp::onSettingsUpdated(std::tuple<bool, std::string, std::string, std::string> settings) {
     mySettingsInternal.beginGroupSet();
-    mySettingsInternal.setBool(Settings::USE_DEMO_SERVER, get<0>(settings));
-    mySettingsInternal.setString(Settings::SERVER_URL, get<1>(settings));
-    mySettingsInternal.setString(Settings::USER_NAME, get<2>(settings));
-    auto passwordHash = QCryptographicHash::hash(QByteArray{get<3>(settings).c_str()},
+    mySettingsInternal.setBool(Settings::USE_DEMO_SERVER, std::get<0>(settings));
+    mySettingsInternal.setString(Settings::SERVER_URL, std::get<1>(settings));
+    mySettingsInternal.setString(Settings::USER_NAME, std::get<2>(settings));
+    auto passwordHash = QCryptographicHash::hash(QByteArray{std::get<3>(settings).c_str()},
         QCryptographicHash::Sha256).toHex().data();
     mySettingsInternal.setString(Settings::PASSWORD_HASH, passwordHash);
     mySettingsInternal.endGroupSet();
