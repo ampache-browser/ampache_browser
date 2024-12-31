@@ -63,7 +63,7 @@ AmpacheBrowserMainWindow::~AmpacheBrowserMainWindow() {
 
 
 QSize AmpacheBrowserMainWindow::sizeHint() const {
-    return QSize(560, 400);
+    return QSize(570, 400);
 }
 
 
