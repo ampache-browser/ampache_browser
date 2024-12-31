@@ -2,8 +2,14 @@ Ampache Browser User Visible Changes
 ====================================
 
 
-Version 1.0.8 [20??-??-??]
+Version 1.0.8 [2024-12-31]
 --------------------------
+
+* Increase the initial size of the main window.
+
+  The initial size of the main window is wider so that the album view displays two columns on most platforms.
+
+* Increase sharpness of album art thumbnails on HiDPI displays.
 
 * Fix building on MacOS.
 
