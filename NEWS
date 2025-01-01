@@ -15,7 +15,7 @@ Version 1.0.8 [2024-12-31]
 
 * Fix creation of cache directory.
 
-  Directory for caching lists of artists, albums and tracks (by defaut '~/.cache/ampache_browser' on Linux) was
+  Directory for caching lists of artists, albums and tracks (by default '~/.cache/ampache_browser' on Linux) was
   sometimes not created.  In such case these data were not cached and thus read again from Ampache server upon
   ApplicationQt::run() call.
 
