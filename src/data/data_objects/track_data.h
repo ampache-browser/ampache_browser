@@ -103,16 +103,12 @@ bool operator>=(const TrackData& lhs, const TrackData& rhs);
 
 
 
-namespace std {
-
 template<>
-class hash<data::TrackData> {
+class std::hash<data::TrackData> {
 
 public:
     size_t operator()(const data::TrackData& trackData) const;
 };
-
-}
 
 
 

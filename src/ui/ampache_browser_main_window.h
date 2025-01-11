@@ -37,11 +37,11 @@ class AmpacheBrowserMainWindow: public QMainWindow {
    Q_OBJECT
 
 public:
+    static constexpr int ALBUM_THUMBNAIL_SIZE = 100;
+
     explicit AmpacheBrowserMainWindow(QWidget* parent = 0);
 
     ~AmpacheBrowserMainWindow();
-
-    CustomProxyStyle* myCustomProxyStyle = nullptr;
 
     QListView* albumsListView = nullptr;
     QListView* artistsListView = nullptr;
@@ -53,6 +53,16 @@ public:
     QAction* addToPlaylistAction = nullptr;
 
     SettingsDialog* settingsDialog = nullptr;
+
+private:
+    CustomProxyStyle* myCustomProxyStyle = nullptr;
+
+    QSize sizeHint() const override;
+    
+    void createAndSetupToolBar();
+    void createAndSetupAlbumsWidget();
+    void createAndSetupArtistsWidget();
+    void createAndSetupTracksWidget();
 };
 
 }

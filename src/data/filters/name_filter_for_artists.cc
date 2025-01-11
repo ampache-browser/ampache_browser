@@ -15,13 +15,11 @@
 #include "data/filters/filter.h"
 #include "data/filters/name_filter_for_artists.h"
 
-using namespace std;
-
 
 
 namespace data {
 
-NameFilterForArtists::NameFilterForArtists(const string& namePattern):
+NameFilterForArtists::NameFilterForArtists(const std::string& namePattern):
 myNamePattern(namePattern) {
 }
 

@@ -16,8 +16,6 @@
 
 #include "domain/album.h"
 
-using namespace std;
-
 
 
 namespace domain {
@@ -26,7 +24,7 @@ class Artist;
 
 
 
-Album::Album(const string& id, const string& name, int releaseYear, int mediaNumber):
+Album::Album(const std::string& id, const std::string& name, int releaseYear, int mediaNumber):
 myId{id},
 myName{name},
 myReleaseYear{releaseYear},
@@ -35,13 +33,13 @@ myMediaNumber{mediaNumber} {
 
 
 
-const string Album::getId() const {
+const std::string Album::getId() const {
     return myId;
 }
 
 
 
-const string Album::getName() const {
+const std::string Album::getName() const {
     return myName;
 }
 
@@ -83,8 +81,8 @@ QPixmap& Album::getArt() const {
 
 
 
-void Album::setArt(unique_ptr<QPixmap> art) {
-    myArt = move(art);
+void Album::setArt(std::unique_ptr<QPixmap> art) {
+    myArt = std::move(art);
 }
 
 
@@ -145,10 +143,6 @@ bool operator>=(const Album& lhs, const Album& rhs) {
 
 
 
-namespace std {
-
-size_t hash<domain::Album>::operator()(const domain::Album& album) const {
-    return hash<string>()(album.getId());
-}
-
+size_t std::hash<domain::Album>::operator()(const domain::Album& album) const {
+    return std::hash<string>()(album.getId());
 }

@@ -7,6 +7,25 @@ Version 1.0.0-next [????-??-??]
 
 
 
+Version 1.0.8 [2024-12-31]
+--------------------------
+
+* Increase the initial size of the main window.
+
+  The initial size of the main window is wider so that the album view displays two columns on most platforms.
+
+* Increase sharpness of album art thumbnails on HiDPI displays.
+
+* Fix building on MacOS.
+
+* Fix creation of cache directory.
+
+  Directory for caching lists of artists, albums and tracks (by default '~/.cache/ampache_browser' on Linux) was
+  sometimes not created.  In such case these data were not cached and thus read again from Ampache server upon
+  ApplicationQt::run() call.
+
+
+
 Version 1.0.7 [2023-12-30]
 --------------------------
 

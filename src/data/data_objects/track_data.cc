@@ -14,7 +14,6 @@
 #include "domain/track.h"
 #include "track_data.h"
 
-using namespace std;
 using namespace domain;
 
 
@@ -27,28 +26,29 @@ bool TrackData::NameCompare::operator()(const TrackData& lhs, const TrackData& r
 
 
 
-TrackData::TrackData(const string& id, const string& artistId, const string& albumId, unique_ptr<Track> track):
+TrackData::TrackData(
+    const std::string& id, const std::string& artistId, const std::string& albumId, std::unique_ptr<Track> track):
 myId{id},
 myArtistId{artistId},
 myAlbumId{albumId},
-myTrack{move(track)} {
+myTrack{std::move(track)} {
 }
 
 
 
-string TrackData::getId() const {
+std::string TrackData::getId() const {
     return myId;
 }
 
 
 
-string TrackData::getArtistId() const {
+std::string TrackData::getArtistId() const {
     return myArtistId;
 }
 
 
 
-string TrackData::getAlbumId() const {
+std::string TrackData::getAlbumId() const {
     return myAlbumId;
 }
 
@@ -98,10 +98,6 @@ bool operator>=(const TrackData& lhs, const TrackData& rhs) {
 
 
 
-namespace std {
-
-size_t hash<data::TrackData>::operator()(const data::TrackData& trackData) const {
-    return hash<string>()(trackData.getId());
-}
-
+size_t std::hash<data::TrackData>::operator()(const data::TrackData& trackData) const {
+    return std::hash<string>()(trackData.getId());
 }

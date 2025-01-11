@@ -24,7 +24,6 @@
 #include "data/repositories/album_repository.h"
 #include "data/repositories/track_repository.h"
 
-using namespace std;
 using namespace infrastructure;
 using namespace domain;
 
@@ -65,7 +64,7 @@ Track& TrackRepository::getDomainObject(const data::TrackData& dataItem) const {
 
 
 
-Event<pair<vector<unique_ptr<TrackData>>, bool>>& TrackRepository::getDataLoadRequestFinishedEvent() {
+Event<std::pair<std::vector<std::unique_ptr<TrackData>>, bool>>& TrackRepository::getDataLoadRequestFinishedEvent() {
     return myAmpache.readyTracks;
 }
 
@@ -99,7 +98,7 @@ void TrackRepository::handleLoadedItem(const TrackData& dataItem) const {
 
 
 
-void TrackRepository::updateIndices(const vector<unique_ptr<TrackData>>& data) {
+void TrackRepository::updateIndices(const std::vector<std::unique_ptr<TrackData>>& data) {
     ArtistAlbumsIndex artistAlbums;
     ArtistTracksIndex artistTracks;
     AlbumTracksIndex albumTracks;

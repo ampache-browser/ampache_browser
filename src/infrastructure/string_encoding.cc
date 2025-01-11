@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2023 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -14,13 +14,11 @@
 #include <windows.h>
 #include "infrastructure/string_encoding.h"
 
-using namespace std;
-
 
 
 namespace infrastructure {
 
-    string StringEncoding::wideToUtf8(const std::wstring& wideStr) {
+    std::string StringEncoding::wideToUtf8(const std::wstring& wideStr) {
         if (wideStr.empty()) {
             return std::string();
         }
@@ -30,7 +28,7 @@ namespace infrastructure {
         return resultStr;
     }
 
-    wstring StringEncoding::utf8ToWide(const std::string& utf8Str) {
+    std::wstring StringEncoding::utf8ToWide(const std::string& utf8Str) {
         if (utf8Str.empty()) {
             return std::wstring();
         }

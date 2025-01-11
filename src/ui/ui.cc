@@ -11,6 +11,7 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <cmath>
 
 #include <QObject>
 #include <QString>
@@ -29,8 +30,6 @@
 #include "ui/ui.h"
 
 class QWidget;
-
-using namespace std;
 
 
 
@@ -59,13 +58,19 @@ QWidget* Ui::getMainWidget() const {
 
 
 
-void Ui::showNotification(const string& message) {
+int Ui::getAlbumThumbnailSize() const {
+    return (int)rint(AmpacheBrowserMainWindow::ALBUM_THUMBNAIL_SIZE * myMainWindow->devicePixelRatio());
+}
+
+
+
+void Ui::showNotification(const std::string& message) {
     myMainWindow->statusBar()->showMessage(QString::fromStdString(message));
 }
 
 
 
-void Ui::populateSettings(bool useDemoServer, string serverUrl, string userName) {
+void Ui::populateSettings(bool useDemoServer, std::string serverUrl, std::string userName) {
     myMainWindow->settingsDialog->populate(useDemoServer, serverUrl, userName);
 }
 
@@ -131,7 +136,7 @@ void Ui::onActivated(const QModelIndex&) {
 
 
 void Ui::onArtistsSelectionModelSelectionChanged(const QItemSelection&, const QItemSelection&) {
-    vector<string> artistIds;
+    std::vector<std::string> artistIds;
     for (auto hiddenColumnIndex: getAristSelectedRows()) {
         artistIds.push_back(hiddenColumnIndex.data().toString().toStdString());
     }
@@ -142,11 +147,11 @@ void Ui::onArtistsSelectionModelSelectionChanged(const QItemSelection&, const QI
 
 
 void Ui::onAlbumsSelectionModelSelectionChanged(const QItemSelection&, const QItemSelection&) {
-    vector<string> albumIds;
+    std::vector<std::string> albumIds;
     for (auto albumHiddenColumnIndex: getAlbumsSelectedRows()) {
         albumIds.push_back(albumHiddenColumnIndex.data().toString().toStdString());
     }
-    vector<string> artistIds;
+    std::vector<std::string> artistIds;
     for (auto artistHiddenColumnIndex: getAristSelectedRows()) {
         artistIds.push_back(artistHiddenColumnIndex.data().toString().toStdString());
     }
@@ -191,15 +196,15 @@ void Ui::onSettingsAccepted() {
 
 
 SelectedItems Ui::getSelectedItems() const {
-    vector<string> artistIds;
+    std::vector<std::string> artistIds;
     for (auto hiddenArtistColumnIndex: getAristSelectedRows()) {
         artistIds.push_back(hiddenArtistColumnIndex.data().toString().toStdString());
     }
-    vector<string> albumIds;
+    std::vector<std::string> albumIds;
     for (auto hiddenAlbumColumnIndex: getAlbumsSelectedRows()) {
         albumIds.push_back(hiddenAlbumColumnIndex.data().toString().toStdString());
     }
-    vector<string> trackIds;
+    std::vector<std::string> trackIds;
     for (auto hiddenTrackColumnIndex: getTracksSelectedRows()) {
         trackIds.push_back(hiddenTrackColumnIndex.data().toString().toStdString());
     }

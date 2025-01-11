@@ -12,8 +12,6 @@
 
 #include "domain/track.h"
 
-using namespace std;
-
 
 
 namespace domain {
@@ -33,19 +31,19 @@ myUrl{url} { }
 
 
 
-const string Track::getId() const {
+const std::string Track::getId() const {
     return myId;
 }
 
 
 
-const string Track::getName() const {
+const std::string Track::getName() const {
     return myName;
 }
 
 
 
-const string Track::getDisk() const {
+const std::string Track::getDisk() const {
     return myDisk;
 }
 
@@ -57,7 +55,7 @@ int Track::getNumber() const {
 
 
 
-const string Track::getUrl() const {
+const std::string Track::getUrl() const {
     return myUrl;
 }
 
@@ -157,10 +155,6 @@ bool operator>=(const Track& lhs, const Track& rhs) {
 
 
 
-namespace std {
-
-size_t hash<domain::Track>::operator()(const domain::Track& track) const {
-    return hash<string>()(track.getId());
-}
-
+size_t std::hash<domain::Track>::operator()(const domain::Track& track) const {
+    return std::hash<string>()(track.getId());
 }

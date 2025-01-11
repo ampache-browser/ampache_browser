@@ -22,7 +22,6 @@
 #include "data/repositories/repository.h"
 #include "data/repositories/artist_repository.h"
 
-using namespace std;
 using namespace infrastructure;
 using namespace domain;
 
@@ -60,7 +59,7 @@ Artist& ArtistRepository::getDomainObject(const data::ArtistData& dataItem) cons
 
 
 
-Event<pair<vector<unique_ptr<ArtistData>>, bool>>& ArtistRepository::getDataLoadRequestFinishedEvent() {
+Event<std::pair<std::vector<std::unique_ptr<ArtistData>>, bool>>& ArtistRepository::getDataLoadRequestFinishedEvent() {
     return myAmpache.readyArtists;
 }
 
@@ -78,8 +77,8 @@ void ArtistRepository::saveDataToCache() {
 
 
 
-void ArtistRepository::updateIndices(const vector<unique_ptr<ArtistData>>& data) {
-    vector<reference_wrapper<Artist>> artists;
+void ArtistRepository::updateIndices(const std::vector<std::unique_ptr<ArtistData>>& data) {
+    std::vector<std::reference_wrapper<Artist>> artists;
     for (auto& dataItem: data) {
         artists.push_back(dataItem->getArtist());
     }

@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2024 Róbert Čerňanský
 
 
 
@@ -85,6 +85,13 @@ public:
      * @return QWidget*
      */
     QWidget* getMainWidget() const;
+    
+    /**
+     * @brief Gets the size of album thumbnail (one side of a square) scaled according to window pixel ratio.
+     *
+     * @return int
+     */
+    int getAlbumThumbnailSize() const;
 
     /**
      * @brief Display a notification message to the user in non-intrusive way.

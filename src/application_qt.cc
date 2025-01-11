@@ -15,7 +15,6 @@
 
 class QtWidget;
 
-using namespace std;
 using namespace application;
 
 
@@ -67,7 +66,7 @@ void ApplicationQt::run() {
 
 
 
-void ApplicationQt::finishRequest(function<void()> finishedCb) {
+void ApplicationQt::finishRequest(std::function<void()> finishedCb) {
     myApplicationQtInternal->finishRequest(finishedCb);
 }
 

@@ -9,8 +9,6 @@
 
 #include "request_group.h"
 
-using namespace std;
-
 
 
 namespace application {
@@ -82,9 +80,9 @@ bool RequestGroup::hasIntersection(RequestGroup other) const {
 
 
 
-pair<RequestGroup, RequestGroup> RequestGroup::split(int offset) const {
+std::pair<RequestGroup, RequestGroup> RequestGroup::split(int offset) const {
     if (!isMember(offset)) {
-        return pair<RequestGroup, RequestGroup>{RequestGroup{}, RequestGroup{}};
+        return std::pair<RequestGroup, RequestGroup>{RequestGroup{}, RequestGroup{}};
     }
 
     RequestGroup lowerPart;
@@ -94,16 +92,16 @@ pair<RequestGroup, RequestGroup> RequestGroup::split(int offset) const {
         lowerPart = RequestGroup{myLower, offset - 1};
     }
     auto upperPart = RequestGroup{offset, myUpper};
-    return pair<RequestGroup, RequestGroup>{lowerPart, upperPart};
+    return std::pair<RequestGroup, RequestGroup>{lowerPart, upperPart};
 }
 
 
 
-pair<RequestGroup, RequestGroup> RequestGroup::substract(RequestGroup other) const {
+std::pair<RequestGroup, RequestGroup> RequestGroup::substract(RequestGroup other) const {
     if (!hasIntersection(other)) {
-        return pair<RequestGroup, RequestGroup>{RequestGroup{}, RequestGroup{}};
+        return std::pair<RequestGroup, RequestGroup>{RequestGroup{}, RequestGroup{}};
     }
-    return pair<RequestGroup, RequestGroup>{RequestGroup{myLower, other.getLower() - 1},
+    return std::pair<RequestGroup, RequestGroup>{RequestGroup{myLower, other.getLower() - 1},
         RequestGroup{other.getUpper() + 1, myUpper}};
 }
 

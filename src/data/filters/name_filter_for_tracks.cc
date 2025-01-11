@@ -15,13 +15,11 @@
 #include "data/filters/filter.h"
 #include "data/filters/name_filter_for_tracks.h"
 
-using namespace std;
-
 
 
 namespace data {
 
-NameFilterForTracks::NameFilterForTracks(const string& namePattern): Filter<TrackData>(),
+NameFilterForTracks::NameFilterForTracks(const std::string& namePattern): Filter<TrackData>(),
 myNamePattern(namePattern) {
 }
 

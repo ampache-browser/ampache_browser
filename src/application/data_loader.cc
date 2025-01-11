@@ -19,7 +19,6 @@
 #include "data/repositories/track_repository.h"
 #include "application/data_loader.h"
 
-using namespace std::chrono;
 using namespace infrastructure;
 using namespace data;
 
@@ -107,7 +106,7 @@ void DataLoader::onAmpacheInitialized(bool error) {
 
     // finish with error if neither Ampache nor cache is available
     if (error && (myCache.getServerUrl() != myAmpache.getUrl() || myCache.getUser() != myAmpache.getUser() ||
-            myCache.getLastUpdate() == system_clock::time_point::min())) {
+            myCache.getLastUpdate() == std::chrono::system_clock::time_point::min())) {
         fireFinished(LoadingResult::NoConnectionNoCache);
         return;
     }

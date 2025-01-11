@@ -20,7 +20,6 @@
 #include "infrastructure/i18n.h"
 #include "settings_dialog.h"
 
-using namespace std;
 using namespace infrastructure;
 
 
@@ -33,7 +32,7 @@ SettingsDialog::SettingsDialog(): QDialog() {
 
     myFormLayout = new QFormLayout{this};
 
-    ostringstream versionString;
+    std::ostringstream versionString;
     versionString << "<small>" << _("Ampache Browser ver. ") << VERSION << "</small>";
     myVersionLabel = new QLabel{QString::fromStdString(versionString.str())};
     myVersionLabel->setAlignment(Qt::AlignRight);
@@ -77,25 +76,25 @@ bool SettingsDialog::getUseDemoServer() const {
 
 
 
-string SettingsDialog::getServerUrl() const {
+std::string SettingsDialog::getServerUrl() const {
     return myServerUrl;
 }
 
 
 
-string SettingsDialog::getUserName() const {
+std::string SettingsDialog::getUserName() const {
     return myUserName;
 }
 
 
 
-string SettingsDialog::getPassword() const {
+std::string SettingsDialog::getPassword() const {
     return myPassword;
 }
 
 
 
-void SettingsDialog::populate(bool useDemoServer, string serverUrl, string userName, string password) {
+void SettingsDialog::populate(bool useDemoServer, std::string serverUrl, std::string userName, std::string password) {
     useDemoServer ? myUseDemoServerCheckBox->setCheckState(Qt::Checked) :
         myUseDemoServerCheckBox->setCheckState(Qt::Unchecked);
     myServerLineEdit->setText(QString::fromStdString(serverUrl));

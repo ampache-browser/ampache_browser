@@ -68,16 +68,12 @@ bool operator>=(const Artist& lhs, const Artist& rhs);
 
 
 
-namespace std {
-
 template<>
-class hash<domain::Artist> {
+class std::hash<domain::Artist> {
 
 public:
     size_t operator()(const domain::Artist& artist) const;
 };
-
-}
 
 
 
