@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2023 Róbert Čerňanský
+// Copyright (C) 2015 - 2026 Róbert Čerňanský
 
 
 
@@ -16,6 +16,7 @@
 #include <map>
 #include <memory>
 #include <chrono>
+#include <fstream>
 #include <QObject>
 #include <QPixmap>
 
