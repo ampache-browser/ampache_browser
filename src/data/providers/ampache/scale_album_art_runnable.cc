@@ -3,14 +3,14 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2024 Róbert Čerňanský
+// Copyright (C) 2015 - 2026 Róbert Čerňanský
 
 
 
 #include <Qt>
 #include <QImage>
 
-#include "scale_album_art_runnable.h"
+#include "data/providers/ampache/scale_album_art_runnable.h"
 
 
 

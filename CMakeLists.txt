@@ -3,7 +3,7 @@
 # Project: Ampache Browser
 # License: GNU GPLv3
 #
-# Copyright (C) 2015 - 2024 Róbert Čerňanský
+# Copyright (C) 2015 - 2026 Róbert Čerňanský
 
 
 
@@ -90,7 +90,7 @@ set(headersWithMo
     include/internal/application/models/artist_model.h
     include/internal/application/models/album_model.h
     include/internal/application/models/track_model.h
-    src/data/providers/ampache/scale_album_art_runnable.h
+    include/internal/data/providers/ampache/scale_album_art_runnable.h
     include/internal/data/providers/ampache.h
     include/internal/data/providers/cache.h
     src/ui/settings_dialog.h
