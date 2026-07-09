@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2024 Róbert Čerňanský
+// Copyright (C) 2015 - 2026 Róbert Čerňanský
 
 
 
@@ -15,7 +15,7 @@
 #include "infrastructure/event/delegate.h"
 #include "infrastructure/event/event.h"
 #include "data/provider_type.h"
-#include "data/providers/ampache.h"
+#include "data/providers/ampache/ampache.h"
 #include "data/providers/cache.h"
 #include "../data_objects/artist_data.h"
 #include "data/indices.h"

@@ -24,7 +24,7 @@
 
 #include "infrastructure/event/event.h"
 #include "data/providers/connection_info.h"
-#include "ampache/scale_album_art_runnable.h"
+#include "scale_album_art_runnable.h"
 
 class QXmlStreamReader;
 

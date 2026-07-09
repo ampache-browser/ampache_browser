@@ -91,7 +91,7 @@ set(headersWithMo
     include/internal/application/models/album_model.h
     include/internal/application/models/track_model.h
     include/internal/data/providers/ampache/scale_album_art_runnable.h
-    include/internal/data/providers/ampache.h
+    include/internal/data/providers/ampache/ampache.h
     include/internal/data/providers/cache.h
     src/ui/settings_dialog.h
     src/ui/ampache_browser_main_window.h

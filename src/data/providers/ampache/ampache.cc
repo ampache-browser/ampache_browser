@@ -38,7 +38,7 @@
 #include "data/providers/ampache/scale_album_art_runnable.h"
 #include "data/providers/connection_info.h"
 #include "ampache_url.h"
-#include "data/providers/ampache.h"
+#include "data/providers/ampache/ampache.h"
 
 using namespace std::placeholders;
 using namespace infrastructure;

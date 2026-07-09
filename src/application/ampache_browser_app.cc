@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2024 Róbert Čerňanský
+// Copyright (C) 2015 - 2026 Róbert Čerňanský
 
 
 
@@ -20,7 +20,7 @@
 #include "infrastructure/logging/logging.h"
 #include "infrastructure/i18n.h"
 #include "data/providers/connection_info.h"
-#include "data/providers/ampache.h"
+#include "data/providers/ampache/ampache.h"
 #include "data/providers/cache.h"
 #include "data/indices.h"
 #include "data/repositories/album_repository.h"

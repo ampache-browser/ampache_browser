@@ -3,14 +3,14 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2024 Róbert Čerňanský
+// Copyright (C) 2015 - 2026 Róbert Čerňanský
 
 
 
 #include <memory>
 #include <functional>
 
-#include "data/providers/ampache.h"
+#include "data/providers/ampache/ampache.h"
 #include "ampache_browser/settings.h"
 #include "ampache_browser/ampache_browser.h"
 #include "infrastructure/logging/log_level.h"
