@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2024 Róbert Čerňanský
+// Copyright (C) 2015 - 2026 Róbert Čerňanský
 
 
 
@@ -35,10 +35,10 @@
 #include "../../data_objects/album_data.h"
 #include "../../data_objects/artist_data.h"
 #include "../../data_objects/track_data.h"
-#include "scale_album_art_runnable.h"
+#include "data/providers/ampache/scale_album_art_runnable.h"
 #include "data/providers/connection_info.h"
 #include "ampache_url.h"
-#include "data/providers/ampache.h"
+#include "data/providers/ampache/ampache.h"
 
 using namespace std::placeholders;
 using namespace infrastructure;

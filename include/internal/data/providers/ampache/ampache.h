@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2024 Róbert Čerňanský
+// Copyright (C) 2015 - 2026 Róbert Čerňanský
 
 
 
@@ -24,6 +24,7 @@
 
 #include "infrastructure/event/event.h"
 #include "data/providers/connection_info.h"
+#include "scale_album_art_runnable.h"
 
 class QXmlStreamReader;
 
@@ -34,7 +35,6 @@ namespace data {
 class AlbumData;
 class ArtistData;
 class TrackData;
-class ScaleAlbumArtRunnable;
 
 
 

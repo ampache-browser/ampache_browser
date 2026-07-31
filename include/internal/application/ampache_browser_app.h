@@ -3,7 +3,7 @@
 // Project: Ampache Browser
 // License: GNU GPLv3
 //
-// Copyright (C) 2015 - 2016 Róbert Čerňanský
+// Copyright (C) 2015 - 2026 Róbert Čerňanský
 
 
 
@@ -17,7 +17,7 @@
 #include <memory>
 #include <functional>
 #include "ui/selected_items.h"
-#include "data/providers/ampache.h"
+#include "data/providers/ampache/ampache.h"
 #include "data_loader.h"
 
 class QWidget;
